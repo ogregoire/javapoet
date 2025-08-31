@@ -17,11 +17,8 @@ package be.imgn.javapoet;
 
 import com.google.testing.compile.CompilationRule;
 import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nullable;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,8 +45,8 @@ public class ParameterSpecTest {
   }
 
   @Test public void equalsAndHashCode() {
-    ParameterSpec a = ParameterSpec.builder(int.class, "foo").build();
-    ParameterSpec b = ParameterSpec.builder(int.class, "foo").build();
+    var a = ParameterSpec.builder(int.class, "foo").build();
+    var b = ParameterSpec.builder(int.class, "foo").build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a.toString()).isEqualTo(b.toString());
@@ -61,12 +58,12 @@ public class ParameterSpecTest {
   }
 
   @Test public void receiverParameterInstanceMethod() {
-    ParameterSpec.Builder builder = ParameterSpec.builder(int.class, "this");
+    var builder = ParameterSpec.builder(int.class, "this");
     assertThat(builder.build().name).isEqualTo("this");
   }
 
   @Test public void receiverParameterNestedClass() {
-    ParameterSpec.Builder builder = ParameterSpec.builder(int.class, "Foo.this");
+    var builder = ParameterSpec.builder(int.class, "Foo.this");
     assertThat(builder.build().name).isEqualTo("Foo.this");
   }
 
@@ -94,9 +91,9 @@ public class ParameterSpecTest {
   }
 
   @Test public void fieldVariableElement() {
-    TypeElement classElement = getElement(VariableElementFieldClass.class);
-    List<VariableElement> methods = fieldsIn(elements.getAllMembers(classElement));
-    VariableElement element = findFirst(methods, "name");
+    var classElement = getElement(VariableElementFieldClass.class);
+    var methods = fieldsIn(elements.getAllMembers(classElement));
+    var element = findFirst(methods, "name");
 
     try {
       ParameterSpec.get(element);
@@ -112,17 +109,17 @@ public class ParameterSpecTest {
   }
 
   @Test public void parameterVariableElement() {
-    TypeElement classElement = getElement(VariableElementParameterClass.class);
-    List<ExecutableElement> methods = methodsIn(elements.getAllMembers(classElement));
-    ExecutableElement element = findFirst(methods, "foo");
-    VariableElement parameterElement = element.getParameters().get(0);
+    var classElement = getElement(VariableElementParameterClass.class);
+    var methods = methodsIn(elements.getAllMembers(classElement));
+    var element = findFirst(methods, "foo");
+    var parameterElement = element.getParameters().getFirst();
 
     assertThat(ParameterSpec.get(parameterElement).toString())
         .isEqualTo("java.lang.String bar");
   }
 
   @Test public void addNonFinalModifier() {
-    List<Modifier> modifiers = new ArrayList<>();
+    var modifiers = new ArrayList<Modifier>();
     modifiers.add(Modifier.FINAL);
     modifiers.add(Modifier.PUBLIC);
 
@@ -136,7 +133,7 @@ public class ParameterSpecTest {
   }
 
   @Test public void modifyAnnotations() {
-    ParameterSpec.Builder builder = ParameterSpec.builder(int.class, "foo")
+    var builder = ParameterSpec.builder(int.class, "foo")
             .addAnnotation(Override.class)
             .addAnnotation(SuppressWarnings.class);
 
@@ -145,7 +142,7 @@ public class ParameterSpecTest {
   }
 
   @Test public void modifyModifiers() {
-    ParameterSpec.Builder builder = ParameterSpec.builder(int.class, "foo")
+    var builder = ParameterSpec.builder(int.class, "foo")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
     builder.modifiers.remove(1);

@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -28,8 +27,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.processing.Filer;
@@ -72,31 +69,31 @@ public final class JavaFile {
     this.staticImports = Util.immutableSet(builder.staticImports);
     this.indent = builder.indent;
 
-    Set<String> alwaysQualifiedNames = new LinkedHashSet<>();
+    var alwaysQualifiedNames = new LinkedHashSet<String>();
     fillAlwaysQualifiedNames(builder.typeSpec, alwaysQualifiedNames);
     this.alwaysQualify = Util.immutableSet(alwaysQualifiedNames);
   }
 
   private void fillAlwaysQualifiedNames(TypeSpec spec, Set<String> alwaysQualifiedNames) {
     alwaysQualifiedNames.addAll(spec.alwaysQualifiedNames);
-    for (TypeSpec nested : spec.typeSpecs) {
+    for (var nested : spec.typeSpecs) {
       fillAlwaysQualifiedNames(nested, alwaysQualifiedNames);
     }
   }
 
   public void writeTo(Appendable out) throws IOException {
     // First pass: emit the entire class, just to collect the types we'll need to import.
-    CodeWriter importsCollector = new CodeWriter(
+    var importsCollector = new CodeWriter(
         NULL_APPENDABLE,
         indent,
         staticImports,
         alwaysQualify
     );
     emit(importsCollector);
-    Map<String, ClassName> suggestedImports = importsCollector.suggestedImports();
+    var suggestedImports = importsCollector.suggestedImports();
 
     // Second pass: write the code, taking advantage of the imports.
-    CodeWriter codeWriter
+    var codeWriter
         = new CodeWriter(out, indent, suggestedImports, staticImports, alwaysQualify);
     emit(codeWriter);
   }
@@ -130,16 +127,16 @@ public final class JavaFile {
   public Path writeToPath(Path directory, Charset charset) throws IOException {
     checkArgument(Files.notExists(directory) || Files.isDirectory(directory),
         "path %s exists but is not a directory.", directory);
-    Path outputDirectory = directory;
+    var outputDirectory = directory;
     if (!packageName.isEmpty()) {
-      for (String packageComponent : packageName.split("\\.", -1)) {
+      for (var packageComponent : packageName.split("\\.", -1)) {
         outputDirectory = outputDirectory.resolve(packageComponent);
       }
       Files.createDirectories(outputDirectory);
     }
 
-    Path outputPath = outputDirectory.resolve(typeSpec.name + ".java");
-    try (Writer writer = new OutputStreamWriter(Files.newOutputStream(outputPath), charset)) {
+    var outputPath = outputDirectory.resolve(typeSpec.name + ".java");
+    try (var writer = new OutputStreamWriter(Files.newOutputStream(outputPath), charset)) {
       writeTo(writer);
     }
 
@@ -156,19 +153,19 @@ public final class JavaFile {
    * Returns the {@link File} instance to which source is actually written.
    */
   public File writeToFile(File directory) throws IOException {
-    final Path outputPath = writeToPath(directory.toPath());
+    final var outputPath = writeToPath(directory.toPath());
     return outputPath.toFile();
   }
 
   /** Writes this to {@code filer}. */
   public void writeTo(Filer filer) throws IOException {
-    String fileName = packageName.isEmpty()
+    var fileName = packageName.isEmpty()
         ? typeSpec.name
         : packageName + "." + typeSpec.name;
-    List<Element> originatingElements = typeSpec.originatingElements;
-    JavaFileObject filerSourceFile = filer.createSourceFile(fileName,
-        originatingElements.toArray(new Element[originatingElements.size()]));
-    try (Writer writer = filerSourceFile.openWriter()) {
+    var originatingElements = typeSpec.originatingElements;
+    var filerSourceFile = filer.createSourceFile(fileName,
+        originatingElements.toArray(new Element[0]));
+    try (var writer = filerSourceFile.openWriter()) {
       writeTo(writer);
     } catch (Exception e) {
       try {
@@ -198,8 +195,8 @@ public final class JavaFile {
       codeWriter.emit("\n");
     }
 
-    int importedTypesCount = 0;
-    for (ClassName className : new TreeSet<>(codeWriter.importedTypes().values())) {
+    var importedTypesCount = 0;
+    for (var className : new TreeSet<>(codeWriter.importedTypes().values())) {
       // TODO what about nested types like java.util.Map.Entry?
       if (skipJavaLangImports
           && className.packageName().equals("java.lang")
@@ -232,7 +229,7 @@ public final class JavaFile {
 
   @Override public String toString() {
     try {
-      StringBuilder result = new StringBuilder();
+      var result = new StringBuilder();
       writeTo(result);
       return result.toString();
     } catch (IOException e) {
@@ -241,7 +238,7 @@ public final class JavaFile {
   }
 
   public JavaFileObject toJavaFileObject() {
-    URI uri = URI.create((packageName.isEmpty()
+    var uri = URI.create((packageName.isEmpty()
         ? typeSpec.name
         : packageName.replace('.', '/') + '/' + typeSpec.name)
         + Kind.SOURCE.extension);
@@ -266,7 +263,7 @@ public final class JavaFile {
   }
 
   public Builder toBuilder() {
-    Builder builder = new Builder(packageName, typeSpec);
+    var builder = new Builder(packageName, typeSpec);
     builder.fileComment.add(fileComment);
     builder.skipJavaLangImports = skipJavaLangImports;
     builder.indent = indent;
@@ -304,7 +301,7 @@ public final class JavaFile {
       checkArgument(className != null, "className == null");
       checkArgument(names != null, "names == null");
       checkArgument(names.length > 0, "names array is empty");
-      for (String name : names) {
+      for (var name : names) {
         checkArgument(name != null, "null entry in names array: %s", Arrays.toString(names));
         staticImports.add(className.canonicalName + "." + name);
       }

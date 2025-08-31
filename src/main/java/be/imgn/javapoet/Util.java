@@ -37,8 +37,8 @@ final class Util {
   }
 
   static <K, V> Map<K, List<V>> immutableMultimap(Map<K, List<V>> multimap) {
-    LinkedHashMap<K, List<V>> result = new LinkedHashMap<>();
-    for (Map.Entry<K, List<V>> entry : multimap.entrySet()) {
+    var result = new LinkedHashMap<K, List<V>>();
+    for (var entry : multimap.entrySet()) {
       if (entry.getValue().isEmpty()) continue;
       result.put(entry.getKey(), immutableList(entry.getValue()));
     }
@@ -71,15 +71,15 @@ final class Util {
   }
 
   static <T> Set<T> union(Set<T> a, Set<T> b) {
-    Set<T> result = new LinkedHashSet<>();
+    var result = new LinkedHashSet<T>();
     result.addAll(a);
     result.addAll(b);
     return result;
   }
 
   static void requireExactlyOneOf(Set<Modifier> modifiers, Modifier... mutuallyExclusive) {
-    int count = 0;
-    for (Modifier modifier : mutuallyExclusive) {
+    var count = 0;
+    for (var modifier : mutuallyExclusive) {
       if (modifiers.contains(modifier)) count++;
     }
     checkArgument(count == 1, "modifiers %s must contain one of %s",
@@ -88,26 +88,25 @@ final class Util {
 
   static String characterLiteralWithoutSingleQuotes(char c) {
     // see https://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6
-    switch (c) {
-      case '\b': return "\\b"; /* \u0008: backspace (BS) */
-      case '\t': return "\\t"; /* \u0009: horizontal tab (HT) */
-      case '\n': return "\\n"; /* \u000a: linefeed (LF) */
-      case '\f': return "\\f"; /* \u000c: form feed (FF) */
-      case '\r': return "\\r"; /* \u000d: carriage return (CR) */
-      case '\"': return "\"";  /* \u0022: double quote (") */
-      case '\'': return "\\'"; /* \u0027: single quote (') */
-      case '\\': return "\\\\";  /* \u005c: backslash (\) */
-      default:
-        return isISOControl(c) ? String.format("\\u%04x", (int) c) : Character.toString(c);
-    }
+    return switch (c) {
+      case '\b' -> "\\b"; /* \u0008: backspace (BS) */
+      case '\t' -> "\\t"; /* \u0009: horizontal tab (HT) */
+      case '\n' -> "\\n"; /* \u000a: linefeed (LF) */
+      case '\f' -> "\\f"; /* \u000c: form feed (FF) */
+      case '\r' -> "\\r"; /* \u000d: carriage return (CR) */
+      case '\"' -> "\"";  /* \u0022: double quote (") */
+      case '\'' -> "\\'"; /* \u0027: single quote (') */
+      case '\\' -> "\\\\";  /* \u005c: backslash (\) */
+      default -> isISOControl(c) ? String.format("\\u%04x", (int) c) : Character.toString(c);
+    };
   }
 
   /** Returns the string literal representing {@code value}, including wrapping double quotes. */
   static String stringLiteralWithDoubleQuotes(String value, String indent) {
-    StringBuilder result = new StringBuilder(value.length() + 2);
+    var result = new StringBuilder(value.length() + 2);
     result.append('"');
-    for (int i = 0; i < value.length(); i++) {
-      char c = value.charAt(i);
+    for (var i = 0; i < value.length(); i++) {
+      var c = value.charAt(i);
       // trivial case: single quote must not be escaped
       if (c == '\'') {
         result.append("'");

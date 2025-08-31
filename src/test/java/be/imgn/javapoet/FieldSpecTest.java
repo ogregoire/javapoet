@@ -24,8 +24,8 @@ import javax.lang.model.element.Modifier;
 
 public class FieldSpecTest {
   @Test public void equalsAndHashCode() {
-    FieldSpec a = FieldSpec.builder(int.class, "foo").build();
-    FieldSpec b = FieldSpec.builder(int.class, "foo").build();
+    var a = FieldSpec.builder(int.class, "foo").build();
+    var b = FieldSpec.builder(int.class, "foo").build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a.toString()).isEqualTo(b.toString());

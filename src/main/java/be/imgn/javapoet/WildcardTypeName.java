@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeMirror;
 
 import static be.imgn.javapoet.Util.checkArgument;
 
@@ -43,11 +42,11 @@ public final class WildcardTypeName extends TypeName {
     this.lowerBounds = Util.immutableList(lowerBounds);
 
     checkArgument(this.upperBounds.size() == 1, "unexpected extends bounds: %s", upperBounds);
-    for (TypeName upperBound : this.upperBounds) {
+    for (var upperBound : this.upperBounds) {
       checkArgument(!upperBound.isPrimitive() && upperBound != VOID,
           "invalid upper bound: %s", upperBound);
     }
-    for (TypeName lowerBound : this.lowerBounds) {
+    for (var lowerBound : this.lowerBounds) {
       checkArgument(!lowerBound.isPrimitive() && lowerBound != VOID,
           "invalid lower bound: %s", lowerBound);
     }
@@ -104,9 +103,9 @@ public final class WildcardTypeName extends TypeName {
   static TypeName get(
       javax.lang.model.type.WildcardType mirror,
       Map<TypeParameterElement, TypeVariableName> typeVariables) {
-    TypeMirror extendsBound = mirror.getExtendsBound();
+    var extendsBound = mirror.getExtendsBound();
     if (extendsBound == null) {
-      TypeMirror superBound = mirror.getSuperBound();
+      var superBound = mirror.getSuperBound();
       if (superBound == null) {
         return subtypeOf(Object.class);
       } else {

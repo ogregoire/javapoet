@@ -73,9 +73,9 @@ public final class ParameterSpec {
   }
 
   @Override public String toString() {
-    StringBuilder out = new StringBuilder();
+    var out = new StringBuilder();
     try {
-      CodeWriter codeWriter = new CodeWriter(out);
+      var codeWriter = new CodeWriter(out);
       emit(codeWriter, false);
       return out.toString();
     } catch (IOException e) {
@@ -86,8 +86,8 @@ public final class ParameterSpec {
   public static ParameterSpec get(VariableElement element) {
     checkArgument(element.getKind().equals(ElementKind.PARAMETER), "element is not a parameter");
 
-    TypeName type = TypeName.get(element.asType());
-    String name = element.getSimpleName().toString();
+    var type = TypeName.get(element.asType());
+    var name = element.getSimpleName().toString();
     // Copying parameter annotations can be incorrect so we're deliberately not including them.
     // See https://github.com/square/javapoet/issues/482.
     return ParameterSpec.builder(type, name)
@@ -96,8 +96,8 @@ public final class ParameterSpec {
   }
 
   static List<ParameterSpec> parametersOf(ExecutableElement method) {
-    List<ParameterSpec> result = new ArrayList<>();
-    for (VariableElement parameter : method.getParameters()) {
+    var result = new ArrayList<ParameterSpec>();
+    for (var parameter : method.getParameters()) {
       result.add(ParameterSpec.get(parameter));
     }
     return result;
@@ -128,7 +128,7 @@ public final class ParameterSpec {
   }
 
   Builder toBuilder(TypeName type, String name) {
-    Builder builder = new Builder(type, name);
+    var builder = new Builder(type, name);
     builder.annotations.addAll(annotations);
     builder.modifiers.addAll(modifiers);
     return builder;
@@ -159,7 +159,7 @@ public final class ParameterSpec {
 
     public Builder addAnnotations(Iterable<AnnotationSpec> annotationSpecs) {
       checkArgument(annotationSpecs != null, "annotationSpecs == null");
-      for (AnnotationSpec annotationSpec : annotationSpecs) {
+      for (var annotationSpec : annotationSpecs) {
         this.annotations.add(annotationSpec);
       }
       return this;
@@ -186,7 +186,7 @@ public final class ParameterSpec {
 
     public Builder addModifiers(Iterable<Modifier> modifiers) {
       checkNotNull(modifiers, "modifiers == null");
-      for (Modifier modifier : modifiers) {
+      for (var modifier : modifiers) {
         if (!modifier.equals(Modifier.FINAL)) {
           throw new IllegalStateException("unexpected parameter modifier: " + modifier);
         }

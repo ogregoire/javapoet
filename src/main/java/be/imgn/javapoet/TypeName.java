@@ -125,7 +125,7 @@ public class TypeName {
   }
 
   protected final List<AnnotationSpec> concatAnnotations(List<AnnotationSpec> annotations) {
-    List<AnnotationSpec> allAnnotations = new ArrayList<>(this.annotations);
+    var allAnnotations = new ArrayList<>(this.annotations);
     allAnnotations.addAll(annotations);
     return allAnnotations;
   }
@@ -147,7 +147,7 @@ public class TypeName {
    * other types types including unboxed primitives and {@code java.lang.Void}.
    */
   public boolean isBoxedPrimitive() {
-    TypeName thisWithoutAnnotations = withoutAnnotations();
+    var thisWithoutAnnotations = withoutAnnotations();
     return thisWithoutAnnotations.equals(BOXED_BOOLEAN)
         || thisWithoutAnnotations.equals(BOXED_BYTE)
         || thisWithoutAnnotations.equals(BOXED_SHORT)
@@ -164,7 +164,7 @@ public class TypeName {
    */
   public TypeName box() {
     if (keyword == null) return this; // Doesn't need boxing.
-    TypeName boxed = null;
+    TypeName boxed;
     if (keyword.equals(VOID.keyword)) boxed = BOXED_VOID;
     else if (keyword.equals(BOOLEAN.keyword)) boxed = BOXED_BOOLEAN;
     else if (keyword.equals(BYTE.keyword)) boxed = BOXED_BYTE;
@@ -186,8 +186,8 @@ public class TypeName {
    */
   public TypeName unbox() {
     if (keyword != null) return this; // Already unboxed.
-    TypeName thisWithoutAnnotations = withoutAnnotations();
-    TypeName unboxed = null;
+    var thisWithoutAnnotations = withoutAnnotations();
+    TypeName unboxed;
     if (thisWithoutAnnotations.equals(BOXED_VOID)) unboxed = VOID;
     else if (thisWithoutAnnotations.equals(BOXED_BOOLEAN)) unboxed = BOOLEAN;
     else if (thisWithoutAnnotations.equals(BOXED_BYTE)) unboxed = BYTE;
@@ -213,11 +213,11 @@ public class TypeName {
   }
 
   @Override public final String toString() {
-    String result = cachedString;
+    var result = cachedString;
     if (result == null) {
       try {
-        StringBuilder resultBuilder = new StringBuilder();
-        CodeWriter codeWriter = new CodeWriter(resultBuilder);
+        var resultBuilder = new StringBuilder();
+        var codeWriter = new CodeWriter(resultBuilder);
         emit(codeWriter);
         result = resultBuilder.toString();
         cachedString = result;
@@ -239,7 +239,7 @@ public class TypeName {
   }
 
   CodeWriter emitAnnotations(CodeWriter out) throws IOException {
-    for (AnnotationSpec annotation : annotations) {
+    for (var annotation : annotations) {
       annotation.emit(out, true);
       out.emit(" ");
     }
@@ -256,32 +256,23 @@ public class TypeName {
       final Map<TypeParameterElement, TypeVariableName> typeVariables) {
     return mirror.accept(new SimpleTypeVisitor8<TypeName, Void>() {
       @Override public TypeName visitPrimitive(PrimitiveType t, Void p) {
-        switch (t.getKind()) {
-          case BOOLEAN:
-            return TypeName.BOOLEAN;
-          case BYTE:
-            return TypeName.BYTE;
-          case SHORT:
-            return TypeName.SHORT;
-          case INT:
-            return TypeName.INT;
-          case LONG:
-            return TypeName.LONG;
-          case CHAR:
-            return TypeName.CHAR;
-          case FLOAT:
-            return TypeName.FLOAT;
-          case DOUBLE:
-            return TypeName.DOUBLE;
-          default:
-            throw new AssertionError();
-        }
+        return switch (t.getKind()) {
+          case BOOLEAN -> TypeName.BOOLEAN;
+          case BYTE -> TypeName.BYTE;
+          case SHORT -> TypeName.SHORT;
+          case INT -> TypeName.INT;
+          case LONG -> TypeName.LONG;
+          case CHAR -> TypeName.CHAR;
+          case FLOAT -> TypeName.FLOAT;
+          case DOUBLE -> TypeName.DOUBLE;
+          default -> throw new AssertionError();
+        };
       }
 
       @Override public TypeName visitDeclared(DeclaredType t, Void p) {
-        ClassName rawType = ClassName.get((TypeElement) t.asElement());
-        TypeMirror enclosingType = t.getEnclosingType();
-        TypeName enclosing =
+        var rawType = ClassName.get((TypeElement) t.asElement());
+        var enclosingType = t.getEnclosingType();
+        var enclosing =
             (enclosingType.getKind() != TypeKind.NONE)
                     && !t.asElement().getModifiers().contains(Modifier.STATIC)
                 ? enclosingType.accept(this, null)
@@ -290,13 +281,12 @@ public class TypeName {
           return rawType;
         }
 
-        List<TypeName> typeArgumentNames = new ArrayList<>();
-        for (TypeMirror mirror : t.getTypeArguments()) {
+        var typeArgumentNames = new ArrayList<TypeName>();
+        for (var mirror : t.getTypeArguments()) {
           typeArgumentNames.add(get(mirror, typeVariables));
         }
-        return enclosing instanceof ParameterizedTypeName
-            ? ((ParameterizedTypeName) enclosing).nestedClass(
-            rawType.simpleName(), typeArgumentNames)
+        return enclosing instanceof ParameterizedTypeName enclosingParameterizedType
+            ? enclosingParameterizedType.nestedClass(rawType.simpleName(), typeArgumentNames)
             : new ParameterizedTypeName(null, rawType, typeArgumentNames);
       }
 
@@ -333,35 +323,26 @@ public class TypeName {
   }
 
   static TypeName get(Type type, Map<Type, TypeVariableName> map) {
-    if (type instanceof Class<?>) {
-      Class<?> classType = (Class<?>) type;
-      if (type == void.class) return VOID;
-      if (type == boolean.class) return BOOLEAN;
-      if (type == byte.class) return BYTE;
-      if (type == short.class) return SHORT;
-      if (type == int.class) return INT;
-      if (type == long.class) return LONG;
-      if (type == char.class) return CHAR;
-      if (type == float.class) return FLOAT;
-      if (type == double.class) return DOUBLE;
-      if (classType.isArray()) return ArrayTypeName.of(get(classType.getComponentType(), map));
-      return ClassName.get(classType);
-
-    } else if (type instanceof ParameterizedType) {
-      return ParameterizedTypeName.get((ParameterizedType) type, map);
-
-    } else if (type instanceof WildcardType) {
-      return WildcardTypeName.get((WildcardType) type, map);
-
-    } else if (type instanceof TypeVariable<?>) {
-      return TypeVariableName.get((TypeVariable<?>) type, map);
-
-    } else if (type instanceof GenericArrayType) {
-      return ArrayTypeName.get((GenericArrayType) type, map);
-
-    } else {
-      throw new IllegalArgumentException("unexpected type: " + type);
-    }
+    return switch (type) {
+      case Class<?> classType -> {
+        if (classType == void.class) yield VOID;
+        if (classType == boolean.class) yield BOOLEAN;
+        if (classType == byte.class) yield BYTE;
+        if (classType == short.class) yield SHORT;
+        if (classType == int.class) yield INT;
+        if (classType == long.class) yield LONG;
+        if (classType == char.class) yield CHAR;
+        if (classType == float.class) yield FLOAT;
+        if (classType == double.class) yield DOUBLE;
+        if (classType.isArray()) yield ArrayTypeName.of(get(classType.getComponentType(), map));
+        yield ClassName.get(classType);
+      }
+      case ParameterizedType parameterizedType -> ParameterizedTypeName.get(parameterizedType, map);
+      case WildcardType wildcardType -> WildcardTypeName.get(wildcardType, map);
+      case TypeVariable<?> typeVariable -> TypeVariableName.get(typeVariable, map);
+      case GenericArrayType genericArrayType -> ArrayTypeName.get(genericArrayType, map);
+      case null, default -> throw new IllegalArgumentException("unexpected type: " + type);
+    };
   }
 
   /** Converts an array of types to a list of type names. */
@@ -370,8 +351,8 @@ public class TypeName {
   }
 
   static List<TypeName> list(Type[] types, Map<Type, TypeVariableName> map) {
-    List<TypeName> result = new ArrayList<>(types.length);
-    for (Type type : types) {
+    var result = new ArrayList<TypeName>(types.length);
+    for (var type : types) {
       result.add(get(type, map));
     }
     return result;
@@ -379,15 +360,15 @@ public class TypeName {
 
   /** Returns the array component of {@code type}, or null if {@code type} is not an array. */
   static TypeName arrayComponent(TypeName type) {
-    return type instanceof ArrayTypeName
-        ? ((ArrayTypeName) type).componentType
+    return type instanceof ArrayTypeName arrayType
+        ? arrayType.componentType
         : null;
   }
 
   /** Returns {@code type} as an array, or null if {@code type} is not an array. */
   static ArrayTypeName asArray(TypeName type) {
-    return type instanceof ArrayTypeName
-        ? ((ArrayTypeName) type)
+    return type instanceof ArrayTypeName arrayType
+        ? arrayType
         : null;
   }
 

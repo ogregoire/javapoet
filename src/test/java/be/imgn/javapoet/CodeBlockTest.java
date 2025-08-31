@@ -28,8 +28,8 @@ import static org.junit.Assert.fail;
 
 public final class CodeBlockTest {
   @Test public void equalsAndHashCode() {
-    CodeBlock a = CodeBlock.builder().build();
-    CodeBlock b = CodeBlock.builder().build();
+    var a = CodeBlock.builder().build();
+    var b = CodeBlock.builder().build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
     a = CodeBlock.builder().add("$L", "taco").build();
@@ -39,7 +39,7 @@ public final class CodeBlockTest {
   }
 
   @Test public void of() {
-    CodeBlock a = CodeBlock.of("$L taco", "delicious");
+    var a = CodeBlock.of("$L taco", "delicious");
     assertThat(a.toString()).isEqualTo("delicious taco");
   }
 
@@ -105,36 +105,36 @@ public final class CodeBlockTest {
   }
 
   @Test public void nameFormatCanBeIndexed() {
-    CodeBlock block = CodeBlock.builder().add("$1N", "taco").build();
+    var block = CodeBlock.builder().add("$1N", "taco").build();
     assertThat(block.toString()).isEqualTo("taco");
   }
 
   @Test public void literalFormatCanBeIndexed() {
-    CodeBlock block = CodeBlock.builder().add("$1L", "taco").build();
+    var block = CodeBlock.builder().add("$1L", "taco").build();
     assertThat(block.toString()).isEqualTo("taco");
   }
 
   @Test public void stringFormatCanBeIndexed() {
-    CodeBlock block = CodeBlock.builder().add("$1S", "taco").build();
+    var block = CodeBlock.builder().add("$1S", "taco").build();
     assertThat(block.toString()).isEqualTo("\"taco\"");
   }
 
   @Test public void typeFormatCanBeIndexed() {
-    CodeBlock block = CodeBlock.builder().add("$1T", String.class).build();
+    var block = CodeBlock.builder().add("$1T", String.class).build();
     assertThat(block.toString()).isEqualTo("java.lang.String");
   }
 
   @Test public void simpleNamedArgument() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("text", "taco");
-    CodeBlock block = CodeBlock.builder().addNamed("$text:S", map).build();
+    var block = CodeBlock.builder().addNamed("$text:S", map).build();
     assertThat(block.toString()).isEqualTo("\"taco\"");
   }
 
   @Test public void repeatedNamedArgument() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("text", "tacos");
-    CodeBlock block = CodeBlock.builder()
+    var block = CodeBlock.builder()
         .addNamed("\"I like \" + $text:S + \". Do you like \" + $text:S + \"?\"", map)
         .build();
     assertThat(block.toString()).isEqualTo(
@@ -142,16 +142,16 @@ public final class CodeBlockTest {
   }
 
   @Test public void namedAndNoArgFormat() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("text", "tacos");
-    CodeBlock block = CodeBlock.builder()
+    var block = CodeBlock.builder()
         .addNamed("$>\n$text:L for $$3.50", map).build();
     assertThat(block.toString()).isEqualTo("\n  tacos for $3.50");
   }
 
   @Test public void missingNamedArgument() {
     try {
-      Map<String, Object> map = new LinkedHashMap<>();
+      var map = new LinkedHashMap<String, Object>();
       CodeBlock.builder().addNamed("$text:S", map).build();
       fail();
     } catch(IllegalArgumentException expected) {
@@ -161,9 +161,9 @@ public final class CodeBlockTest {
 
   @Test public void lowerCaseNamed() {
     try {
-      Map<String, Object> map = new LinkedHashMap<>();
+      var map = new LinkedHashMap<String, Object>();
       map.put("Text", "tacos");
-      CodeBlock block = CodeBlock.builder().addNamed("$Text:S", map).build();
+      var block = CodeBlock.builder().addNamed("$Text:S", map).build();
       fail();
     } catch(IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().isEqualTo("argument 'Text' must start with a lowercase character");
@@ -171,11 +171,11 @@ public final class CodeBlockTest {
   }
 
   @Test public void multipleNamedArguments() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("pipe", System.class);
     map.put("text", "tacos");
 
-    CodeBlock block = CodeBlock.builder()
+    var block = CodeBlock.builder()
         .addNamed("$pipe:T.out.println(\"Let's eat some $text:L\");", map)
         .build();
 
@@ -184,14 +184,14 @@ public final class CodeBlockTest {
   }
 
   @Test public void namedNewline() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("clazz", Integer.class);
-    CodeBlock block = CodeBlock.builder().addNamed("$clazz:T\n", map).build();
+    var block = CodeBlock.builder().addNamed("$clazz:T\n", map).build();
     assertThat(block.toString()).isEqualTo("java.lang.Integer\n");
   }
 
   @Test public void danglingNamed() {
-    Map<String, Object> map = new LinkedHashMap<>();
+    var map = new LinkedHashMap<String, Object>();
     map.put("clazz", Integer.class);
     try {
       CodeBlock.builder().addNamed("$clazz:T$", map).build();
@@ -274,14 +274,14 @@ public final class CodeBlockTest {
   }
 
   @Test public void sameIndexCanBeUsedWithDifferentFormats() {
-    CodeBlock block = CodeBlock.builder()
+    var block = CodeBlock.builder()
         .add("$1T.out.println($1S)", ClassName.get(System.class))
         .build();
     assertThat(block.toString()).isEqualTo("java.lang.System.out.println(\"java.lang.System\")");
   }
 
   @Test public void tooManyStatementEnters() {
-    CodeBlock codeBlock = CodeBlock.builder().add("$[$[").build();
+    var codeBlock = CodeBlock.builder().add("$[$[").build();
     try {
       // We can't report this error until rendering type because code blocks might be composed.
       codeBlock.toString();
@@ -292,7 +292,7 @@ public final class CodeBlockTest {
   }
 
   @Test public void statementExitWithoutStatementEnter() {
-    CodeBlock codeBlock = CodeBlock.builder().add("$]").build();
+    var codeBlock = CodeBlock.builder().add("$]").build();
     try {
       // We can't report this error until rendering type because code blocks might be composed.
       codeBlock.toString();
@@ -303,45 +303,45 @@ public final class CodeBlockTest {
   }
 
   @Test public void join() {
-    List<CodeBlock> codeBlocks = new ArrayList<>();
+    var codeBlocks = new ArrayList<CodeBlock>();
     codeBlocks.add(CodeBlock.of("$S", "hello"));
     codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
     codeBlocks.add(CodeBlock.of("need tacos"));
 
-    CodeBlock joined = CodeBlock.join(codeBlocks, " || ");
+    var joined = CodeBlock.join(codeBlocks, " || ");
     assertThat(joined.toString()).isEqualTo("\"hello\" || world.World || need tacos");
   }
 
   @Test public void joining() {
-    List<CodeBlock> codeBlocks = new ArrayList<>();
+    var codeBlocks = new ArrayList<CodeBlock>();
     codeBlocks.add(CodeBlock.of("$S", "hello"));
     codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
     codeBlocks.add(CodeBlock.of("need tacos"));
 
-    CodeBlock joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
+    var joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
     assertThat(joined.toString()).isEqualTo("\"hello\" || world.World || need tacos");
   }
 
   @Test public void joiningSingle() {
-    List<CodeBlock> codeBlocks = new ArrayList<>();
+    var codeBlocks = new ArrayList<CodeBlock>();
     codeBlocks.add(CodeBlock.of("$S", "hello"));
 
-    CodeBlock joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
+    var joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
     assertThat(joined.toString()).isEqualTo("\"hello\"");
   }
 
   @Test public void joiningWithPrefixAndSuffix() {
-    List<CodeBlock> codeBlocks = new ArrayList<>();
+    var codeBlocks = new ArrayList<CodeBlock>();
     codeBlocks.add(CodeBlock.of("$S", "hello"));
     codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
     codeBlocks.add(CodeBlock.of("need tacos"));
 
-    CodeBlock joined = codeBlocks.stream().collect(CodeBlock.joining(" || ", "start {", "} end"));
+    var joined = codeBlocks.stream().collect(CodeBlock.joining(" || ", "start {", "} end"));
     assertThat(joined.toString()).isEqualTo("start {\"hello\" || world.World || need tacos} end");
   }
 
   @Test public void clear() {
-    CodeBlock block = CodeBlock.builder()
+    var block = CodeBlock.builder()
         .addStatement("$S", "Test string")
         .clear()
         .build();

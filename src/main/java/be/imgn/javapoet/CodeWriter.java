@@ -22,7 +22,6 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +41,9 @@ import static java.lang.String.join;
  * honors imports, indentation, and deferred variable names.
  */
 final class CodeWriter {
-  /** Sentinel value that indicates that no user-provided package has been set. */
+  /**
+   * Sentinel value that indicates that no user-provided package has been set.
+   */
   private static final String NO_PACKAGE = new String();
   private static final Pattern LINE_BREAKING_PATTERN = Pattern.compile("\\R");
 
@@ -79,17 +80,17 @@ final class CodeWriter {
   }
 
   CodeWriter(Appendable out,
-      String indent,
-      Map<String, ClassName> importedTypes,
-      Set<String> staticImports,
-      Set<String> alwaysQualify) {
+             String indent,
+             Map<String, ClassName> importedTypes,
+             Set<String> staticImports,
+             Set<String> alwaysQualify) {
     this.out = new LineWrapper(out, indent, 100);
     this.indent = checkNotNull(indent, "indent == null");
     this.importedTypes = checkNotNull(importedTypes, "importedTypes == null");
     this.staticImports = checkNotNull(staticImports, "staticImports == null");
     this.alwaysQualify = checkNotNull(alwaysQualify, "alwaysQualify == null");
     this.staticImportClassNames = new LinkedHashSet<>();
-    for (String signature : staticImports) {
+    for (var signature : staticImports) {
       staticImportClassNames.add(signature.substring(0, signature.lastIndexOf('.')));
     }
   }
@@ -164,7 +165,7 @@ final class CodeWriter {
   }
 
   public void emitAnnotations(List<AnnotationSpec> annotations, boolean inline) throws IOException {
-    for (AnnotationSpec annotationSpec : annotations) {
+    for (var annotationSpec : annotations) {
       annotationSpec.emit(this, inline);
       emit(inline ? " " : "\n");
     }
@@ -175,9 +176,9 @@ final class CodeWriter {
    * be emitted.
    */
   public void emitModifiers(Set<Modifier> modifiers, Set<Modifier> implicitModifiers)
-      throws IOException {
+    throws IOException {
     if (modifiers.isEmpty()) return;
-    for (Modifier modifier : EnumSet.copyOf(modifiers)) {
+    for (var modifier : EnumSet.copyOf(modifiers)) {
       if (implicitModifiers.contains(modifier)) continue;
       emitAndIndent(modifier.name().toLowerCase(Locale.US));
       emitAndIndent(" ");
@@ -198,13 +199,13 @@ final class CodeWriter {
     typeVariables.forEach(typeVariable -> currentTypeVariables.add(typeVariable.name));
 
     emit("<");
-    boolean firstTypeVariable = true;
-    for (TypeVariableName typeVariable : typeVariables) {
+    var firstTypeVariable = true;
+    for (var typeVariable : typeVariables) {
       if (!firstTypeVariable) emit(", ");
       emitAnnotations(typeVariable.annotations, true);
       emit("$L", typeVariable.name);
-      boolean firstBound = true;
-      for (TypeName bound : typeVariable.bounds) {
+      var firstBound = true;
+      for (var bound : typeVariable.bounds) {
         emit(firstBound ? " extends $T" : " & $T", bound);
         firstBound = false;
       }
@@ -230,11 +231,11 @@ final class CodeWriter {
   }
 
   public CodeWriter emit(CodeBlock codeBlock, boolean ensureTrailingNewline) throws IOException {
-    int a = 0;
+    var a = 0;
     ClassName deferredTypeName = null; // used by "import static" logic
-    ListIterator<String> partIterator = codeBlock.formatParts.listIterator();
+    var partIterator = codeBlock.formatParts.listIterator();
     while (partIterator.hasNext()) {
-      String part = partIterator.next();
+      var part = partIterator.next();
       switch (part) {
         case "$L":
           emitLiteral(codeBlock.args.get(a++));
@@ -245,19 +246,18 @@ final class CodeWriter {
           break;
 
         case "$S":
-          String string = (String) codeBlock.args.get(a++);
+          var string = (String) codeBlock.args.get(a++);
           // Emit null as a literal null: no quotes.
           emitAndIndent(string != null
-              ? stringLiteralWithDoubleQuotes(string, indent)
-              : "null");
+            ? stringLiteralWithDoubleQuotes(string, indent)
+            : "null");
           break;
 
         case "$T":
-          TypeName typeName = (TypeName) codeBlock.args.get(a++);
+          var typeName = (TypeName) codeBlock.args.get(a++);
           // defer "typeName.emit(this)" if next format part will be handled by the default case
-          if (typeName instanceof ClassName && partIterator.hasNext()) {
+          if (typeName instanceof ClassName candidate && partIterator.hasNext()) {
             if (!codeBlock.formatParts.get(partIterator.nextIndex()).startsWith("$")) {
-              ClassName candidate = (ClassName) typeName;
               if (staticImportClassNames.contains(candidate.canonicalName)) {
                 checkState(deferredTypeName == null, "pending type for static import?!");
                 deferredTypeName = candidate;
@@ -331,7 +331,7 @@ final class CodeWriter {
 
   private static String extractMemberName(String part) {
     checkArgument(Character.isJavaIdentifierStart(part.charAt(0)), "not an identifier: %s", part);
-    for (int i = 1; i <= part.length(); i++) {
+    for (var i = 1; i <= part.length(); i++) {
       if (!SourceVersion.isIdentifier(part.substring(0, i))) {
         return part.substring(0, i - 1);
       }
@@ -340,12 +340,12 @@ final class CodeWriter {
   }
 
   private boolean emitStaticImportMember(String canonical, String part) throws IOException {
-    String partWithoutLeadingDot = part.substring(1);
+    var partWithoutLeadingDot = part.substring(1);
     if (partWithoutLeadingDot.isEmpty()) return false;
-    char first = partWithoutLeadingDot.charAt(0);
+    var first = partWithoutLeadingDot.charAt(0);
     if (!Character.isJavaIdentifierStart(first)) return false;
-    String explicit = canonical + "." + extractMemberName(partWithoutLeadingDot);
-    String wildcard = canonical + ".*";
+    var explicit = canonical + "." + extractMemberName(partWithoutLeadingDot);
+    var wildcard = canonical + ".*";
     if (staticImports.contains(explicit) || staticImports.contains(wildcard)) {
       emitAndIndent(partWithoutLeadingDot);
       return true;
@@ -354,17 +354,11 @@ final class CodeWriter {
   }
 
   private void emitLiteral(Object o) throws IOException {
-    if (o instanceof TypeSpec) {
-      TypeSpec typeSpec = (TypeSpec) o;
-      typeSpec.emit(this, null, Collections.emptySet());
-    } else if (o instanceof AnnotationSpec) {
-      AnnotationSpec annotationSpec = (AnnotationSpec) o;
-      annotationSpec.emit(this, true);
-    } else if (o instanceof CodeBlock) {
-      CodeBlock codeBlock = (CodeBlock) o;
-      emit(codeBlock);
-    } else {
-      emitAndIndent(String.valueOf(o));
+    switch (o) {
+      case TypeSpec type -> type.emit(this, null, Set.of());
+      case AnnotationSpec annotation -> annotation.emit(this, true);
+      case CodeBlock codeBlock -> emit(codeBlock);
+      default -> emitAndIndent(String.valueOf(o));
     }
   }
 
@@ -375,22 +369,22 @@ final class CodeWriter {
    */
   String lookupName(ClassName className) {
     // If the top level simple name is masked by a current type variable, use the canonical name.
-    String topLevelSimpleName = className.topLevelClassName().simpleName();
+    var topLevelSimpleName = className.topLevelClassName().simpleName();
     if (currentTypeVariables.contains(topLevelSimpleName)) {
       return className.canonicalName;
     }
 
     // Find the shortest suffix of className that resolves to className. This uses both local type
     // names (so `Entry` in `Map` refers to `Map.Entry`). Also uses imports.
-    boolean nameResolved = false;
-    for (ClassName c = className; c != null; c = c.enclosingClassName()) {
-      ClassName resolved = resolve(c.simpleName());
+    var nameResolved = false;
+    for (var c = className; c != null; c = c.enclosingClassName()) {
+      var resolved = resolve(c.simpleName());
       nameResolved = resolved != null;
 
       if (resolved != null && Objects.equals(resolved.canonicalName, c.canonicalName)) {
         int suffixOffset = c.simpleNames().size() - 1;
         return join(".", className.simpleNames().subList(
-            suffixOffset, className.simpleNames().size()));
+          suffixOffset, className.simpleNames().size()));
       }
     }
 
@@ -420,9 +414,9 @@ final class CodeWriter {
       // TODO what about nested types like java.util.Map.Entry?
       return;
     }
-    ClassName topLevelClassName = className.topLevelClassName();
-    String simpleName = topLevelClassName.simpleName();
-    ClassName replaced = importableTypes.put(simpleName, topLevelClassName);
+    var topLevelClassName = className.topLevelClassName();
+    var simpleName = topLevelClassName.simpleName();
+    var replaced = importableTypes.put(simpleName, topLevelClassName);
     if (replaced != null) {
       importableTypes.put(simpleName, replaced); // On collision, prefer the first inserted.
     }
@@ -435,30 +429,32 @@ final class CodeWriter {
   // TODO(jwilson): also honor superclass members when resolving names.
   private ClassName resolve(String simpleName) {
     // Match a child of the current (potentially nested) class.
-    for (int i = typeSpecStack.size() - 1; i >= 0; i--) {
-      TypeSpec typeSpec = typeSpecStack.get(i);
+    for (var i = typeSpecStack.size() - 1; i >= 0; i--) {
+      var typeSpec = typeSpecStack.get(i);
       if (typeSpec.nestedTypesSimpleNames.contains(simpleName)) {
         return stackClassName(i, simpleName);
       }
     }
 
     // Match the top-level class.
-    if (typeSpecStack.size() > 0 && Objects.equals(typeSpecStack.get(0).name, simpleName)) {
+    if (!typeSpecStack.isEmpty() && Objects.equals(typeSpecStack.getFirst().name, simpleName)) {
       return ClassName.get(packageName, simpleName);
     }
 
     // Match an imported type.
-    ClassName importedType = importedTypes.get(simpleName);
+    var importedType = importedTypes.get(simpleName);
     if (importedType != null) return importedType;
 
     // No match.
     return null;
   }
 
-  /** Returns the class named {@code simpleName} when nested in the class at {@code stackDepth}. */
+  /**
+   * Returns the class named {@code simpleName} when nested in the class at {@code stackDepth}.
+   */
   private ClassName stackClassName(int stackDepth, String simpleName) {
-    ClassName className = ClassName.get(packageName, typeSpecStack.get(0).name);
-    for (int i = 1; i <= stackDepth; i++) {
+    var className = ClassName.get(packageName, typeSpecStack.get(0).name);
+    for (var i = 1; i <= stackDepth; i++) {
       className = className.nestedClass(typeSpecStack.get(i).name);
     }
     return className.nestedClass(simpleName);
@@ -470,8 +466,8 @@ final class CodeWriter {
    * unnecessary trailing whitespace.
    */
   CodeWriter emitAndIndent(String s) throws IOException {
-    boolean first = true;
-    for (String line : LINE_BREAKING_PATTERN.split(s, -1)) {
+    var first = true;
+    for (var line : LINE_BREAKING_PATTERN.split(s, -1)) {
       // Emit a newline character. Make sure blank lines in Javadoc & comments look good.
       if (!first) {
         if ((javadoc || comment) && trailingNewline) {
@@ -508,7 +504,7 @@ final class CodeWriter {
   }
 
   private void emitIndentation() throws IOException {
-    for (int j = 0; j < indentLevel; j++) {
+    for (var j = 0; j < indentLevel; j++) {
       out.append(indent);
     }
   }
@@ -518,7 +514,7 @@ final class CodeWriter {
    * collisions, that type's first use is imported.
    */
   Map<String, ClassName> suggestedImports() {
-    Map<String, ClassName> result = new LinkedHashMap<>(importableTypes);
+    var result = new LinkedHashMap<>(importableTypes);
     result.keySet().removeAll(referencedNames);
     return result;
   }
@@ -528,12 +524,12 @@ final class CodeWriter {
     private final Map<T, Integer> map = new LinkedHashMap<>();
 
     void add(T t) {
-      int count = map.getOrDefault(t, 0);
+      var count = map.getOrDefault(t, 0);
       map.put(t, count + 1);
     }
 
     void remove(T t) {
-      int count = map.getOrDefault(t, 0);
+      var count = map.getOrDefault(t, 0);
       if (count == 0) {
         throw new IllegalStateException(t + " is not in the multiset");
       }

@@ -115,7 +115,7 @@ public final class NameAllocator implements Cloneable {
       suggestion = suggestion + "_";
     }
 
-    String replaced = tagToName.put(tag, suggestion);
+    var replaced = tagToName.put(tag, suggestion);
     if (replaced != null) {
       tagToName.put(tag, replaced); // Put things back as they were!
       throw new IllegalArgumentException("tag " + tag + " cannot be used for both '" + replaced
@@ -126,16 +126,16 @@ public final class NameAllocator implements Cloneable {
   }
 
   public static String toJavaIdentifier(String suggestion) {
-    StringBuilder result = new StringBuilder();
-    for (int i = 0; i < suggestion.length(); ) {
-      int codePoint = suggestion.codePointAt(i);
+    var result = new StringBuilder();
+    for (var i = 0; i < suggestion.length(); ) {
+      var codePoint = suggestion.codePointAt(i);
       if (i == 0
           && !Character.isJavaIdentifierStart(codePoint)
           && Character.isJavaIdentifierPart(codePoint)) {
         result.append("_");
       }
 
-      int validCodePoint = Character.isJavaIdentifierPart(codePoint) ? codePoint : '_';
+      var validCodePoint = Character.isJavaIdentifierPart(codePoint) ? codePoint : '_';
       result.appendCodePoint(validCodePoint);
       i += Character.charCount(codePoint);
     }
@@ -144,7 +144,7 @@ public final class NameAllocator implements Cloneable {
 
   /** Retrieve a name created with {@link #newName(String, Object)}. */
   public String get(Object tag) {
-    String result = tagToName.get(tag);
+    var result = tagToName.get(tag);
     if (result == null) {
       throw new IllegalArgumentException("unknown tag: " + tag);
     }

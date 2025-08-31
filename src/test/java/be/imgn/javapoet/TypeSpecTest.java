@@ -58,7 +58,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void basic() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("toString")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -66,64 +66,66 @@ public final class TypeSpecTest {
             .addCode("return $S;\n", "taco")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  @Override\n"
-        + "  public final String toString() {\n"
-        + "    return \"taco\";\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            class Taco {
+              @Override
+              public final String toString() {
+                return "taco";
+              }
+            }
+            """);
     assertEquals(472949424, taco.hashCode()); // update expected number if source changes
   }
 
   @Test public void interestingTypes() throws Exception {
-    TypeName listOfAny = ParameterizedTypeName.get(
+    var listOfAny = ParameterizedTypeName.get(
         ClassName.get(List.class), WildcardTypeName.subtypeOf(Object.class));
-    TypeName listOfExtends = ParameterizedTypeName.get(
+    var listOfExtends = ParameterizedTypeName.get(
         ClassName.get(List.class), WildcardTypeName.subtypeOf(Serializable.class));
-    TypeName listOfSuper = ParameterizedTypeName.get(ClassName.get(List.class),
+    var listOfSuper = ParameterizedTypeName.get(ClassName.get(List.class),
         WildcardTypeName.supertypeOf(String.class));
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(listOfAny, "extendsObject")
         .addField(listOfExtends, "extendsSerializable")
         .addField(listOfSuper, "superString")
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.lang.String;\n"
-        + "import java.util.List;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  List<?> extendsObject;\n"
-        + "\n"
-        + "  List<? extends Serializable> extendsSerializable;\n"
-        + "\n"
-        + "  List<? super String> superString;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.lang.String;
+            import java.util.List;
+            
+            class Taco {
+              List<?> extendsObject;
+            
+              List<? extends Serializable> extendsSerializable;
+            
+              List<? super String> superString;
+            }
+            """);
   }
 
   @Test public void anonymousInnerClass() throws Exception {
-    ClassName foo = ClassName.get(tacosPackage, "Foo");
-    ClassName bar = ClassName.get(tacosPackage, "Bar");
-    ClassName thingThang = ClassName.get(tacosPackage, "Thing", "Thang");
-    TypeName thingThangOfFooBar = ParameterizedTypeName.get(thingThang, foo, bar);
-    ClassName thung = ClassName.get(tacosPackage, "Thung");
-    ClassName simpleThung = ClassName.get(tacosPackage, "SimpleThung");
-    TypeName thungOfSuperBar = ParameterizedTypeName.get(thung, WildcardTypeName.supertypeOf(bar));
-    TypeName thungOfSuperFoo = ParameterizedTypeName.get(thung, WildcardTypeName.supertypeOf(foo));
-    TypeName simpleThungOfBar = ParameterizedTypeName.get(simpleThung, bar);
+    var foo = ClassName.get(tacosPackage, "Foo");
+    var bar = ClassName.get(tacosPackage, "Bar");
+    var thingThang = ClassName.get(tacosPackage, "Thing", "Thang");
+    var thingThangOfFooBar = ParameterizedTypeName.get(thingThang, foo, bar);
+    var thung = ClassName.get(tacosPackage, "Thung");
+    var simpleThung = ClassName.get(tacosPackage, "SimpleThung");
+    var thungOfSuperBar = ParameterizedTypeName.get(thung, WildcardTypeName.supertypeOf(bar));
+    var thungOfSuperFoo = ParameterizedTypeName.get(thung, WildcardTypeName.supertypeOf(foo));
+    var simpleThungOfBar = ParameterizedTypeName.get(simpleThung, bar);
 
-    ParameterSpec thungParameter = ParameterSpec.builder(thungOfSuperFoo, "thung")
+    var thungParameter = ParameterSpec.builder(thungOfSuperFoo, "thung")
         .addModifiers(Modifier.FINAL)
         .build();
-    TypeSpec aSimpleThung = TypeSpec.anonymousClassBuilder(CodeBlock.of("$N", thungParameter))
+    var aSimpleThung = TypeSpec.anonymousClassBuilder(CodeBlock.of("$N", thungParameter))
         .superclass(simpleThungOfBar)
         .addMethod(MethodSpec.methodBuilder("doSomething")
             .addAnnotation(Override.class)
@@ -132,7 +134,7 @@ public final class TypeSpecTest {
             .addCode("/* code snippets */\n")
             .build())
         .build();
-    TypeSpec aThingThang = TypeSpec.anonymousClassBuilder("")
+    var aThingThang = TypeSpec.anonymousClassBuilder("")
         .superclass(thingThangOfFooBar)
         .addMethod(MethodSpec.methodBuilder("call")
             .addAnnotation(Override.class)
@@ -142,35 +144,36 @@ public final class TypeSpecTest {
             .addCode("return $L;\n", aSimpleThung)
             .build())
         .build();
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(FieldSpec.builder(thingThangOfFooBar, "NAME")
             .addModifiers(Modifier.STATIC, Modifier.FINAL, Modifier.FINAL)
             .initializer("$L", aThingThang)
             .build())
         .build();
 
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  static final Thing.Thang<Foo, Bar> NAME = new Thing.Thang<Foo, Bar>() {\n"
-        + "    @Override\n"
-        + "    public Thung<? super Bar> call(final Thung<? super Foo> thung) {\n"
-        + "      return new SimpleThung<Bar>(thung) {\n"
-        + "        @Override\n"
-        + "        public void doSomething(Bar bar) {\n"
-        + "          /* code snippets */\n"
-        + "        }\n"
-        + "      };\n"
-        + "    }\n"
-        + "  };\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            
+            class Taco {
+              static final Thing.Thang<Foo, Bar> NAME = new Thing.Thang<Foo, Bar>() {
+                @Override
+                public Thung<? super Bar> call(final Thung<? super Foo> thung) {
+                  return new SimpleThung<Bar>(thung) {
+                    @Override
+                    public void doSomething(Bar bar) {
+                      /* code snippets */
+                    }
+                  };
+                }
+              };
+            }
+            """);
   }
 
   @Test public void annotatedParameters() throws Exception {
-    TypeSpec service = TypeSpec.classBuilder("Foo")
+    var service = TypeSpec.classBuilder("Foo")
         .addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
             .addParameter(long.class, "id")
@@ -192,17 +195,18 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(service)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Foo {\n"
-        + "  public Foo(long id, @Ping String one, @Ping String two, @Pong(\"pong\") String three,\n"
-        + "      @Ping String four) {\n"
-        + "    /* code snippets */\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(service)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Foo {
+              public Foo(long id, @Ping String one, @Ping String two, @Pong("pong") String three,
+                  @Ping String four) {
+                /* code snippets */
+              }
+            }
+            """);
   }
 
   /**
@@ -210,36 +214,37 @@ public final class TypeSpecTest {
    * imports. https://github.com/square/javapoet/issues/422
    */
   @Test public void annotationsAndJavaLangTypes() throws Exception {
-    ClassName freeRange = ClassName.get("javax.annotation", "FreeRange");
-    TypeSpec taco = TypeSpec.classBuilder("EthicalTaco")
+    var freeRange = ClassName.get("javax.annotation", "FreeRange");
+    var taco = TypeSpec.classBuilder("EthicalTaco")
         .addField(ClassName.get(String.class)
             .annotated(AnnotationSpec.builder(freeRange).build()), "meat")
         .build();
 
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "import javax.annotation.FreeRange;\n"
-        + "\n"
-        + "class EthicalTaco {\n"
-        + "  @FreeRange String meat;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            import javax.annotation.FreeRange;
+            
+            class EthicalTaco {
+              @FreeRange String meat;
+            }
+            """);
   }
 
   @Test public void retrofitStyleInterface() throws Exception {
-    ClassName observable = ClassName.get(tacosPackage, "Observable");
-    ClassName fooBar = ClassName.get(tacosPackage, "FooBar");
-    ClassName thing = ClassName.get(tacosPackage, "Thing");
-    ClassName things = ClassName.get(tacosPackage, "Things");
-    ClassName map = ClassName.get("java.util", "Map");
-    ClassName string = ClassName.get("java.lang", "String");
-    ClassName headers = ClassName.get(tacosPackage, "Headers");
-    ClassName post = ClassName.get(tacosPackage, "POST");
-    ClassName body = ClassName.get(tacosPackage, "Body");
-    ClassName queryMap = ClassName.get(tacosPackage, "QueryMap");
-    ClassName header = ClassName.get(tacosPackage, "Header");
-    TypeSpec service = TypeSpec.interfaceBuilder("Service")
+    var observable = ClassName.get(tacosPackage, "Observable");
+    var fooBar = ClassName.get(tacosPackage, "FooBar");
+    var thing = ClassName.get(tacosPackage, "Thing");
+    var things = ClassName.get(tacosPackage, "Things");
+    var map = ClassName.get("java.util", "Map");
+    var string = ClassName.get("java.lang", "String");
+    var headers = ClassName.get(tacosPackage, "Headers");
+    var post = ClassName.get(tacosPackage, "POST");
+    var body = ClassName.get(tacosPackage, "Body");
+    var queryMap = ClassName.get(tacosPackage, "QueryMap");
+    var header = ClassName.get(tacosPackage, "Header");
+    var service = TypeSpec.interfaceBuilder("Service")
         .addMethod(MethodSpec.methodBuilder("fooBar")
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
             .addAnnotation(AnnotationSpec.builder(headers)
@@ -267,46 +272,48 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(service)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "import java.util.Map;\n"
-        + "\n"
-        + "interface Service {\n"
-        + "  @Headers({\n"
-        + "      \"Accept: application/json\",\n"
-        + "      \"User-Agent: foobar\"\n"
-        + "  })\n"
-        + "  @POST(\"/foo/bar\")\n"
-        + "  Observable<FooBar> fooBar(@Body Things<Thing> things,\n"
-        + "      @QueryMap(encodeValues = false) Map<String, String> query,\n"
-        + "      @Header(\"Authorization\") String authorization);\n"
-        + "}\n");
+    assertThat(toString(service)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            import java.util.Map;
+            
+            interface Service {
+              @Headers({
+                  "Accept: application/json",
+                  "User-Agent: foobar"
+              })
+              @POST("/foo/bar")
+              Observable<FooBar> fooBar(@Body Things<Thing> things,
+                  @QueryMap(encodeValues = false) Map<String, String> query,
+                  @Header("Authorization") String authorization);
+            }
+            """);
   }
 
   @Test public void annotatedField() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(FieldSpec.builder(String.class, "thing", Modifier.PRIVATE, Modifier.FINAL)
             .addAnnotation(AnnotationSpec.builder(ClassName.get(tacosPackage, "JsonAdapter"))
                 .addMember("value", "$T.class", ClassName.get(tacosPackage, "Foo"))
                 .build())
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  @JsonAdapter(Foo.class)\n"
-        + "  private final String thing;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Taco {
+              @JsonAdapter(Foo.class)
+              private final String thing;
+            }
+            """);
   }
 
   @Test public void annotatedClass() throws Exception {
-    ClassName someType = ClassName.get(tacosPackage, "SomeType");
-    TypeSpec taco = TypeSpec.classBuilder("Foo")
+    var someType = ClassName.get(tacosPackage, "SomeType");
+    var taco = TypeSpec.classBuilder("Foo")
         .addAnnotation(AnnotationSpec.builder(ClassName.get(tacosPackage, "Something"))
             .addMember("hi", "$T.$N", someType, "FIELD")
             .addMember("hey", "$L", 12)
@@ -314,16 +321,17 @@ public final class TypeSpecTest {
             .build())
         .addModifiers(Modifier.PUBLIC)
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "@Something(\n"
-        + "    hi = SomeType.FIELD,\n"
-        + "    hey = 12,\n"
-        + "    hello = \"goodbye\"\n"
-        + ")\n"
-        + "public class Foo {\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            @Something(
+                hi = SomeType.FIELD,
+                hey = 12,
+                hello = "goodbye"
+            )
+            public class Foo {
+            }
+            """);
   }
 
   @Test public void addAnnotationDisallowsNull() {
@@ -348,7 +356,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void enumWithSubclassing() throws Exception {
-    TypeSpec roshambo = TypeSpec.enumBuilder("Roshambo")
+    var roshambo = TypeSpec.enumBuilder("Roshambo")
         .addModifiers(Modifier.PUBLIC)
         .addEnumConstant("ROCK", TypeSpec.anonymousClassBuilder("")
             .addJavadoc("Avalanche!\n")
@@ -372,42 +380,43 @@ public final class TypeSpecTest {
             .addCode("this($S);\n", "fist")
             .build())
         .build();
-    assertThat(toString(roshambo)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "public enum Roshambo {\n"
-        + "  /**\n"
-        + "   * Avalanche!\n"
-        + "   */\n"
-        + "  ROCK,\n"
-        + "\n"
-        + "  PAPER(\"flat\") {\n"
-        + "    @Override\n"
-        + "    public String toString() {\n"
-        + "      return \"paper airplane!\";\n"
-        + "    }\n"
-        + "  },\n"
-        + "\n"
-        + "  SCISSORS(\"peace sign\");\n"
-        + "\n"
-        + "  private final String handPosition;\n"
-        + "\n"
-        + "  Roshambo(String handPosition) {\n"
-        + "    this.handPosition = handPosition;\n"
-        + "  }\n"
-        + "\n"
-        + "  Roshambo() {\n"
-        + "    this(\"fist\");\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(roshambo)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            public enum Roshambo {
+              /**
+               * Avalanche!
+               */
+              ROCK,
+            
+              PAPER("flat") {
+                @Override
+                public String toString() {
+                  return "paper airplane!";
+                }
+              },
+            
+              SCISSORS("peace sign");
+            
+              private final String handPosition;
+            
+              Roshambo(String handPosition) {
+                this.handPosition = handPosition;
+              }
+            
+              Roshambo() {
+                this("fist");
+              }
+            }
+            """);
   }
 
   /** https://github.com/square/javapoet/issues/193 */
   @Test public void enumsMayDefineAbstractMethods() throws Exception {
-    TypeSpec roshambo = TypeSpec.enumBuilder("Tortilla")
+    var roshambo = TypeSpec.enumBuilder("Tortilla")
         .addModifiers(Modifier.PUBLIC)
         .addEnumConstant("CORN", TypeSpec.anonymousClassBuilder("")
             .addMethod(MethodSpec.methodBuilder("fold")
@@ -419,35 +428,37 @@ public final class TypeSpecTest {
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
             .build())
         .build();
-    assertThat(toString(roshambo)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "\n"
-        + "public enum Tortilla {\n"
-        + "  CORN {\n"
-        + "    @Override\n"
-        + "    public void fold() {\n"
-        + "    }\n"
-        + "  };\n"
-        + "\n"
-        + "  public abstract void fold();\n"
-        + "}\n");
+    assertThat(toString(roshambo)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            
+            public enum Tortilla {
+              CORN {
+                @Override
+                public void fold() {
+                }
+              };
+            
+              public abstract void fold();
+            }
+            """);
   }
 
   @Test public void noEnumConstants() throws Exception {
-    TypeSpec roshambo = TypeSpec.enumBuilder("Roshambo")
+    var roshambo = TypeSpec.enumBuilder("Roshambo")
             .addField(String.class, "NO_ENUM", Modifier.STATIC)
             .build();
-    assertThat(toString(roshambo)).isEqualTo(""
-            + "package be.imgn.tacos;\n"
-            + "\n"
-            + "import java.lang.String;\n"
-            + "\n"
-            + "enum Roshambo {\n"
-            + "  ;\n"
-            + "  static String NO_ENUM;\n"
-            + "}\n");
+    assertThat(toString(roshambo)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            enum Roshambo {
+              ;
+              static String NO_ENUM;
+            }
+            """);
   }
 
   @Test public void onlyEnumsMayHaveEnumConstants() throws Exception {
@@ -461,7 +472,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void enumWithMembersButNoConstructorCall() throws Exception {
-    TypeSpec roshambo = TypeSpec.enumBuilder("Roshambo")
+    var roshambo = TypeSpec.enumBuilder("Roshambo")
         .addEnumConstant("SPOCK", TypeSpec.anonymousClassBuilder("")
             .addMethod(MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override.class)
@@ -471,25 +482,26 @@ public final class TypeSpecTest {
                 .build())
             .build())
         .build();
-    assertThat(toString(roshambo)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "enum Roshambo {\n"
-        + "  SPOCK {\n"
-        + "    @Override\n"
-        + "    public String toString() {\n"
-        + "      return \"west side\";\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(roshambo)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            enum Roshambo {
+              SPOCK {
+                @Override
+                public String toString() {
+                  return "west side";
+                }
+              }
+            }
+            """);
   }
 
   /** https://github.com/square/javapoet/issues/253 */
   @Test public void enumWithAnnotatedValues() throws Exception {
-    TypeSpec roshambo = TypeSpec.enumBuilder("Roshambo")
+    var roshambo = TypeSpec.enumBuilder("Roshambo")
         .addModifiers(Modifier.PUBLIC)
         .addEnumConstant("ROCK", TypeSpec.anonymousClassBuilder("")
             .addAnnotation(Deprecated.class)
@@ -497,23 +509,24 @@ public final class TypeSpecTest {
         .addEnumConstant("PAPER")
         .addEnumConstant("SCISSORS")
         .build();
-    assertThat(toString(roshambo)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Deprecated;\n"
-        + "\n"
-        + "public enum Roshambo {\n"
-        + "  @Deprecated\n"
-        + "  ROCK,\n"
-        + "\n"
-        + "  PAPER,\n"
-        + "\n"
-        + "  SCISSORS\n"
-        + "}\n");
+    assertThat(toString(roshambo)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Deprecated;
+            
+            public enum Roshambo {
+              @Deprecated
+              ROCK,
+            
+              PAPER,
+            
+              SCISSORS
+            }
+            """);
   }
 
   @Test public void methodThrows() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addModifiers(Modifier.ABSTRACT)
         .addMethod(MethodSpec.methodBuilder("throwOne")
             .addException(IOException.class)
@@ -531,29 +544,30 @@ public final class TypeSpecTest {
             .addException(IOException.class)
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.IOException;\n"
-        + "\n"
-        + "abstract class Taco {\n"
-        + "  void throwOne() throws IOException {\n"
-        + "  }\n"
-        + "\n"
-        + "  void throwTwo() throws IOException, SourCreamException {\n"
-        + "  }\n"
-        + "\n"
-        + "  abstract void abstractThrow() throws IOException;\n"
-        + "\n"
-        + "  native void nativeThrow() throws IOException;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.IOException;
+            
+            abstract class Taco {
+              void throwOne() throws IOException {
+              }
+            
+              void throwTwo() throws IOException, SourCreamException {
+              }
+            
+              abstract void abstractThrow() throws IOException;
+            
+              native void nativeThrow() throws IOException;
+            }
+            """);
   }
 
   @Test public void typeVariables() throws Exception {
-    TypeVariableName t = TypeVariableName.get("T");
-    TypeVariableName p = TypeVariableName.get("P", Number.class);
-    ClassName location = ClassName.get(tacosPackage, "Location");
-    TypeSpec typeSpec = TypeSpec.classBuilder("Location")
+    var t = TypeVariableName.get("T");
+    var p = TypeVariableName.get("P", Number.class);
+    var location = ClassName.get(tacosPackage, "Location");
+    var typeSpec = TypeSpec.classBuilder("Location")
         .addTypeVariable(t)
         .addTypeVariable(p)
         .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Comparable.class), p))
@@ -578,81 +592,84 @@ public final class TypeSpecTest {
             .addCode("throw new $T($S);\n", UnsupportedOperationException.class, "TODO")
             .build())
         .build();
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Comparable;\n"
-        + "import java.lang.Number;\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.UnsupportedOperationException;\n"
-        + "\n"
-        + "class Location<T, P extends Number> implements Comparable<P> {\n"
-        + "  T label;\n"
-        + "\n"
-        + "  P x;\n"
-        + "\n"
-        + "  P y;\n"
-        + "\n"
-        + "  @Override\n"
-        + "  public int compareTo(P p) {\n"
-        + "    return 0;\n"
-        + "  }\n"
-        + "\n"
-        + "  public static <T, P extends Number> Location<T, P> of(T label, P x, P y) {\n"
-        + "    throw new UnsupportedOperationException(\"TODO\");\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Comparable;
+            import java.lang.Number;
+            import java.lang.Override;
+            import java.lang.UnsupportedOperationException;
+            
+            class Location<T, P extends Number> implements Comparable<P> {
+              T label;
+            
+              P x;
+            
+              P y;
+            
+              @Override
+              public int compareTo(P p) {
+                return 0;
+              }
+            
+              public static <T, P extends Number> Location<T, P> of(T label, P x, P y) {
+                throw new UnsupportedOperationException("TODO");
+              }
+            }
+            """);
   }
 
   @Test public void typeVariableWithBounds() {
-    AnnotationSpec a = AnnotationSpec.builder(ClassName.get("be.imgn.tacos", "A")).build();
-    TypeVariableName p = TypeVariableName.get("P", Number.class);
-    TypeVariableName q = (TypeVariableName) TypeVariableName.get("Q", Number.class).annotated(a);
-    TypeSpec typeSpec = TypeSpec.classBuilder("Location")
+    var a = AnnotationSpec.builder(ClassName.get("be.imgn.tacos", "A")).build();
+    var p = TypeVariableName.get("P", Number.class);
+    var q = (TypeVariableName) TypeVariableName.get("Q", Number.class).annotated(a);
+    var typeSpec = TypeSpec.classBuilder("Location")
         .addTypeVariable(p.withBounds(Comparable.class))
         .addTypeVariable(q.withBounds(Comparable.class))
         .addField(p, "x")
         .addField(q, "y")
         .build();
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Comparable;\n"
-        + "import java.lang.Number;\n"
-        + "\n"
-        + "class Location<P extends Number & Comparable, @A Q extends Number & Comparable> {\n"
-        + "  P x;\n"
-        + "\n"
-        + "  @A Q y;\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Comparable;
+            import java.lang.Number;
+            
+            class Location<P extends Number & Comparable, @A Q extends Number & Comparable> {
+              P x;
+            
+              @A Q y;
+            }
+            """);
   }
 
   @Test public void classImplementsExtends() throws Exception {
-    ClassName taco = ClassName.get(tacosPackage, "Taco");
-    ClassName food = ClassName.get("be.imgn.tacos", "Food");
-    TypeSpec typeSpec = TypeSpec.classBuilder("Taco")
+    var taco = ClassName.get(tacosPackage, "Taco");
+    var food = ClassName.get("be.imgn.tacos", "Food");
+    var typeSpec = TypeSpec.classBuilder("Taco")
         .addModifiers(Modifier.ABSTRACT)
         .superclass(ParameterizedTypeName.get(ClassName.get(AbstractSet.class), food))
         .addSuperinterface(Serializable.class)
         .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Comparable.class), taco))
         .build();
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.lang.Comparable;\n"
-        + "import java.util.AbstractSet;\n"
-        + "\n"
-        + "abstract class Taco extends AbstractSet<Food> "
-        + "implements Serializable, Comparable<Taco> {\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.lang.Comparable;
+            import java.util.AbstractSet;
+            
+            abstract class Taco extends AbstractSet<Food> \
+            implements Serializable, Comparable<Taco> {
+            }
+            """);
   }
 
   @Test public void classImplementsNestedClass() throws Exception {
-    ClassName outer = ClassName.get(tacosPackage, "Outer");
-    ClassName inner = outer.nestedClass("Inner");
-    ClassName callable = ClassName.get(Callable.class);
-    TypeSpec typeSpec = TypeSpec.classBuilder("Outer")
+    var outer = ClassName.get(tacosPackage, "Outer");
+    var inner = outer.nestedClass("Inner");
+    var callable = ClassName.get(Callable.class);
+    var typeSpec = TypeSpec.classBuilder("Outer")
         .superclass(ParameterizedTypeName.get(callable,
             inner))
         .addType(TypeSpec.classBuilder("Inner")
@@ -660,59 +677,62 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.util.concurrent.Callable;\n"
-        + "\n"
-        + "class Outer extends Callable<Outer.Inner> {\n"
-        + "  static class Inner {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.util.concurrent.Callable;
+            
+            class Outer extends Callable<Outer.Inner> {
+              static class Inner {
+              }
+            }
+            """);
   }
 
   @Test public void enumImplements() throws Exception {
-    TypeSpec typeSpec = TypeSpec.enumBuilder("Food")
+    var typeSpec = TypeSpec.enumBuilder("Food")
         .addSuperinterface(Serializable.class)
         .addSuperinterface(Cloneable.class)
         .addEnumConstant("LEAN_GROUND_BEEF")
         .addEnumConstant("SHREDDED_CHEESE")
         .build();
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.lang.Cloneable;\n"
-        + "\n"
-        + "enum Food implements Serializable, Cloneable {\n"
-        + "  LEAN_GROUND_BEEF,\n"
-        + "\n"
-        + "  SHREDDED_CHEESE\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.lang.Cloneable;
+            
+            enum Food implements Serializable, Cloneable {
+              LEAN_GROUND_BEEF,
+            
+              SHREDDED_CHEESE
+            }
+            """);
   }
 
   @Test public void interfaceExtends() throws Exception {
-    ClassName taco = ClassName.get(tacosPackage, "Taco");
-    TypeSpec typeSpec = TypeSpec.interfaceBuilder("Taco")
+    var taco = ClassName.get(tacosPackage, "Taco");
+    var typeSpec = TypeSpec.interfaceBuilder("Taco")
         .addSuperinterface(Serializable.class)
         .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Comparable.class), taco))
         .build();
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.lang.Comparable;\n"
-        + "\n"
-        + "interface Taco extends Serializable, Comparable<Taco> {\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.lang.Comparable;
+            
+            interface Taco extends Serializable, Comparable<Taco> {
+            }
+            """);
   }
 
   @Test public void nestedClasses() throws Exception {
-    ClassName taco = ClassName.get(tacosPackage, "Combo", "Taco");
-    ClassName topping = ClassName.get(tacosPackage, "Combo", "Taco", "Topping");
-    ClassName chips = ClassName.get(tacosPackage, "Combo", "Chips");
-    ClassName sauce = ClassName.get(tacosPackage, "Combo", "Sauce");
-    TypeSpec typeSpec = TypeSpec.classBuilder("Combo")
+    var taco = ClassName.get(tacosPackage, "Combo", "Taco");
+    var topping = ClassName.get(tacosPackage, "Combo", "Taco", "Topping");
+    var chips = ClassName.get(tacosPackage, "Combo", "Chips");
+    var sauce = ClassName.get(tacosPackage, "Combo", "Sauce");
+    var typeSpec = TypeSpec.classBuilder("Combo")
         .addField(taco, "taco")
         .addField(chips, "chips")
         .addType(TypeSpec.classBuilder(taco.simpleName())
@@ -738,50 +758,51 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(typeSpec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.util.List;\n"
-        + "\n"
-        + "class Combo {\n"
-        + "  Taco taco;\n"
-        + "\n"
-        + "  Chips chips;\n"
-        + "\n"
-        + "  static class Taco {\n"
-        + "    List<Topping> toppings;\n"
-        + "\n"
-        + "    Sauce sauce;\n"
-        + "\n"
-        + "    enum Topping {\n"
-        + "      SHREDDED_CHEESE,\n"
-        + "\n"
-        + "      LEAN_GROUND_BEEF\n"
-        + "    }\n"
-        + "  }\n"
-        + "\n"
-        + "  static class Chips {\n"
-        + "    Taco.Topping topping;\n"
-        + "\n"
-        + "    Sauce dippingSauce;\n"
-        + "  }\n"
-        + "\n"
-        + "  enum Sauce {\n"
-        + "    SOUR_CREAM,\n"
-        + "\n"
-        + "    SALSA,\n"
-        + "\n"
-        + "    QUESO,\n"
-        + "\n"
-        + "    MILD,\n"
-        + "\n"
-        + "    FIRE\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(typeSpec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.util.List;
+            
+            class Combo {
+              Taco taco;
+            
+              Chips chips;
+            
+              static class Taco {
+                List<Topping> toppings;
+            
+                Sauce sauce;
+            
+                enum Topping {
+                  SHREDDED_CHEESE,
+            
+                  LEAN_GROUND_BEEF
+                }
+              }
+            
+              static class Chips {
+                Taco.Topping topping;
+            
+                Sauce dippingSauce;
+              }
+            
+              enum Sauce {
+                SOUR_CREAM,
+            
+                SALSA,
+            
+                QUESO,
+            
+                MILD,
+            
+                FIRE
+              }
+            }
+            """);
   }
 
   @Test public void annotation() throws Exception {
-    TypeSpec annotation = TypeSpec.annotationBuilder("MyAnnotation")
+    var annotation = TypeSpec.annotationBuilder("MyAnnotation")
         .addModifiers(Modifier.PUBLIC)
         .addMethod(MethodSpec.methodBuilder("test")
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -790,17 +811,18 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(annotation)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "public @interface MyAnnotation {\n"
-        + "  int test() default 0;\n"
-        + "}\n"
+    assertThat(toString(annotation)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            public @interface MyAnnotation {
+              int test() default 0;
+            }
+            """
     );
   }
 
   @Test public void innerAnnotationInAnnotationDeclaration() throws Exception {
-    TypeSpec bar = TypeSpec.annotationBuilder("Bar")
+    var bar = TypeSpec.annotationBuilder("Bar")
         .addMethod(MethodSpec.methodBuilder("value")
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
             .defaultValue("@$T", Deprecated.class)
@@ -808,33 +830,35 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(bar)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Deprecated;\n"
-        + "\n"
-        + "@interface Bar {\n"
-        + "  Deprecated value() default @Deprecated;\n"
-        + "}\n"
+    assertThat(toString(bar)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Deprecated;
+            
+            @interface Bar {
+              Deprecated value() default @Deprecated;
+            }
+            """
     );
   }
 
   @Test public void annotationWithFields() {
-    FieldSpec field = FieldSpec.builder(int.class, "FOO")
+    var field = FieldSpec.builder(int.class, "FOO")
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
         .initializer("$L", 101)
         .build();
 
-    TypeSpec anno = TypeSpec.annotationBuilder("Anno")
+    var anno = TypeSpec.annotationBuilder("Anno")
         .addField(field)
         .build();
 
-    assertThat(toString(anno)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "@interface Anno {\n"
-        + "  int FOO = 101;\n"
-        + "}\n"
+    assertThat(toString(anno)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            @interface Anno {
+              int FOO = 101;
+            }
+            """
     );
   }
 
@@ -870,7 +894,7 @@ public final class TypeSpecTest {
 
   @Test
   public void interfaceStaticMethods() throws Exception {
-    TypeSpec bar = TypeSpec.interfaceBuilder("Tacos")
+    var bar = TypeSpec.interfaceBuilder("Tacos")
         .addMethod(MethodSpec.methodBuilder("test")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .returns(int.class)
@@ -878,20 +902,21 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(bar)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "interface Tacos {\n"
-        + "  static int test() {\n"
-        + "    return 0;\n"
-        + "  }\n"
-        + "}\n"
+    assertThat(toString(bar)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            interface Tacos {
+              static int test() {
+                return 0;
+              }
+            }
+            """
     );
   }
 
   @Test
   public void interfaceDefaultMethods() throws Exception {
-    TypeSpec bar = TypeSpec.interfaceBuilder("Tacos")
+    var bar = TypeSpec.interfaceBuilder("Tacos")
         .addMethod(MethodSpec.methodBuilder("test")
             .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
             .returns(int.class)
@@ -899,14 +924,15 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(bar)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "interface Tacos {\n"
-        + "  default int test() {\n"
-        + "    return 0;\n"
-        + "  }\n"
-        + "}\n"
+    assertThat(toString(bar)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            interface Tacos {
+              default int test() {
+                return 0;
+              }
+            }
+            """
     );
   }
 
@@ -950,7 +976,7 @@ public final class TypeSpecTest {
 
   @Test
   public void interfacePrivateMethods() {
-    TypeSpec bar = TypeSpec.interfaceBuilder("Tacos")
+    var bar = TypeSpec.interfaceBuilder("Tacos")
         .addMethod(MethodSpec.methodBuilder("test")
             .addModifiers(Modifier.PRIVATE)
             .returns(int.class)
@@ -958,14 +984,15 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(bar)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "interface Tacos {\n"
-        + "  private int test() {\n"
-        + "    return 0;\n"
-        + "  }\n"
-        + "}\n"
+    assertThat(toString(bar)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            interface Tacos {
+              private int test() {
+                return 0;
+              }
+            }
+            """
     );
 
     bar = TypeSpec.interfaceBuilder("Tacos")
@@ -976,27 +1003,28 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(bar)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "interface Tacos {\n"
-        + "  private static int test() {\n"
-        + "    return 0;\n"
-        + "  }\n"
-        + "}\n"
+    assertThat(toString(bar)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            interface Tacos {
+              private static int test() {
+                return 0;
+              }
+            }
+            """
     );
   }
 
   @Test public void referencedAndDeclaredSimpleNamesConflict() throws Exception {
-    FieldSpec internalTop = FieldSpec.builder(
+    var internalTop = FieldSpec.builder(
         ClassName.get(tacosPackage, "Top"), "internalTop").build();
-    FieldSpec internalBottom = FieldSpec.builder(
+    var internalBottom = FieldSpec.builder(
         ClassName.get(tacosPackage, "Top", "Middle", "Bottom"), "internalBottom").build();
-    FieldSpec externalTop = FieldSpec.builder(
+    var externalTop = FieldSpec.builder(
         ClassName.get(donutsPackage, "Top"), "externalTop").build();
-    FieldSpec externalBottom = FieldSpec.builder(
+    var externalBottom = FieldSpec.builder(
         ClassName.get(donutsPackage, "Bottom"), "externalBottom").build();
-    TypeSpec top = TypeSpec.classBuilder("Top")
+    var top = TypeSpec.classBuilder("Top")
         .addField(internalTop)
         .addField(internalBottom)
         .addField(externalTop)
@@ -1014,67 +1042,69 @@ public final class TypeSpecTest {
                 .build())
             .build())
         .build();
-    assertThat(toString(top)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import be.imgn.donuts.Bottom;\n"
-        + "\n"
-        + "class Top {\n"
-        + "  Top internalTop;\n"
-        + "\n"
-        + "  Middle.Bottom internalBottom;\n"
-        + "\n"
-        + "  be.imgn.donuts.Top externalTop;\n"
-        + "\n"
-        + "  Bottom externalBottom;\n"
-        + "\n"
-        + "  class Middle {\n"
-        + "    Top internalTop;\n"
-        + "\n"
-        + "    Bottom internalBottom;\n"
-        + "\n"
-        + "    be.imgn.donuts.Top externalTop;\n"
-        + "\n"
-        + "    be.imgn.donuts.Bottom externalBottom;\n"
-        + "\n"
-        + "    class Bottom {\n"
-        + "      Top internalTop;\n"
-        + "\n"
-        + "      Bottom internalBottom;\n"
-        + "\n"
-        + "      be.imgn.donuts.Top externalTop;\n"
-        + "\n"
-        + "      be.imgn.donuts.Bottom externalBottom;\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(top)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import be.imgn.donuts.Bottom;
+            
+            class Top {
+              Top internalTop;
+            
+              Middle.Bottom internalBottom;
+            
+              be.imgn.donuts.Top externalTop;
+            
+              Bottom externalBottom;
+            
+              class Middle {
+                Top internalTop;
+            
+                Bottom internalBottom;
+            
+                be.imgn.donuts.Top externalTop;
+            
+                be.imgn.donuts.Bottom externalBottom;
+            
+                class Bottom {
+                  Top internalTop;
+            
+                  Bottom internalBottom;
+            
+                  be.imgn.donuts.Top externalTop;
+            
+                  be.imgn.donuts.Bottom externalBottom;
+                }
+              }
+            }
+            """);
   }
 
   @Test public void simpleNamesConflictInThisAndOtherPackage() throws Exception {
-    FieldSpec internalOther = FieldSpec.builder(
+    var internalOther = FieldSpec.builder(
         ClassName.get(tacosPackage, "Other"), "internalOther").build();
-    FieldSpec externalOther = FieldSpec.builder(
+    var externalOther = FieldSpec.builder(
         ClassName.get(donutsPackage, "Other"), "externalOther").build();
-    TypeSpec gen = TypeSpec.classBuilder("Gen")
+    var gen = TypeSpec.classBuilder("Gen")
         .addField(internalOther)
         .addField(externalOther)
         .build();
-    assertThat(toString(gen)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Gen {\n"
-        + "  Other internalOther;\n"
-        + "\n"
-        + "  be.imgn.donuts.Other externalOther;\n"
-        + "}\n");
+    assertThat(toString(gen)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Gen {
+              Other internalOther;
+            
+              be.imgn.donuts.Other externalOther;
+            }
+            """);
   }
 
   @Test public void simpleNameConflictsWithTypeVariable() {
-    ClassName inPackage = ClassName.get("be.imgn.tacos", "InPackage");
-    ClassName otherType = ClassName.get("com.other", "OtherType");
-    ClassName methodInPackage = ClassName.get("be.imgn.tacos", "MethodInPackage");
-    ClassName methodOtherType = ClassName.get("com.other", "MethodOtherType");
-    TypeSpec gen = TypeSpec.classBuilder("Gen")
+    var inPackage = ClassName.get("be.imgn.tacos", "InPackage");
+    var otherType = ClassName.get("com.other", "OtherType");
+    var methodInPackage = ClassName.get("be.imgn.tacos", "MethodInPackage");
+    var methodOtherType = ClassName.get("com.other", "MethodOtherType");
+    var gen = TypeSpec.classBuilder("Gen")
         .addTypeVariable(TypeVariableName.get("InPackage"))
         .addTypeVariable(TypeVariableName.get("OtherType"))
         .addField(FieldSpec.builder(inPackage, "inPackage").build())
@@ -1103,44 +1133,45 @@ public final class TypeSpecTest {
             .addStatement("$T inPackage = null", inPackage)
             .build())
         .build();
-    assertThat(toString(gen)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import com.other.MethodOtherType;\n"
-        + "\n"
-        + "class Gen<InPackage, OtherType> {\n"
-        + "  be.imgn.tacos.InPackage inPackage;\n"
-        + "\n"
-        + "  com.other.OtherType otherType;\n"
-        + "\n"
-        + "  <MethodInPackage, MethodOtherType> void withTypeVariables() {\n"
-        + "    be.imgn.tacos.MethodInPackage inPackage = null;\n"
-        + "    com.other.MethodOtherType otherType = null;\n"
-        + "  }\n"
-        + "\n"
-        + "  void withoutTypeVariables() {\n"
-        + "    MethodInPackage inPackage = null;\n"
-        + "    MethodOtherType otherType = null;\n"
-        + "  }\n"
-        + "\n"
-        + "  <MethodInPackage, MethodOtherType> void againWithTypeVariables() {\n"
-        + "    be.imgn.tacos.MethodInPackage inPackage = null;\n"
-        + "    com.other.MethodOtherType otherType = null;\n"
-        + "  }\n"
-        + "\n"
-        + "  <InPackage> void masksEnclosingTypeVariable() {\n"
-        + "  }\n"
-        + "\n"
-        + "  void hasSimpleNameThatWasPreviouslyMasked() {\n"
-        + "    be.imgn.tacos.InPackage inPackage = null;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(gen)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import com.other.MethodOtherType;
+            
+            class Gen<InPackage, OtherType> {
+              be.imgn.tacos.InPackage inPackage;
+            
+              com.other.OtherType otherType;
+            
+              <MethodInPackage, MethodOtherType> void withTypeVariables() {
+                be.imgn.tacos.MethodInPackage inPackage = null;
+                com.other.MethodOtherType otherType = null;
+              }
+            
+              void withoutTypeVariables() {
+                MethodInPackage inPackage = null;
+                MethodOtherType otherType = null;
+              }
+            
+              <MethodInPackage, MethodOtherType> void againWithTypeVariables() {
+                be.imgn.tacos.MethodInPackage inPackage = null;
+                com.other.MethodOtherType otherType = null;
+              }
+            
+              <InPackage> void masksEnclosingTypeVariable() {
+              }
+            
+              void hasSimpleNameThatWasPreviouslyMasked() {
+                be.imgn.tacos.InPackage inPackage = null;
+              }
+            }
+            """);
   }
 
   @Test public void originatingElementsIncludesThoseOfNestedTypes() {
-    Element outerElement = Mockito.mock(Element.class);
-    Element innerElement = Mockito.mock(Element.class);
-    TypeSpec outer = TypeSpec.classBuilder("Outer")
+    var outerElement = Mockito.mock(Element.class);
+    var innerElement = Mockito.mock(Element.class);
+    var outer = TypeSpec.classBuilder("Outer")
         .addOriginatingElement(outerElement)
         .addType(TypeSpec.classBuilder("Inner")
             .addOriginatingElement(innerElement)
@@ -1150,41 +1181,43 @@ public final class TypeSpecTest {
   }
 
   @Test public void intersectionType() {
-    TypeVariableName typeVariable = TypeVariableName.get("T", Comparator.class, Serializable.class);
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var typeVariable = TypeVariableName.get("T", Comparator.class, Serializable.class);
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("getComparator")
             .addTypeVariable(typeVariable)
             .returns(typeVariable)
             .addCode("return null;\n")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.util.Comparator;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  <T extends Comparator & Serializable> T getComparator() {\n"
-        + "    return null;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.util.Comparator;
+            
+            class Taco {
+              <T extends Comparator & Serializable> T getComparator() {
+                return null;
+              }
+            }
+            """);
   }
 
   @Test public void arrayType() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(int[].class, "ints")
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  int[] ints;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              int[] ints;
+            }
+            """);
   }
 
   @Test public void javadoc() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addJavadoc("A hard or soft tortilla, loosely folded and filled with whatever {@link \n")
         .addJavadoc("{@link $T random} tex-mex stuff we could find in the pantry\n", Random.class)
         .addJavadoc(CodeBlock.of("and some {@link $T} cheese.\n", String.class))
@@ -1200,38 +1233,39 @@ public final class TypeSpecTest {
         .build();
     // Mentioning a type in Javadoc will not cause an import to be added (java.util.Random here),
     // but the short name will be used if it's already imported (java.util.Locale here).
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.util.Locale;\n"
-        + "\n"
-        + "/**\n"
-        + " * A hard or soft tortilla, loosely folded and filled with whatever {@link \n"
-        + " * {@link java.util.Random random} tex-mex stuff we could find in the pantry\n"
-        + " * and some {@link java.lang.String} cheese.\n"
-        + " */\n"
-        + "class Taco {\n"
-        + "  /**\n"
-        + "   * True for a soft flour tortilla; false for a crunchy corn tortilla.\n"
-        + "   */\n"
-        + "  boolean soft;\n"
-        + "\n"
-        + "  /**\n"
-        + "   * Folds the back of this taco to reduce sauce leakage.\n"
-        + "   *\n"
-        + "   * <p>For {@link Locale#KOREAN}, the front may also be folded.\n"
-        + "   */\n"
-        + "  void refold(Locale locale) {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.util.Locale;
+            
+            /**
+             * A hard or soft tortilla, loosely folded and filled with whatever {@link\s
+             * {@link java.util.Random random} tex-mex stuff we could find in the pantry
+             * and some {@link java.lang.String} cheese.
+             */
+            class Taco {
+              /**
+               * True for a soft flour tortilla; false for a crunchy corn tortilla.
+               */
+              boolean soft;
+            
+              /**
+               * Folds the back of this taco to reduce sauce leakage.
+               *
+               * <p>For {@link Locale#KOREAN}, the front may also be folded.
+               */
+              void refold(Locale locale) {
+              }
+            }
+            """);
   }
 
   @Test public void annotationsInAnnotations() throws Exception {
-    ClassName beef = ClassName.get(tacosPackage, "Beef");
-    ClassName chicken = ClassName.get(tacosPackage, "Chicken");
-    ClassName option = ClassName.get(tacosPackage, "Option");
-    ClassName mealDeal = ClassName.get(tacosPackage, "MealDeal");
-    TypeSpec menu = TypeSpec.classBuilder("Menu")
+    var beef = ClassName.get(tacosPackage, "Beef");
+    var chicken = ClassName.get(tacosPackage, "Chicken");
+    var option = ClassName.get(tacosPackage, "Option");
+    var mealDeal = ClassName.get(tacosPackage, "MealDeal");
+    var menu = TypeSpec.classBuilder("Menu")
         .addAnnotation(AnnotationSpec.builder(mealDeal)
             .addMember("price", "$L", 500)
             .addMember("options", "$L", AnnotationSpec.builder(option)
@@ -1244,46 +1278,48 @@ public final class TypeSpecTest {
                 .build())
             .build())
         .build();
-    assertThat(toString(menu)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "@MealDeal(\n"
-        + "    price = 500,\n"
-        + "    options = {\n"
-        + "        @Option(name = \"taco\", meat = Beef.class),\n"
-        + "        @Option(name = \"quesadilla\", meat = Chicken.class)\n"
-        + "    }\n"
-        + ")\n"
-        + "class Menu {\n"
-        + "}\n");
+    assertThat(toString(menu)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            @MealDeal(
+                price = 500,
+                options = {
+                    @Option(name = "taco", meat = Beef.class),
+                    @Option(name = "quesadilla", meat = Chicken.class)
+                }
+            )
+            class Menu {
+            }
+            """);
   }
 
   @Test public void varargs() throws Exception {
-    TypeSpec taqueria = TypeSpec.classBuilder("Taqueria")
+    var taqueria = TypeSpec.classBuilder("Taqueria")
         .addMethod(MethodSpec.methodBuilder("prepare")
             .addParameter(int.class, "workers")
             .addParameter(Runnable[].class, "jobs")
             .varargs()
             .build())
         .build();
-    assertThat(toString(taqueria)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Runnable;\n"
-        + "\n"
-        + "class Taqueria {\n"
-        + "  void prepare(int workers, Runnable... jobs) {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taqueria)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Runnable;
+            
+            class Taqueria {
+              void prepare(int workers, Runnable... jobs) {
+              }
+            }
+            """);
   }
 
   @Test public void codeBlocks() throws Exception {
-    CodeBlock ifBlock = CodeBlock.builder()
+    var ifBlock = CodeBlock.builder()
         .beginControlFlow("if (!a.equals(b))")
         .addStatement("return i")
         .endControlFlow()
         .build();
-    CodeBlock methodBody = CodeBlock.builder()
+    var methodBody = CodeBlock.builder()
         .addStatement("$T size = $T.min(listA.size(), listB.size())", int.class, Math.class)
         .beginControlFlow("for ($T i = 0; i < size; i++)", int.class)
         .addStatement("$T $N = $N.get(i)", String.class, "a", "listA")
@@ -1292,7 +1328,7 @@ public final class TypeSpecTest {
         .endControlFlow()
         .addStatement("return size")
         .build();
-    CodeBlock fieldBlock = CodeBlock.builder()
+    var fieldBlock = CodeBlock.builder()
         .add("$>$>")
         .add("\n$T.<$T, $T>builder()$>$>", ImmutableMap.class, String.class, String.class)
         .add("\n.add($S, $S)", '\'', "&#39;")
@@ -1302,12 +1338,12 @@ public final class TypeSpecTest {
         .add("\n.build()$<$<")
         .add("$<$<")
         .build();
-    FieldSpec escapeHtml = FieldSpec.builder(ParameterizedTypeName.get(
+    var escapeHtml = FieldSpec.builder(ParameterizedTypeName.get(
         Map.class, String.class, String.class), "ESCAPE_HTML")
         .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
         .initializer(fieldBlock)
         .build();
-    TypeSpec util = TypeSpec.classBuilder("Util")
+    var util = TypeSpec.classBuilder("Util")
         .addField(escapeHtml)
         .addMethod(MethodSpec.methodBuilder("commonPrefixLength")
             .returns(int.class)
@@ -1316,40 +1352,41 @@ public final class TypeSpecTest {
             .addCode(methodBody)
             .build())
         .build();
-    assertThat(toString(util)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import com.google.common.collect.ImmutableMap;\n"
-        + "import java.lang.Math;\n"
-        + "import java.lang.String;\n"
-        + "import java.util.List;\n"
-        + "import java.util.Map;\n"
-        + "\n"
-        + "class Util {\n"
-        + "  private static final Map<String, String> ESCAPE_HTML = \n"
-        + "      ImmutableMap.<String, String>builder()\n"
-        + "          .add(\"\'\", \"&#39;\")\n"
-        + "          .add(\"&\", \"&amp;\")\n"
-        + "          .add(\"<\", \"&lt;\")\n"
-        + "          .add(\">\", \"&gt;\")\n"
-        + "          .build();\n"
-        + "\n"
-        + "  int commonPrefixLength(List<String> listA, List<String> listB) {\n"
-        + "    int size = Math.min(listA.size(), listB.size());\n"
-        + "    for (int i = 0; i < size; i++) {\n"
-        + "      String a = listA.get(i);\n"
-        + "      String b = listB.get(i);\n"
-        + "      if (!a.equals(b)) {\n"
-        + "        return i;\n"
-        + "      }\n"
-        + "    }\n"
-        + "    return size;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(util)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import com.google.common.collect.ImmutableMap;
+            import java.lang.Math;
+            import java.lang.String;
+            import java.util.List;
+            import java.util.Map;
+            
+            class Util {
+              private static final Map<String, String> ESCAPE_HTML =\s
+                  ImmutableMap.<String, String>builder()
+                      .add("\'", "&#39;")
+                      .add("&", "&amp;")
+                      .add("<", "&lt;")
+                      .add(">", "&gt;")
+                      .build();
+            
+              int commonPrefixLength(List<String> listA, List<String> listB) {
+                int size = Math.min(listA.size(), listB.size());
+                for (int i = 0; i < size; i++) {
+                  String a = listA.get(i);
+                  String b = listB.get(i);
+                  if (!a.equals(b)) {
+                    return i;
+                  }
+                }
+                return size;
+              }
+            }
+            """);
   }
 
   @Test public void indexedElseIf() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("choices")
             .beginControlFlow("if ($1L != null || $1L == $2L)", "taco", "otherTaco")
             .addStatement("$T.out.println($S)", System.class, "only one taco? NOO!")
@@ -1358,24 +1395,25 @@ public final class TypeSpecTest {
             .endControlFlow()
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.System;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void choices() {\n"
-        + "    if (taco != null || taco == otherTaco) {\n"
-        + "      System.out.println(\"only one taco? NOO!\");\n"
-        + "    } else if (taco.isSupreme() && otherTaco.isSupreme()) {\n"
-        + "      System.out.println(\"taco heaven\");\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.System;
+            
+            class Taco {
+              void choices() {
+                if (taco != null || taco == otherTaco) {
+                  System.out.println("only one taco? NOO!");
+                } else if (taco.isSupreme() && otherTaco.isSupreme()) {
+                  System.out.println("taco heaven");
+                }
+              }
+            }
+            """);
   }
 
   @Test public void elseIf() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("choices")
             .beginControlFlow("if (5 < 4) ")
             .addStatement("$T.out.println($S)", System.class, "wat")
@@ -1384,66 +1422,69 @@ public final class TypeSpecTest {
             .endControlFlow()
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.System;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void choices() {\n"
-        + "    if (5 < 4)  {\n"
-        + "      System.out.println(\"wat\");\n"
-        + "    } else if (5 < 6) {\n"
-        + "      System.out.println(\"hello\");\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.System;
+            
+            class Taco {
+              void choices() {
+                if (5 < 4)  {
+                  System.out.println("wat");
+                } else if (5 < 6) {
+                  System.out.println("hello");
+                }
+              }
+            }
+            """);
   }
 
   @Test public void doWhile() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("loopForever")
             .beginControlFlow("do")
             .addStatement("$T.out.println($S)", System.class, "hello")
             .endControlFlow("while (5 < 6)")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.System;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void loopForever() {\n"
-        + "    do {\n"
-        + "      System.out.println(\"hello\");\n"
-        + "    } while (5 < 6);\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.System;
+            
+            class Taco {
+              void loopForever() {
+                do {
+                  System.out.println("hello");
+                } while (5 < 6);
+              }
+            }
+            """);
   }
 
   @Test public void inlineIndent() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("inlineIndent")
             .addCode("if (3 < 4) {\n$>$T.out.println($S);\n$<}\n", System.class, "hello")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.System;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void inlineIndent() {\n"
-        + "    if (3 < 4) {\n"
-        + "      System.out.println(\"hello\");\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.System;
+            
+            class Taco {
+              void inlineIndent() {
+                if (3 < 4) {
+                  System.out.println("hello");
+                }
+              }
+            }
+            """);
   }
 
   @Test public void defaultModifiersForInterfaceMembers() throws Exception {
-    TypeSpec taco = TypeSpec.interfaceBuilder("Taco")
+    var taco = TypeSpec.interfaceBuilder("Taco")
         .addField(FieldSpec.builder(String.class, "SHELL")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
             .initializer("$S", "crunchy corn")
@@ -1455,23 +1496,24 @@ public final class TypeSpecTest {
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "interface Taco {\n"
-        + "  String SHELL = \"crunchy corn\";\n"
-        + "\n"
-        + "  void fold();\n"
-        + "\n"
-        + "  class Topping {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            interface Taco {
+              String SHELL = "crunchy corn";
+            
+              void fold();
+            
+              class Topping {
+              }
+            }
+            """);
   }
 
   @Test public void defaultModifiersForMemberInterfacesAndEnums() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addType(TypeSpec.classBuilder("Meat")
             .addModifiers(Modifier.STATIC)
             .build())
@@ -1483,25 +1525,26 @@ public final class TypeSpecTest {
             .addEnumConstant("SALSA")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  static class Meat {\n"
-        + "  }\n"
-        + "\n"
-        + "  interface Tortilla {\n"
-        + "  }\n"
-        + "\n"
-        + "  enum Topping {\n"
-        + "    SALSA\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              static class Meat {
+              }
+            
+              interface Tortilla {
+              }
+            
+              enum Topping {
+                SALSA
+              }
+            }
+            """);
   }
 
   @Test public void membersOrdering() throws Exception {
     // Hand out names in reverse-alphabetical order to defend against unexpected sorting.
-    TypeSpec taco = TypeSpec.classBuilder("Members")
+    var taco = TypeSpec.classBuilder("Members")
         .addType(TypeSpec.classBuilder("Z").build())
         .addType(TypeSpec.classBuilder("Y").build())
         .addField(String.class, "X", Modifier.STATIC)
@@ -1516,48 +1559,49 @@ public final class TypeSpecTest {
         .addMethod(MethodSpec.constructorBuilder().addParameter(long.class, "o").build())
         .build();
     // Static fields, instance fields, constructors, methods, classes.
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Members {\n"
-        + "  static String X;\n"
-        + "\n"
-        + "  static String V;\n"
-        + "\n"
-        + "  String W;\n"
-        + "\n"
-        + "  String U;\n"
-        + "\n"
-        + "  Members(int p) {\n"
-        + "  }\n"
-        + "\n"
-        + "  Members(long o) {\n"
-        + "  }\n"
-        + "\n"
-        + "  static void T() {\n"
-        + "  }\n"
-        + "\n"
-        + "  void S() {\n"
-        + "  }\n"
-        + "\n"
-        + "  static void R() {\n"
-        + "  }\n"
-        + "\n"
-        + "  void Q() {\n"
-        + "  }\n"
-        + "\n"
-        + "  class Z {\n"
-        + "  }\n"
-        + "\n"
-        + "  class Y {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Members {
+              static String X;
+            
+              static String V;
+            
+              String W;
+            
+              String U;
+            
+              Members(int p) {
+              }
+            
+              Members(long o) {
+              }
+            
+              static void T() {
+              }
+            
+              void S() {
+              }
+            
+              static void R() {
+              }
+            
+              void Q() {
+              }
+            
+              class Z {
+              }
+            
+              class Y {
+              }
+            }
+            """);
   }
 
   @Test public void nativeMethods() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("nativeInt")
             .addModifiers(Modifier.NATIVE)
             .returns(int.class)
@@ -1575,58 +1619,60 @@ public final class TypeSpecTest {
                 .build())
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  native int nativeInt();\n"
-        + "\n"
-        + "  public static native void alert(String msg) /*-{\n"
-        + "    $wnd.alert(msg);\n"
-        + "  }-*/;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Taco {
+              native int nativeInt();
+            
+              public static native void alert(String msg) /*-{
+                $wnd.alert(msg);
+              }-*/;
+            }
+            """);
   }
 
   @Test public void nullStringLiteral() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(FieldSpec.builder(String.class, "NULL")
             .initializer("$S", (Object) null)
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  String NULL = null;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Taco {
+              String NULL = null;
+            }
+            """);
   }
 
   @Test public void annotationToString() throws Exception {
-    AnnotationSpec annotation = AnnotationSpec.builder(SuppressWarnings.class)
+    var annotation = AnnotationSpec.builder(SuppressWarnings.class)
         .addMember("value", "$S", "unused")
         .build();
     assertThat(annotation.toString()).isEqualTo("@java.lang.SuppressWarnings(\"unused\")");
   }
 
   @Test public void codeBlockToString() throws Exception {
-    CodeBlock codeBlock = CodeBlock.builder()
+    var codeBlock = CodeBlock.builder()
         .addStatement("$T $N = $S.substring(0, 3)", String.class, "s", "taco")
         .build();
     assertThat(codeBlock.toString()).isEqualTo("java.lang.String s = \"taco\".substring(0, 3);\n");
   }
 
   @Test public void codeBlockAddStatementOfCodeBlockToString() throws Exception {
-    CodeBlock contents = CodeBlock.of("$T $N = $S.substring(0, 3)", String.class, "s", "taco");
-    CodeBlock statement = CodeBlock.builder().addStatement(contents).build();
+    var contents = CodeBlock.of("$T $N = $S.substring(0, 3)", String.class, "s", "taco");
+    var statement = CodeBlock.builder().addStatement(contents).build();
     assertThat(statement.toString()).isEqualTo("java.lang.String s = \"taco\".substring(0, 3);\n");
   }
 
   @Test public void fieldToString() throws Exception {
-    FieldSpec field = FieldSpec.builder(String.class, "s", Modifier.FINAL)
+    var field = FieldSpec.builder(String.class, "s", Modifier.FINAL)
         .initializer("$S.substring(0, 3)", "taco")
         .build();
     assertThat(field.toString())
@@ -1634,33 +1680,35 @@ public final class TypeSpecTest {
   }
 
   @Test public void methodToString() throws Exception {
-    MethodSpec method = MethodSpec.methodBuilder("toString")
+    var method = MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(Modifier.PUBLIC)
         .returns(String.class)
         .addStatement("return $S", "taco")
         .build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "public java.lang.String toString() {\n"
-        + "  return \"taco\";\n"
-        + "}\n");
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            public java.lang.String toString() {
+              return "taco";
+            }
+            """);
   }
 
   @Test public void constructorToString() throws Exception {
-    MethodSpec constructor = MethodSpec.constructorBuilder()
+    var constructor = MethodSpec.constructorBuilder()
         .addModifiers(Modifier.PUBLIC)
         .addParameter(ClassName.get(tacosPackage, "Taco"), "taco")
         .addStatement("this.$N = $N", "taco", "taco")
         .build();
-    assertThat(constructor.toString()).isEqualTo(""
-        + "public Constructor(be.imgn.tacos.Taco taco) {\n"
-        + "  this.taco = taco;\n"
-        + "}\n");
+    assertThat(constructor.toString()).isEqualTo("""
+            public Constructor(be.imgn.tacos.Taco taco) {
+              this.taco = taco;
+            }
+            """);
   }
 
   @Test public void parameterToString() throws Exception {
-    ParameterSpec parameter = ParameterSpec.builder(ClassName.get(tacosPackage, "Taco"), "taco")
+    var parameter = ParameterSpec.builder(ClassName.get(tacosPackage, "Taco"), "taco")
         .addModifiers(Modifier.FINAL)
         .addAnnotation(ClassName.get("javax.annotation", "Nullable"))
         .build();
@@ -1669,7 +1717,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void classToString() throws Exception {
-    TypeSpec type = TypeSpec.classBuilder("Taco")
+    var type = TypeSpec.classBuilder("Taco")
         .build();
     assertThat(type.toString()).isEqualTo(""
         + "class Taco {\n"
@@ -1677,35 +1725,37 @@ public final class TypeSpecTest {
   }
 
   @Test public void anonymousClassToString() throws Exception {
-    TypeSpec type = TypeSpec.anonymousClassBuilder("")
+    var type = TypeSpec.anonymousClassBuilder("")
         .addSuperinterface(Runnable.class)
         .addMethod(MethodSpec.methodBuilder("run")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .build())
         .build();
-    assertThat(type.toString()).isEqualTo(""
-        + "new java.lang.Runnable() {\n"
-        + "  @java.lang.Override\n"
-        + "  public void run() {\n"
-        + "  }\n"
-        + "}");
+    assertThat(type.toString()).isEqualTo("""
+            new java.lang.Runnable() {
+              @java.lang.Override
+              public void run() {
+              }
+            }""");
   }
 
   @Test public void interfaceClassToString() throws Exception {
-    TypeSpec type = TypeSpec.interfaceBuilder("Taco")
+    var type = TypeSpec.interfaceBuilder("Taco")
         .build();
-    assertThat(type.toString()).isEqualTo(""
-        + "interface Taco {\n"
-        + "}\n");
+    assertThat(type.toString()).isEqualTo("""
+            interface Taco {
+            }
+            """);
   }
 
   @Test public void annotationDeclarationToString() throws Exception {
-    TypeSpec type = TypeSpec.annotationBuilder("Taco")
+    var type = TypeSpec.annotationBuilder("Taco")
         .build();
-    assertThat(type.toString()).isEqualTo(""
-        + "@interface Taco {\n"
-        + "}\n");
+    assertThat(type.toString()).isEqualTo("""
+            @interface Taco {
+            }
+            """);
   }
 
   private String toString(TypeSpec typeSpec) {
@@ -1713,7 +1763,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void multilineStatement() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("toString")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -1722,28 +1772,29 @@ public final class TypeSpecTest {
                 "Taco(", "beef,", "lettuce,", "cheese", ")")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  @Override\n"
-        + "  public String toString() {\n"
-        + "    return \"Taco(\"\n"
-        + "        + \"beef,\"\n"
-        + "        + \"lettuce,\"\n"
-        + "        + \"cheese\"\n"
-        + "        + \")\";\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            class Taco {
+              @Override
+              public String toString() {
+                return "Taco("
+                    + "beef,"
+                    + "lettuce,"
+                    + "cheese"
+                    + ")";
+              }
+            }
+            """);
   }
 
   @Test public void multilineStatementWithAnonymousClass() throws Exception {
-    TypeName stringComparator = ParameterizedTypeName.get(Comparator.class, String.class);
-    TypeName listOfString = ParameterizedTypeName.get(List.class, String.class);
-    TypeSpec prefixComparator = TypeSpec.anonymousClassBuilder("")
+    var stringComparator = ParameterizedTypeName.get(Comparator.class, String.class);
+    var listOfString = ParameterizedTypeName.get(List.class, String.class);
+    var prefixComparator = TypeSpec.anonymousClassBuilder("")
         .addSuperinterface(stringComparator)
         .addMethod(MethodSpec.methodBuilder("compare")
             .addAnnotation(Override.class)
@@ -1755,7 +1806,7 @@ public final class TypeSpecTest {
                 + ".compareTo(b.substring(0, length))")
             .build())
         .build();
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("comparePrefix")
             .returns(stringComparator)
             .addParameter(int.class, "length", Modifier.FINAL)
@@ -1767,57 +1818,59 @@ public final class TypeSpecTest {
             .addStatement("$T.sort(\nlist,\n$L)", Collections.class, prefixComparator)
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "import java.util.Collections;\n"
-        + "import java.util.Comparator;\n"
-        + "import java.util.List;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  Comparator<String> comparePrefix(final int length) {\n"
-        + "    return new Comparator<String>() {\n"
-        + "      @Override\n"
-        + "      public int compare(String a, String b) {\n"
-        + "        return a.substring(0, length)\n"
-        + "            .compareTo(b.substring(0, length));\n"
-        + "      }\n"
-        + "    };\n"
-        + "  }\n"
-        + "\n"
-        + "  void sortPrefix(List<String> list, final int length) {\n"
-        + "    Collections.sort(\n"
-        + "        list,\n"
-        + "        new Comparator<String>() {\n"
-        + "          @Override\n"
-        + "          public int compare(String a, String b) {\n"
-        + "            return a.substring(0, length)\n"
-        + "                .compareTo(b.substring(0, length));\n"
-        + "          }\n"
-        + "        });\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            import java.util.Collections;
+            import java.util.Comparator;
+            import java.util.List;
+            
+            class Taco {
+              Comparator<String> comparePrefix(final int length) {
+                return new Comparator<String>() {
+                  @Override
+                  public int compare(String a, String b) {
+                    return a.substring(0, length)
+                        .compareTo(b.substring(0, length));
+                  }
+                };
+              }
+            
+              void sortPrefix(List<String> list, final int length) {
+                Collections.sort(
+                    list,
+                    new Comparator<String>() {
+                      @Override
+                      public int compare(String a, String b) {
+                        return a.substring(0, length)
+                            .compareTo(b.substring(0, length));
+                      }
+                    });
+              }
+            }
+            """);
   }
 
   @Test public void multilineStrings() throws Exception {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(FieldSpec.builder(String.class, "toppings")
             .initializer("$S", "shell\nbeef\nlettuce\ncheese\n")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  String toppings = \"shell\\n\"\n"
-        + "      + \"beef\\n\"\n"
-        + "      + \"lettuce\\n\"\n"
-        + "      + \"cheese\\n\";\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Taco {
+              String toppings = "shell\\n"
+                  + "beef\\n"
+                  + "lettuce\\n"
+                  + "cheese\\n";
+            }
+            """);
   }
 
   @Test public void doubleFieldInitialization() {
@@ -1851,23 +1904,24 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleAnnotationAddition() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addAnnotations(Arrays.asList(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unchecked")
                 .build(),
             AnnotationSpec.builder(Deprecated.class).build()))
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Deprecated;\n"
-        + "import java.lang.SuppressWarnings;\n"
-        + "\n"
-        + "@SuppressWarnings(\"unchecked\")\n"
-        + "@Deprecated\n"
-        + "class Taco {\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Deprecated;
+            import java.lang.SuppressWarnings;
+            
+            @SuppressWarnings("unchecked")
+            @Deprecated
+            class Taco {
+            }
+            """);
   }
 
   @Test public void nullFieldsAddition() {
@@ -1881,21 +1935,22 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleFieldAddition() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addFields(Arrays.asList(
             FieldSpec.builder(int.class, "ANSWER", Modifier.STATIC, Modifier.FINAL).build(),
             FieldSpec.builder(BigDecimal.class, "price", Modifier.PRIVATE).build()))
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.math.BigDecimal;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  static final int ANSWER;\n"
-        + "\n"
-        + "  private BigDecimal price;\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.math.BigDecimal;
+            
+            class Taco {
+              static final int ANSWER;
+            
+              private BigDecimal price;
+            }
+            """);
   }
 
   @Test public void nullMethodsAddition() {
@@ -1909,7 +1964,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleMethodAddition() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethods(Arrays.asList(
             MethodSpec.methodBuilder("getAnswer")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -1923,21 +1978,22 @@ public final class TypeSpecTest {
                 .addStatement("return $L", 4)
                 .build()))
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  public static int getAnswer() {\n"
-        + "    return 42;\n"
-        + "  }\n"
-        + "\n"
-        + "  /**\n"
-        + "   * chosen by fair dice roll ;)\n"
-        + "   */\n"
-        + "  public int getRandomQuantity() {\n"
-        + "    return 4;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              public static int getAnswer() {
+                return 42;
+              }
+            
+              /**
+               * chosen by fair dice roll ;)
+               */
+              public int getRandomQuantity() {
+                return 4;
+              }
+            }
+            """);
   }
 
   @Test public void nullSuperinterfacesAddition() {
@@ -1961,7 +2017,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void nullInSuperinterfaceIterableAddition() {
-    List<TypeName> superinterfaces = new ArrayList<>();
+    var superinterfaces = new ArrayList<TypeName>();
     superinterfaces.add(TypeName.get(List.class));
     superinterfaces.add(null);
 
@@ -1975,19 +2031,20 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleSuperinterfaceAddition() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addSuperinterfaces(Arrays.asList(
             TypeName.get(Serializable.class),
             TypeName.get(EventListener.class)))
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.io.Serializable;\n"
-        + "import java.util.EventListener;\n"
-        + "\n"
-        + "class Taco implements Serializable, EventListener {\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.io.Serializable;
+            import java.util.EventListener;
+            
+            class Taco implements Serializable, EventListener {
+            }
+            """);
   }
 
   @Test public void nullModifiersAddition() {
@@ -2011,18 +2068,19 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleTypeVariableAddition() {
-    TypeSpec location = TypeSpec.classBuilder("Location")
+    var location = TypeSpec.classBuilder("Location")
         .addTypeVariables(Arrays.asList(
             TypeVariableName.get("T"),
             TypeVariableName.get("P", Number.class)))
         .build();
-    assertThat(toString(location)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Number;\n"
-        + "\n"
-        + "class Location<T, P extends Number> {\n"
-        + "}\n");
+    assertThat(toString(location)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Number;
+            
+            class Location<T, P extends Number> {
+            }
+            """);
   }
 
   @Test public void nullTypesAddition() {
@@ -2036,25 +2094,26 @@ public final class TypeSpecTest {
   }
 
   @Test public void multipleTypeAddition() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addTypes(Arrays.asList(
             TypeSpec.classBuilder("Topping").build(),
             TypeSpec.classBuilder("Sauce").build()))
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  class Topping {\n"
-        + "  }\n"
-        + "\n"
-        + "  class Sauce {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              class Topping {
+              }
+            
+              class Sauce {
+              }
+            }
+            """);
   }
 
   @Test public void tryCatch() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("addTopping")
             .addParameter(ClassName.get("be.imgn.tacos", "Topping"), "topping")
             .beginControlFlow("try")
@@ -2064,21 +2123,22 @@ public final class TypeSpecTest {
             .endControlFlow()
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void addTopping(Topping topping) {\n"
-        + "    try {\n"
-        + "      /* do something tricky with the topping */\n"
-        + "    } catch (IllegalToppingException e) {\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              void addTopping(Topping topping) {
+                try {
+                  /* do something tricky with the topping */
+                } catch (IllegalToppingException e) {
+                }
+              }
+            }
+            """);
   }
 
   @Test public void ifElse() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(
             MethodSpec.methodBuilder("isDelicious")
                 .addParameter(TypeName.INT, "count")
@@ -2091,22 +2151,23 @@ public final class TypeSpecTest {
                 .build()
         )
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  boolean isDelicious(int count) {\n"
-        + "    if (count > 0) {\n"
-        + "      return true;\n"
-        + "    } else {\n"
-        + "      return false;\n"
-        + "    }\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              boolean isDelicious(int count) {
+                if (count > 0) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            }
+            """);
   }
 
   @Test public void literalFromAnything() {
-    Object value = new Object() {
+    var value = new Object() {
       @Override public String toString() {
         return "foo";
       }
@@ -2119,17 +2180,17 @@ public final class TypeSpecTest {
   }
 
   @Test public void nameFromField() {
-    FieldSpec field = FieldSpec.builder(String.class, "field").build();
+    var field = FieldSpec.builder(String.class, "field").build();
     assertThat(CodeBlock.of("$N", field).toString()).isEqualTo("field");
   }
 
   @Test public void nameFromParameter() {
-    ParameterSpec parameter = ParameterSpec.builder(String.class, "parameter").build();
+    var parameter = ParameterSpec.builder(String.class, "parameter").build();
     assertThat(CodeBlock.of("$N", parameter).toString()).isEqualTo("parameter");
   }
 
   @Test public void nameFromMethod() {
-    MethodSpec method = MethodSpec.methodBuilder("method")
+    var method = MethodSpec.methodBuilder("method")
         .addModifiers(Modifier.ABSTRACT)
         .returns(String.class)
         .build();
@@ -2137,7 +2198,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void nameFromType() {
-    TypeSpec type = TypeSpec.classBuilder("Type").build();
+    var type = TypeSpec.classBuilder("Type").build();
     assertThat(CodeBlock.of("$N", type).toString()).isEqualTo("Type");
   }
 
@@ -2151,7 +2212,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void stringFromAnything() {
-    Object value = new Object() {
+    var value = new Object() {
       @Override public String toString() {
         return "foo";
       }
@@ -2164,17 +2225,17 @@ public final class TypeSpecTest {
   }
 
   @Test public void typeFromTypeName() {
-    TypeName typeName = TypeName.get(String.class);
+    var typeName = TypeName.get(String.class);
     assertThat(CodeBlock.of("$T", typeName).toString()).isEqualTo("java.lang.String");
   }
 
   @Test public void typeFromTypeMirror() {
-    TypeMirror mirror = getElement(String.class).asType();
+    var mirror = getElement(String.class).asType();
     assertThat(CodeBlock.of("$T", mirror).toString()).isEqualTo("java.lang.String");
   }
 
   @Test public void typeFromTypeElement() {
-    TypeElement element = getElement(String.class);
+    var element = getElement(String.class);
     assertThat(CodeBlock.of("$T", element).toString()).isEqualTo("java.lang.String");
   }
 
@@ -2265,7 +2326,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void staticCodeBlock() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(String.class, "foo", Modifier.PRIVATE)
         .addField(String.class, "FOO", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
         .addStaticBlock(CodeBlock.builder()
@@ -2278,30 +2339,31 @@ public final class TypeSpecTest {
             .addCode("return FOO;\n")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  private static final String FOO;\n"
-        + "\n"
-        + "  static {\n"
-        + "    FOO = \"FOO\";\n"
-        + "  }\n"
-        + "\n"
-        + "  private String foo;\n"
-        + "\n"
-        + "  @Override\n"
-        + "  public String toString() {\n"
-        + "    return FOO;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            class Taco {
+              private static final String FOO;
+            
+              static {
+                FOO = "FOO";
+              }
+            
+              private String foo;
+            
+              @Override
+              public String toString() {
+                return FOO;
+              }
+            }
+            """);
   }
 
   @Test public void initializerBlockInRightPlace() {
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(String.class, "foo", Modifier.PRIVATE)
         .addField(String.class, "FOO", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
         .addStaticBlock(CodeBlock.builder()
@@ -2318,39 +2380,40 @@ public final class TypeSpecTest {
             .addStatement("foo = $S", "FOO")
             .build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  private static final String FOO;\n"
-        + "\n"
-        + "  static {\n"
-        + "    FOO = \"FOO\";\n"
-        + "  }\n"
-        + "\n"
-        + "  private String foo;\n"
-        + "\n"
-        + "  {\n"
-        + "    foo = \"FOO\";\n"
-        + "  }\n"
-        + "\n"
-        + "  Taco() {\n"
-        + "  }\n"
-        + "\n"
-        + "  @Override\n"
-        + "  public String toString() {\n"
-        + "    return FOO;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            class Taco {
+              private static final String FOO;
+            
+              static {
+                FOO = "FOO";
+              }
+            
+              private String foo;
+            
+              {
+                foo = "FOO";
+              }
+            
+              Taco() {
+              }
+            
+              @Override
+              public String toString() {
+                return FOO;
+              }
+            }
+            """);
   }
 
   @Test public void initializersToBuilder() {
     // Tests if toBuilder() contains correct static and instance initializers
-    Element originatingElement = getElement(TypeSpecTest.class);
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var originatingElement = getElement(TypeSpecTest.class);
+    var taco = TypeSpec.classBuilder("Taco")
         .addField(String.class, "foo", Modifier.PRIVATE)
         .addField(String.class, "FOO", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
         .addStaticBlock(CodeBlock.builder()
@@ -2370,14 +2433,14 @@ public final class TypeSpecTest {
         .alwaysQualify("com.example.AlwaysQualified")
         .build();
 
-    TypeSpec recreatedTaco = taco.toBuilder().build();
+    var recreatedTaco = taco.toBuilder().build();
     assertThat(toString(taco)).isEqualTo(toString(recreatedTaco));
     assertThat(taco.originatingElements)
         .containsExactlyElementsIn(recreatedTaco.originatingElements);
     assertThat(taco.alwaysQualifiedNames)
         .containsExactlyElementsIn(recreatedTaco.alwaysQualifiedNames);
 
-    TypeSpec initializersAdded = taco.toBuilder()
+    var initializersAdded = taco.toBuilder()
         .addInitializerBlock(CodeBlock.builder()
             .addStatement("foo = $S", "instanceFoo")
             .build())
@@ -2386,43 +2449,44 @@ public final class TypeSpecTest {
             .build())
         .build();
 
-    assertThat(toString(initializersAdded)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.Override;\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  private static final String FOO;\n"
-        + "\n"
-        + "  static {\n"
-        + "    FOO = \"FOO\";\n"
-        + "  }\n"
-        + "  static {\n"
-        + "    FOO = \"staticFoo\";\n"
-        + "  }\n"
-        + "\n"
-        + "  private String foo;\n"
-        + "\n"
-        + "  {\n"
-        + "    foo = \"FOO\";\n"
-        + "  }\n"
-        + "  {\n"
-        + "    foo = \"instanceFoo\";\n"
-        + "  }\n"
-        + "\n"
-        + "  Taco() {\n"
-        + "  }\n"
-        + "\n"
-        + "  @Override\n"
-        + "  public String toString() {\n"
-        + "    return FOO;\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(initializersAdded)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.Override;
+            import java.lang.String;
+            
+            class Taco {
+              private static final String FOO;
+            
+              static {
+                FOO = "FOO";
+              }
+              static {
+                FOO = "staticFoo";
+              }
+            
+              private String foo;
+            
+              {
+                foo = "FOO";
+              }
+              {
+                foo = "instanceFoo";
+              }
+            
+              Taco() {
+              }
+            
+              @Override
+              public String toString() {
+                return FOO;
+              }
+            }
+            """);
   }
 
   @Test public void initializerBlockUnsupportedExceptionOnInterface() {
-    TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder("Taco");
+    var interfaceBuilder = TypeSpec.interfaceBuilder("Taco");
     try {
       interfaceBuilder.addInitializerBlock(CodeBlock.builder().build());
       fail("Exception expected");
@@ -2431,7 +2495,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void initializerBlockUnsupportedExceptionOnAnnotation() {
-    TypeSpec.Builder annotationBuilder = TypeSpec.annotationBuilder("Taco");
+    var annotationBuilder = TypeSpec.annotationBuilder("Taco");
     try {
       annotationBuilder.addInitializerBlock(CodeBlock.builder().build());
       fail("Exception expected");
@@ -2440,59 +2504,61 @@ public final class TypeSpecTest {
   }
 
   @Test public void lineWrapping() {
-    MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("call");
+    var methodBuilder = MethodSpec.methodBuilder("call");
     methodBuilder.addCode("$[call(");
-    for (int i = 0; i < 32; i++) {
+    for (var i = 0; i < 32; i++) {
       methodBuilder.addParameter(String.class, "s" + i);
       methodBuilder.addCode(i > 0 ? ",$W$S" : "$S", i);
     }
     methodBuilder.addCode(");$]\n");
 
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(methodBuilder.build())
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void call(String s0, String s1, String s2, String s3, String s4, String s5, String s6, String s7,\n"
-        + "      String s8, String s9, String s10, String s11, String s12, String s13, String s14, String s15,\n"
-        + "      String s16, String s17, String s18, String s19, String s20, String s21, String s22,\n"
-        + "      String s23, String s24, String s25, String s26, String s27, String s28, String s29,\n"
-        + "      String s30, String s31) {\n"
-        + "    call(\"0\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\",\n"
-        + "        \"17\", \"18\", \"19\", \"20\", \"21\", \"22\", \"23\", \"24\", \"25\", \"26\", \"27\", \"28\", \"29\", \"30\", \"31\");\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            import java.lang.String;
+            
+            class Taco {
+              void call(String s0, String s1, String s2, String s3, String s4, String s5, String s6, String s7,
+                  String s8, String s9, String s10, String s11, String s12, String s13, String s14, String s15,
+                  String s16, String s17, String s18, String s19, String s20, String s21, String s22,
+                  String s23, String s24, String s25, String s26, String s27, String s28, String s29,
+                  String s30, String s31) {
+                call("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+                    "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31");
+              }
+            }
+            """);
   }
 
   @Test public void lineWrappingWithZeroWidthSpace() {
-    MethodSpec method = MethodSpec.methodBuilder("call")
+    var method = MethodSpec.methodBuilder("call")
         .addCode("$[iAmSickOfWaitingInLine($Z")
         .addCode("it, has, been, far, too, long, of, a, wait, and, i, would, like, to, eat, ")
         .addCode("this, is, a, run, on, sentence")
         .addCode(");$]\n")
         .build();
 
-    TypeSpec taco = TypeSpec.classBuilder("Taco")
+    var taco = TypeSpec.classBuilder("Taco")
         .addMethod(method)
         .build();
-    assertThat(toString(taco)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "  void call() {\n"
-        + "    iAmSickOfWaitingInLine(\n"
-        + "        it, has, been, far, too, long, of, a, wait, and, i, would, like, to, eat, this, is, a, run, on, sentence);\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(toString(taco)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            class Taco {
+              void call() {
+                iAmSickOfWaitingInLine(
+                    it, has, been, far, too, long, of, a, wait, and, i, would, like, to, eat, this, is, a, run, on, sentence);
+              }
+            }
+            """);
   }
 
   @Test public void equalsAndHashCode() {
-    TypeSpec a = TypeSpec.interfaceBuilder("taco").build();
-    TypeSpec b = TypeSpec.interfaceBuilder("taco").build();
+    var a = TypeSpec.interfaceBuilder("taco").build();
+    var b = TypeSpec.interfaceBuilder("taco").build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
     a = TypeSpec.classBuilder("taco").build();
@@ -2510,7 +2576,7 @@ public final class TypeSpecTest {
   }
 
   @Test public void classNameFactories() {
-    ClassName className = ClassName.get("com.example", "Example");
+    var className = ClassName.get("com.example", "Example");
     assertThat(TypeSpec.classBuilder(className).build().name).isEqualTo("Example");
     assertThat(TypeSpec.interfaceBuilder(className).build().name).isEqualTo("Example");
     assertThat(TypeSpec.enumBuilder(className).addEnumConstant("A").build().name).isEqualTo("Example");
@@ -2519,7 +2585,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyAnnotations() {
-    TypeSpec.Builder builder =
+    var builder =
         TypeSpec.classBuilder("Taco")
             .addAnnotation(Override.class)
             .addAnnotation(SuppressWarnings.class);
@@ -2530,7 +2596,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyModifiers() {
-    TypeSpec.Builder builder =
+    var builder =
         TypeSpec.classBuilder("Taco").addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
     builder.modifiers.remove(1);
@@ -2539,7 +2605,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyFields() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder("Taco")
+    var builder = TypeSpec.classBuilder("Taco")
         .addField(int.class, "source");
 
     builder.fieldSpecs.remove(0);
@@ -2548,8 +2614,8 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyTypeVariables() {
-    TypeVariableName t = TypeVariableName.get("T");
-    TypeSpec.Builder builder =
+    var t = TypeVariableName.get("T");
+    var builder =
         TypeSpec.classBuilder("Taco")
             .addTypeVariable(t)
             .addTypeVariable(TypeVariableName.get("V"));
@@ -2560,7 +2626,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifySuperinterfaces() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder("Taco")
+    var builder = TypeSpec.classBuilder("Taco")
         .addSuperinterface(File.class);
 
     builder.superinterfaces.clear();
@@ -2569,7 +2635,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyMethods() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder("Taco")
+    var builder = TypeSpec.classBuilder("Taco")
         .addMethod(MethodSpec.methodBuilder("bell").build());
 
     builder.methodSpecs.clear();
@@ -2578,7 +2644,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyTypes() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder("Taco")
+    var builder = TypeSpec.classBuilder("Taco")
         .addType(TypeSpec.classBuilder("Bell").build());
 
     builder.typeSpecs.clear();
@@ -2587,8 +2653,8 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyEnumConstants() {
-    TypeSpec constantType = TypeSpec.anonymousClassBuilder("").build();
-    TypeSpec.Builder builder = TypeSpec.enumBuilder("Taco")
+    var constantType = TypeSpec.anonymousClassBuilder("").build();
+    var builder = TypeSpec.enumBuilder("Taco")
         .addEnumConstant("BELL", constantType)
         .addEnumConstant("WUT", TypeSpec.anonymousClassBuilder("").build());
 
@@ -2598,7 +2664,7 @@ public final class TypeSpecTest {
 
   @Test
   public void modifyOriginatingElements() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder("Taco")
+    var builder = TypeSpec.classBuilder("Taco")
         .addOriginatingElement(Mockito.mock(Element.class));
 
     builder.originatingElements.clear();
@@ -2606,32 +2672,34 @@ public final class TypeSpecTest {
   }
     
   @Test public void javadocWithTrailingLineDoesNotAddAnother() {
-    TypeSpec spec = TypeSpec.classBuilder("Taco")
+    var spec = TypeSpec.classBuilder("Taco")
         .addJavadoc("Some doc with a newline\n")
         .build();
 
-    assertThat(toString(spec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "/**\n"
-        + " * Some doc with a newline\n"
-        + " */\n"
-        + "class Taco {\n"
-        + "}\n");
+    assertThat(toString(spec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            /**
+             * Some doc with a newline
+             */
+            class Taco {
+            }
+            """);
   }
 
   @Test public void javadocEnsuresTrailingLine() {
-    TypeSpec spec = TypeSpec.classBuilder("Taco")
+    var spec = TypeSpec.classBuilder("Taco")
         .addJavadoc("Some doc with a newline")
         .build();
 
-    assertThat(toString(spec)).isEqualTo(""
-        + "package be.imgn.tacos;\n"
-        + "\n"
-        + "/**\n"
-        + " * Some doc with a newline\n"
-        + " */\n"
-        + "class Taco {\n"
-        + "}\n");
+    assertThat(toString(spec)).isEqualTo("""
+            package be.imgn.tacos;
+            
+            /**
+             * Some doc with a newline
+             */
+            class Taco {
+            }
+            """);
   }
 }

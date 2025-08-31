@@ -47,7 +47,7 @@ public class FileReadingTest {
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test public void javaFileObjectUri() {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     assertThat(JavaFile.builder("", type).build().toJavaFileObject().toUri())
         .isEqualTo(URI.create("Test.java"));
     assertThat(JavaFile.builder("foo", type).build().toJavaFileObject().toUri())
@@ -57,17 +57,17 @@ public class FileReadingTest {
   }
   
   @Test public void javaFileObjectKind() {
-    JavaFile javaFile = JavaFile.builder("", TypeSpec.classBuilder("Test").build()).build();
+    var javaFile = JavaFile.builder("", TypeSpec.classBuilder("Test").build()).build();
     assertThat(javaFile.toJavaFileObject().getKind()).isEqualTo(Kind.SOURCE);
   }
   
   @Test public void javaFileObjectCharacterContent() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test")
+    var type = TypeSpec.classBuilder("Test")
         .addJavadoc("Pi\u00f1ata\u00a1")
         .addMethod(MethodSpec.methodBuilder("fooBar").build())
         .build();
-    JavaFile javaFile = JavaFile.builder("foo", type).build();
-    JavaFileObject javaFileObject = javaFile.toJavaFileObject();
+    var javaFile = JavaFile.builder("foo", type).build();
+    var javaFileObject = javaFile.toJavaFileObject();
     
     // We can never have encoding issues (everything is in process)
     assertThat(javaFileObject.getCharContent(true)).isEqualTo(javaFile.toString());
@@ -75,18 +75,18 @@ public class FileReadingTest {
   }
   
   @Test public void javaFileObjectInputStreamIsUtf8() throws IOException {
-    JavaFile javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Test").build())
+    var javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Test").build())
         .addFileComment("Pi\u00f1ata\u00a1")
         .build();
-    byte[] bytes = ByteStreams.toByteArray(javaFile.toJavaFileObject().openInputStream());
+    var bytes = ByteStreams.toByteArray(javaFile.toJavaFileObject().openInputStream());
     
     // JavaPoet always uses UTF-8.
     assertThat(bytes).isEqualTo(javaFile.toString().getBytes(UTF_8));
   }
   
   @Test public void compileJavaFile() throws Exception {
-    final String value = "Hello World!";
-    TypeSpec type = TypeSpec.classBuilder("Test")
+    var value = "Hello World!";
+    var type = TypeSpec.classBuilder("Test")
         .addModifiers(Modifier.PUBLIC)
         .addSuperinterface(ParameterizedTypeName.get(Callable.class, String.class))
         .addMethod(MethodSpec.methodBuilder("call")
@@ -95,15 +95,15 @@ public class FileReadingTest {
             .addStatement("return $S", value)
             .build())
         .build();
-    JavaFile javaFile = JavaFile.builder("foo", type).build();
+    var javaFile = JavaFile.builder("foo", type).build();
 
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
-    StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticCollector, 
+    var compiler = ToolProvider.getSystemJavaCompiler();
+    var diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
+    var fileManager = compiler.getStandardFileManager(diagnosticCollector,
         Locale.getDefault(), UTF_8);
     fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
         Collections.singleton(temporaryFolder.newFolder()));
-    CompilationTask task = compiler.getTask(null, 
+    var task = compiler.getTask(null,
         fileManager,
         diagnosticCollector,
         Set.of("-proc:full"),
@@ -113,8 +113,8 @@ public class FileReadingTest {
     assertThat(task.call()).isTrue();
     assertThat(diagnosticCollector.getDiagnostics()).isEmpty();
 
-    ClassLoader loader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
-    Callable<?> test = Class.forName("foo.Test", true, loader)
+    var loader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
+    var test = Class.forName("foo.Test", true, loader)
             .asSubclass(Callable.class)
             .getDeclaredConstructor()
             .newInstance();

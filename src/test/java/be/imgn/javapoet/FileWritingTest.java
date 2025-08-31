@@ -49,9 +49,9 @@ public final class FileWritingTest {
   private final TestFiler filer = new TestFiler(fs, fsRoot);
 
   @Test public void pathNotDirectory() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
-    JavaFile javaFile = JavaFile.builder("example", type).build();
-    Path path = fs.getPath("/foo/bar");
+    var type = TypeSpec.classBuilder("Test").build();
+    var javaFile = JavaFile.builder("example", type).build();
+    var path = fs.getPath("/foo/bar");
     Files.createDirectories(path.getParent());
     Files.createFile(path);
     try {
@@ -63,9 +63,9 @@ public final class FileWritingTest {
   }
 
   @Test public void fileNotDirectory() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
-    JavaFile javaFile = JavaFile.builder("example", type).build();
-    File file = new File(tmp.newFolder("foo"), "bar");
+    var type = TypeSpec.classBuilder("Test").build();
+    var javaFile = JavaFile.builder("example", type).build();
+    var file = new File(tmp.newFolder("foo"), "bar");
     file.createNewFile();
     try {
       javaFile.writeTo(file);
@@ -77,83 +77,83 @@ public final class FileWritingTest {
   }
 
   @Test public void pathDefaultPackage() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("", type).build().writeTo(fsRoot);
 
-    Path testPath = fsRoot.resolve("Test.java");
+    var testPath = fsRoot.resolve("Test.java");
     assertThat(Files.exists(testPath)).isTrue();
   }
 
   @Test public void fileDefaultPackage() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("", type).build().writeTo(tmp.getRoot());
 
-    File testFile = new File(tmp.getRoot(), "Test.java");
+    var testFile = new File(tmp.getRoot(), "Test.java");
     assertThat(testFile.exists()).isTrue();
   }
 
   @Test public void filerDefaultPackage() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("", type).build().writeTo(filer);
 
-    Path testPath = fsRoot.resolve("Test.java");
+    var testPath = fsRoot.resolve("Test.java");
     assertThat(Files.exists(testPath)).isTrue();
   }
 
   @Test public void pathNestedClasses() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("foo", type).build().writeTo(fsRoot);
     JavaFile.builder("foo.bar", type).build().writeTo(fsRoot);
     JavaFile.builder("foo.bar.baz", type).build().writeTo(fsRoot);
 
-    Path fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
-    Path barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
-    Path bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
+    var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
+    var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
+    var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
     assertThat(Files.exists(fooPath)).isTrue();
     assertThat(Files.exists(barPath)).isTrue();
     assertThat(Files.exists(bazPath)).isTrue();
   }
 
   @Test public void fileNestedClasses() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("foo", type).build().writeTo(tmp.getRoot());
     JavaFile.builder("foo.bar", type).build().writeTo(tmp.getRoot());
     JavaFile.builder("foo.bar.baz", type).build().writeTo(tmp.getRoot());
 
-    File fooDir = new File(tmp.getRoot(), "foo");
-    File fooFile = new File(fooDir, "Test.java");
-    File barDir = new File(fooDir, "bar");
-    File barFile = new File(barDir, "Test.java");
-    File bazDir = new File(barDir, "baz");
-    File bazFile = new File(bazDir, "Test.java");
+    var fooDir = new File(tmp.getRoot(), "foo");
+    var fooFile = new File(fooDir, "Test.java");
+    var barDir = new File(fooDir, "bar");
+    var barFile = new File(barDir, "Test.java");
+    var bazDir = new File(barDir, "baz");
+    var bazFile = new File(bazDir, "Test.java");
     assertThat(fooFile.exists()).isTrue();
     assertThat(barFile.exists()).isTrue();
     assertThat(bazFile.exists()).isTrue();
   }
 
   @Test public void filerNestedClasses() throws IOException {
-    TypeSpec type = TypeSpec.classBuilder("Test").build();
+    var type = TypeSpec.classBuilder("Test").build();
     JavaFile.builder("foo", type).build().writeTo(filer);
     JavaFile.builder("foo.bar", type).build().writeTo(filer);
     JavaFile.builder("foo.bar.baz", type).build().writeTo(filer);
 
-    Path fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
-    Path barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
-    Path bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
+    var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
+    var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
+    var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
     assertThat(Files.exists(fooPath)).isTrue();
     assertThat(Files.exists(barPath)).isTrue();
     assertThat(Files.exists(bazPath)).isTrue();
   }
 
   @Test public void filerPassesOriginatingElements() throws IOException {
-    Element element1_1 = Mockito.mock(Element.class);
-    TypeSpec test1 = TypeSpec.classBuilder("Test1")
+    var element1_1 = Mockito.mock(Element.class);
+    var test1 = TypeSpec.classBuilder("Test1")
         .addOriginatingElement(element1_1)
         .build();
 
-    Element element2_1 = Mockito.mock(Element.class);
-    Element element2_2 = Mockito.mock(Element.class);
-    TypeSpec test2 = TypeSpec.classBuilder("Test2")
+    var element2_1 = Mockito.mock(Element.class);
+    var element2_2 = Mockito.mock(Element.class);
+    var test2 = TypeSpec.classBuilder("Test2")
         .addOriginatingElement(element2_1)
         .addOriginatingElement(element2_2)
         .build();
@@ -161,14 +161,14 @@ public final class FileWritingTest {
     JavaFile.builder("example", test1).build().writeTo(filer);
     JavaFile.builder("example", test2).build().writeTo(filer);
 
-    Path testPath1 = fsRoot.resolve(fs.getPath("example", "Test1.java"));
+    var testPath1 = fsRoot.resolve(fs.getPath("example", "Test1.java"));
     assertThat(filer.getOriginatingElements(testPath1)).containsExactly(element1_1);
-    Path testPath2 = fsRoot.resolve(fs.getPath("example", "Test2.java"));
+    var testPath2 = fsRoot.resolve(fs.getPath("example", "Test2.java"));
     assertThat(filer.getOriginatingElements(testPath2)).containsExactly(element2_1, element2_2);
   }
 
   @Test public void filerClassesWithTabIndent() throws IOException {
-    TypeSpec test = TypeSpec.classBuilder("Test")
+    var test = TypeSpec.classBuilder("Test")
         .addField(Date.class, "madeFreshDate")
         .addMethod(MethodSpec.methodBuilder("main")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -178,24 +178,25 @@ public final class FileWritingTest {
         .build();
     JavaFile.builder("foo", test).indent("\t").build().writeTo(filer);
 
-    Path fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
+    var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
     assertThat(Files.exists(fooPath)).isTrue();
-    String source = new String(Files.readAllBytes(fooPath));
+    var source = new String(Files.readAllBytes(fooPath));
 
-    assertThat(source).isEqualTo(""
-        + "package foo;\n"
-        + "\n"
-        + "import java.lang.String;\n"
-        + "import java.lang.System;\n"
-        + "import java.util.Date;\n"
-        + "\n"
-        + "class Test {\n"
-        + "\tDate madeFreshDate;\n"
-        + "\n"
-        + "\tpublic static void main(String[] args) {\n"
-        + "\t\tSystem.out.println(\"Hello World!\");\n"
-        + "\t}\n"
-        + "}\n");
+    assertThat(source).isEqualTo("""
+            package foo;
+            
+            import java.lang.String;
+            import java.lang.System;
+            import java.util.Date;
+            
+            class Test {
+            \tDate madeFreshDate;
+            
+            \tpublic static void main(String[] args) {
+            \t\tSystem.out.println("Hello World!");
+            \t}
+            }
+            """);
   }
 
   /**
@@ -203,23 +204,24 @@ public final class FileWritingTest {
    * charset is customized with {@code -Dfile.encoding=ISO-8859-1}.
    */
   @Test public void fileIsUtf8() throws IOException {
-    JavaFile javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Taco").build())
+    var javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Taco").build())
         .addFileComment("Pi\u00f1ata\u00a1")
         .build();
     javaFile.writeTo(fsRoot);
 
-    Path fooPath = fsRoot.resolve(fs.getPath("foo", "Taco.java"));
-    assertThat(new String(Files.readAllBytes(fooPath), UTF_8)).isEqualTo(""
-        + "// Pi\u00f1ata\u00a1\n"
-        + "package foo;\n"
-        + "\n"
-        + "class Taco {\n"
-        + "}\n");
+    var fooPath = fsRoot.resolve(fs.getPath("foo", "Taco.java"));
+    assertThat(new String(Files.readAllBytes(fooPath), UTF_8)).isEqualTo("""
+            // Pi\u00f1ata\u00a1
+            package foo;
+            
+            class Taco {
+            }
+            """);
   }
 
   @Test public void writeToPathReturnsPath() throws IOException {
-    JavaFile javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Taco").build()).build();
-    Path filePath = javaFile.writeToPath(fsRoot);
+    var javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Taco").build()).build();
+    var filePath = javaFile.writeToPath(fsRoot);
     // Cast to avoid ambiguity between assertThat(Path) and assertThat(Iterable<?>)
     assertThat((Iterable<?>) filePath).isEqualTo(fsRoot.resolve(fs.getPath("foo", "Taco.java")));
   }

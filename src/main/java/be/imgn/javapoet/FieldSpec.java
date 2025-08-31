@@ -76,9 +76,9 @@ public final class FieldSpec {
   }
 
   @Override public String toString() {
-    StringBuilder out = new StringBuilder();
+    var out = new StringBuilder();
     try {
-      CodeWriter codeWriter = new CodeWriter(out);
+      var codeWriter = new CodeWriter(out);
       emit(codeWriter, Collections.emptySet());
       return out.toString();
     } catch (IOException e) {
@@ -98,7 +98,7 @@ public final class FieldSpec {
   }
 
   public Builder toBuilder() {
-    Builder builder = new Builder(type, name);
+    var builder = new Builder(type, name);
     builder.javadoc.add(javadoc);
     builder.annotations.addAll(annotations);
     builder.modifiers.addAll(modifiers);
@@ -133,7 +133,7 @@ public final class FieldSpec {
 
     public Builder addAnnotations(Iterable<AnnotationSpec> annotationSpecs) {
       checkArgument(annotationSpecs != null, "annotationSpecs == null");
-      for (AnnotationSpec annotationSpec : annotationSpecs) {
+      for (var annotationSpec : annotationSpecs) {
         this.annotations.add(annotationSpec);
       }
       return this;

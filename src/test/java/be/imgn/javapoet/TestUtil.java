@@ -7,7 +7,7 @@ import java.util.Collection;
 
 final class TestUtil {
   static <E extends Element> E findFirst(Collection<E> elements, String name) {
-    for (E element : elements) {
+    for (var element : elements) {
       if (element.getSimpleName().toString().equals(name)) {
         return element;
       }

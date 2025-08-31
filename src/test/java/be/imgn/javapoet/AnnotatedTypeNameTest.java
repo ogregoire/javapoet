@@ -51,24 +51,24 @@ public class AnnotatedTypeNameTest {
   }
 
   @Test public void annotated() {
-    TypeName simpleString = TypeName.get(String.class);
+    var simpleString = TypeName.get(String.class);
     assertFalse(simpleString.isAnnotated());
     assertEquals(simpleString, TypeName.get(String.class));
 
-    TypeName annotated = simpleString.annotated(NEVER_NULL);
+    var annotated = simpleString.annotated(NEVER_NULL);
     assertTrue(annotated.isAnnotated());
     assertEquals(annotated, annotated.annotated());
   }
 
   @Test public void annotatedType() {
-    TypeName type = TypeName.get(String.class);
-    TypeName actual = type.annotated(TYPE_USE_ANNOTATION);
+    var type = TypeName.get(String.class);
+    var actual = type.annotated(TYPE_USE_ANNOTATION);
     assertThat(actual.toString()).isEqualTo("java.lang. @" + TUA + " String");
   }
 
   @Test public void annotatedTwice() {
-    TypeName type = TypeName.get(String.class);
-    TypeName actual =
+    var type = TypeName.get(String.class);
+    var actual =
         type.annotated(NEVER_NULL)
             .annotated(TYPE_USE_ANNOTATION);
     assertThat(actual.toString())
@@ -76,26 +76,26 @@ public class AnnotatedTypeNameTest {
   }
 
   @Test public void annotatedParameterizedType() {
-    TypeName type = ParameterizedTypeName.get(List.class, String.class);
-    TypeName actual = type.annotated(TYPE_USE_ANNOTATION);
+    var type = ParameterizedTypeName.get(List.class, String.class);
+    var actual = type.annotated(TYPE_USE_ANNOTATION);
     assertThat(actual.toString()).isEqualTo("java.util. @" + TUA + " List<java.lang.String>");
   }
 
   @Test public void annotatedArgumentOfParameterizedType() {
-    TypeName type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
-    TypeName actual = ParameterizedTypeName.get(ClassName.get(List.class), type);
+    var type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
+    var actual = ParameterizedTypeName.get(ClassName.get(List.class), type);
     assertThat(actual.toString()).isEqualTo("java.util.List<java.lang. @" + TUA + " String>");
   }
 
   @Test public void annotatedWildcardTypeNameWithSuper() {
-    TypeName type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
-    TypeName actual = WildcardTypeName.supertypeOf(type);
+    var type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
+    var actual = WildcardTypeName.supertypeOf(type);
     assertThat(actual.toString()).isEqualTo("? super java.lang. @" + TUA + " String");
   }
 
   @Test public void annotatedWildcardTypeNameWithExtends() {
-    TypeName type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
-    TypeName actual = WildcardTypeName.subtypeOf(type);
+    var type = TypeName.get(String.class).annotated(TYPE_USE_ANNOTATION);
+    var actual = WildcardTypeName.subtypeOf(type);
     assertThat(actual.toString()).isEqualTo("? extends java.lang. @" + TUA + " String");
   }
 
@@ -121,40 +121,40 @@ public class AnnotatedTypeNameTest {
 
   // https://github.com/square/javapoet/issues/431
   @Test public void annotatedNestedType() {
-    TypeName type = TypeName.get(Map.Entry.class).annotated(TYPE_USE_ANNOTATION);
+    var type = TypeName.get(Map.Entry.class).annotated(TYPE_USE_ANNOTATION);
     assertThat(type.toString()).isEqualTo("java.util.Map. @" + TUA + " Entry");
   }
 
   @Test public void annotatedEnclosingAndNestedType() {
-    TypeName type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
+    var type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
         .nestedClass("Entry").annotated(TYPE_USE_ANNOTATION);
     assertThat(type.toString()).isEqualTo("java.util. @" + TUA + " Map. @" + TUA + " Entry");
   }
 
   // https://github.com/square/javapoet/issues/431
   @Test public void annotatedNestedParameterizedType() {
-    TypeName type = ParameterizedTypeName.get(Map.Entry.class, Byte.class, Byte.class)
+    var type = ParameterizedTypeName.get(Map.Entry.class, Byte.class, Byte.class)
         .annotated(TYPE_USE_ANNOTATION);
     assertThat(type.toString())
         .isEqualTo("java.util.Map. @" + TUA + " Entry<java.lang.Byte, java.lang.Byte>");
   }
 
   @Test public void withoutAnnotationsOnAnnotatedEnclosingAndNestedType() {
-    TypeName type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
+    var type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
         .nestedClass("Entry").annotated(TYPE_USE_ANNOTATION);
     assertThat(type.isAnnotated()).isTrue();
     assertThat(type.withoutAnnotations()).isEqualTo(TypeName.get(Map.Entry.class));
   }
 
   @Test public void withoutAnnotationsOnAnnotatedEnclosingType() {
-    TypeName type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
+    var type = ((ClassName) TypeName.get(Map.class).annotated(TYPE_USE_ANNOTATION))
         .nestedClass("Entry");
     assertThat(type.isAnnotated()).isTrue();
     assertThat(type.withoutAnnotations()).isEqualTo(TypeName.get(Map.Entry.class));
   }
 
   @Test public void withoutAnnotationsOnAnnotatedNestedType() {
-    TypeName type = ((ClassName) TypeName.get(Map.class))
+    var type = ((ClassName) TypeName.get(Map.class))
         .nestedClass("Entry").annotated(TYPE_USE_ANNOTATION);
     assertThat(type.isAnnotated()).isTrue();
     assertThat(type.withoutAnnotations()).isEqualTo(TypeName.get(Map.Entry.class));
@@ -162,34 +162,34 @@ public class AnnotatedTypeNameTest {
 
   // https://github.com/square/javapoet/issues/614
    @Test public void annotatedArrayType() {
-    TypeName type = ArrayTypeName.of(ClassName.get(Object.class)).annotated(TYPE_USE_ANNOTATION);
+    var type = ArrayTypeName.of(ClassName.get(Object.class)).annotated(TYPE_USE_ANNOTATION);
     assertThat(type.toString()).isEqualTo("java.lang.Object @" + TUA + " []");
   }
 
   @Test public void annotatedArrayElementType() {
-    TypeName type = ArrayTypeName.of(ClassName.get(Object.class).annotated(TYPE_USE_ANNOTATION));
+    var type = ArrayTypeName.of(ClassName.get(Object.class).annotated(TYPE_USE_ANNOTATION));
     assertThat(type.toString()).isEqualTo("java.lang. @" + TUA + " Object[]");
   }
 
   // https://github.com/square/javapoet/issues/614
   @Test public void annotatedOuterMultidimensionalArrayType() {
-    TypeName type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class)))
+    var type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class)))
         .annotated(TYPE_USE_ANNOTATION);
     assertThat(type.toString()).isEqualTo("java.lang.Object @" + TUA + " [][]");
   }
 
   // https://github.com/square/javapoet/issues/614
   @Test public void annotatedInnerMultidimensionalArrayType() {
-    TypeName type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class))
+    var type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class))
         .annotated(TYPE_USE_ANNOTATION));
     assertThat(type.toString()).isEqualTo("java.lang.Object[] @" + TUA + " []");
   }
 
   // https://github.com/square/javapoet/issues/614
   @Test public void annotatedArrayTypeVarargsParameter() {
-    TypeName type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class)))
+    var type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class)))
         .annotated(TYPE_USE_ANNOTATION);
-    MethodSpec varargsMethod = MethodSpec.methodBuilder("m")
+    var varargsMethod = MethodSpec.methodBuilder("m")
         .addParameter(
             ParameterSpec.builder(type, "p")
                 .build())
@@ -202,9 +202,9 @@ public class AnnotatedTypeNameTest {
 
   // https://github.com/square/javapoet/issues/614
   @Test public void annotatedArrayTypeInVarargsParameter() {
-    TypeName type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class))
+    var type = ArrayTypeName.of(ArrayTypeName.of(ClassName.get(Object.class))
         .annotated(TYPE_USE_ANNOTATION));
-    MethodSpec varargsMethod = MethodSpec.methodBuilder("m")
+    var varargsMethod = MethodSpec.methodBuilder("m")
         .addParameter(
             ParameterSpec.builder(type, "p")
                 .build())

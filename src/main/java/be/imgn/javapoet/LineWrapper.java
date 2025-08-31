@@ -62,7 +62,7 @@ final class LineWrapper {
     if (closed) throw new IllegalStateException("closed");
 
     if (nextFlush != null) {
-      int nextNewline = s.indexOf('\n');
+      var nextNewline = s.indexOf('\n');
 
       // If s doesn't cause the current line to cross the limit, buffer it and return. We'll decide
       // whether or not we have to wrap it later.
@@ -73,12 +73,12 @@ final class LineWrapper {
       }
 
       // Wrap if appending s would overflow the current line.
-      boolean wrap = nextNewline == -1 || column + nextNewline > columnLimit;
+      var wrap = nextNewline == -1 || column + nextNewline > columnLimit;
       flush(wrap ? FlushType.WRAP : nextFlush);
     }
 
     out.append(s);
-    int lastNewline = s.lastIndexOf('\n');
+    var lastNewline = s.lastIndexOf('\n');
     column = lastNewline != -1
         ? s.length() - lastNewline - 1
         : column + s.length();
@@ -113,21 +113,18 @@ final class LineWrapper {
   /** Write the space followed by any buffered text that follows it. */
   private void flush(FlushType flushType) throws IOException {
     switch (flushType) {
-      case WRAP:
+      case WRAP -> {
         out.append('\n');
-        for (int i = 0; i < indentLevel; i++) {
+        for (var i = 0; i < indentLevel; i++) {
           out.append(indent);
         }
         column = indentLevel * indent.length();
         column += buffer.length();
-        break;
-      case SPACE:
-        out.append(' ');
-        break;
-      case EMPTY:
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown FlushType: " + flushType);
+      }
+      case SPACE -> out.append(' ');
+      case EMPTY -> {
+      }
+      default -> throw new IllegalArgumentException("Unknown FlushType: " + flushType);
     }
 
     out.append(buffer);
@@ -151,7 +148,7 @@ final class LineWrapper {
     }
 
     @Override public Appendable append(CharSequence csq) throws IOException {
-      int length = csq.length();
+      var length = csq.length();
       if (length != 0) {
         lastChar = csq.charAt(length - 1);
       }
@@ -159,7 +156,7 @@ final class LineWrapper {
     }
 
     @Override public Appendable append(CharSequence csq, int start, int end) throws IOException {
-      CharSequence sub = csq.subSequence(start, end);
+      var sub = csq.subSequence(start, end);
       return append(sub);
     }
 

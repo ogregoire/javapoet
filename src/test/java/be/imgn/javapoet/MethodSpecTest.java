@@ -146,63 +146,68 @@ public final class MethodSpecTest {
   }
 
   @Test public void overrideEverything() {
-    TypeElement classElement = getElement(Everything.class);
-    ExecutableElement methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
-    MethodSpec method = MethodSpec.overriding(methodElement).build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "protected <T extends java.lang.Runnable & java.io.Closeable> java.lang.Runnable "
-        + "everything(\n"
-        + "    java.lang.String arg0, java.util.List<? extends T> arg1) throws java.io.IOException,\n"
-        + "    java.lang.SecurityException {\n"
-        + "}\n");
+    var classElement = getElement(Everything.class);
+    var methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
+    var method = MethodSpec.overriding(methodElement).build();
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            protected <T extends java.lang.Runnable & java.io.Closeable> java.lang.Runnable \
+            everything(
+                java.lang.String arg0, java.util.List<? extends T> arg1) throws java.io.IOException,
+                java.lang.SecurityException {
+            }
+            """);
   }
 
   @Test public void overrideGenerics() {
-    TypeElement classElement = getElement(Generics.class);
-    ExecutableElement methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
-    MethodSpec method = MethodSpec.overriding(methodElement)
+    var classElement = getElement(Generics.class);
+    var methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
+    var method = MethodSpec.overriding(methodElement)
         .addStatement("return null")
         .build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "<T, R, V extends java.lang.Throwable> T run(R param) throws V {\n"
-        + "  return null;\n"
-        + "}\n");
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            <T, R, V extends java.lang.Throwable> T run(R param) throws V {
+              return null;
+            }
+            """);
   }
 
   @Test public void overrideDoesNotCopyOverrideAnnotation() {
-    TypeElement classElement = getElement(HasAnnotation.class);
-    ExecutableElement exec = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
-    MethodSpec method = MethodSpec.overriding(exec).build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "public java.lang.String toString() {\n"
-        + "}\n");
+    var classElement = getElement(HasAnnotation.class);
+    var exec = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
+    var method = MethodSpec.overriding(exec).build();
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            public java.lang.String toString() {
+            }
+            """);
   }
 
   @Test public void overrideDoesNotCopyDefaultModifier() {
-    TypeElement classElement = getElement(ExtendsIterableWithDefaultMethods.class);
-    DeclaredType classType = (DeclaredType) classElement.asType();
-    List<ExecutableElement> methods = methodsIn(elements.getAllMembers(classElement));
-    ExecutableElement exec = findFirst(methods, "spliterator");
-    MethodSpec method = MethodSpec.overriding(exec, classType, types).build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "public java.util.Spliterator<java.lang.Object> spliterator() {\n"
-        + "}\n");
+    var classElement = getElement(ExtendsIterableWithDefaultMethods.class);
+    var classType = (DeclaredType) classElement.asType();
+    var methods = methodsIn(elements.getAllMembers(classElement));
+    var exec = findFirst(methods, "spliterator");
+    var method = MethodSpec.overriding(exec, classType, types).build();
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            public java.util.Spliterator<java.lang.Object> spliterator() {
+            }
+            """);
   }
 
   @Test public void overrideExtendsOthersWorksWithActualTypeParameters() {
-    TypeElement classElement = getElement(ExtendsOthers.class);
-    DeclaredType classType = (DeclaredType) classElement.asType();
-    List<ExecutableElement> methods = methodsIn(elements.getAllMembers(classElement));
-    ExecutableElement exec = findFirst(methods, "call");
-    MethodSpec method = MethodSpec.overriding(exec, classType, types).build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "public java.lang.Integer call() throws java.lang.Exception {\n"
-        + "}\n");
+    var classElement = getElement(ExtendsOthers.class);
+    var classType = (DeclaredType) classElement.asType();
+    var methods = methodsIn(elements.getAllMembers(classElement));
+    var exec = findFirst(methods, "call");
+    var method = MethodSpec.overriding(exec, classType, types).build();
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            public java.lang.Integer call() throws java.lang.Exception {
+            }
+            """);
     exec = findFirst(methods, "compareTo");
     method = MethodSpec.overriding(exec, classType, types).build();
     assertThat(method.toString()).isEqualTo(""
@@ -211,15 +216,16 @@ public final class MethodSpecTest {
         + "}\n");
     exec = findFirst(methods, "fail");
     method = MethodSpec.overriding(exec, classType, types).build();
-    assertThat(method.toString()).isEqualTo(""
-        + "@java.lang.Override\n"
-        + "public void fail() throws java.lang.IllegalStateException {\n"
-        + "}\n");
+    assertThat(method.toString()).isEqualTo("""
+            @java.lang.Override
+            public void fail() throws java.lang.IllegalStateException {
+            }
+            """);
   }
 
   @Test public void overrideFinalClassMethod() {
-    TypeElement classElement = getElement(FinalClass.class);
-    List<ExecutableElement> methods = methodsIn(elements.getAllMembers(classElement));
+    var classElement = getElement(FinalClass.class);
+    var methods = methodsIn(elements.getAllMembers(classElement));
     try {
       MethodSpec.overriding(findFirst(methods, "method"));
       fail();
@@ -230,8 +236,8 @@ public final class MethodSpecTest {
   }
 
   @Test public void overrideInvalidModifiers() {
-    TypeElement classElement = getElement(InvalidOverrideMethods.class);
-    List<ExecutableElement> methods = methodsIn(elements.getAllMembers(classElement));
+    var classElement = getElement(InvalidOverrideMethods.class);
+    var methods = methodsIn(elements.getAllMembers(classElement));
     try {
       MethodSpec.overriding(findFirst(methods, "finalMethod"));
       fail();
@@ -260,29 +266,29 @@ public final class MethodSpecTest {
   }
 
   @Test public void overrideDoesNotCopyParameterAnnotations() {
-    TypeElement abstractTypeElement = getElement(AbstractClassWithPrivateAnnotation.class);
-    ExecutableElement fooElement = ElementFilter.methodsIn(abstractTypeElement.getEnclosedElements()).get(0);
-    ClassName implClassName = ClassName.get("be.imgn.javapoet", "Impl");
-    TypeSpec type = TypeSpec.classBuilder(implClassName)
+    var abstractTypeElement = getElement(AbstractClassWithPrivateAnnotation.class);
+    var fooElement = ElementFilter.methodsIn(abstractTypeElement.getEnclosedElements()).get(0);
+    var implClassName = ClassName.get("be.imgn.javapoet", "Impl");
+    var type = TypeSpec.classBuilder(implClassName)
             .superclass(abstractTypeElement.asType())
             .addMethod(MethodSpec.overriding(fooElement).build())
             .build();
-    JavaFileObject jfo = JavaFile.builder(implClassName.packageName, type).build().toJavaFileObject();
-    Compilation compilation = javac().compile(jfo);
+    var jfo = JavaFile.builder(implClassName.packageName, type).build().toJavaFileObject();
+    var compilation = javac().compile(jfo);
     assertThat(compilation).succeeded();
   }
 
   @Test public void equalsAndHashCode() {
-    MethodSpec a = MethodSpec.constructorBuilder().build();
-    MethodSpec b = MethodSpec.constructorBuilder().build();
+    var a = MethodSpec.constructorBuilder().build();
+    var b = MethodSpec.constructorBuilder().build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
     a = MethodSpec.methodBuilder("taco").build();
     b = MethodSpec.methodBuilder("taco").build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    TypeElement classElement = getElement(Everything.class);
-    ExecutableElement methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
+    var classElement = getElement(Everything.class);
+    var methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
     a = MethodSpec.overriding(methodElement).build();
     b = MethodSpec.overriding(methodElement).build();
     assertThat(a.equals(b)).isTrue();
@@ -290,21 +296,22 @@ public final class MethodSpecTest {
   }
 
   @Test public void withoutParameterJavaDoc() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("getTaco")
+    var methodSpec = MethodSpec.methodBuilder("getTaco")
         .addModifiers(Modifier.PRIVATE)
         .addParameter(TypeName.DOUBLE, "money")
         .addJavadoc("Gets the best Taco\n")
         .build();
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "/**\n"
-        + " * Gets the best Taco\n"
-        + " */\n"
-        + "private void getTaco(double money) {\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            /**
+             * Gets the best Taco
+             */
+            private void getTaco(double money) {
+            }
+            """);
   }
 
   @Test public void withParameterJavaDoc() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("getTaco")
+    var methodSpec = MethodSpec.methodBuilder("getTaco")
         .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "money")
             .addJavadoc("the amount required to buy the taco.\n")
             .build())
@@ -313,19 +320,20 @@ public final class MethodSpecTest {
             .build())
         .addJavadoc("Gets the best Taco money can buy.\n")
         .build();
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "/**\n"
-        + " * Gets the best Taco money can buy.\n"
-        + " *\n"
-        + " * @param money the amount required to buy the taco.\n"
-        + " * @param count the number of Tacos to buy.\n"
-        + " */\n"
-        + "void getTaco(double money, int count) {\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            /**
+             * Gets the best Taco money can buy.
+             *
+             * @param money the amount required to buy the taco.
+             * @param count the number of Tacos to buy.
+             */
+            void getTaco(double money, int count) {
+            }
+            """);
   }
 
   @Test public void withParameterJavaDocAndWithoutMethodJavadoc() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("getTaco")
+    var methodSpec = MethodSpec.methodBuilder("getTaco")
         .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "money")
             .addJavadoc("the amount required to buy the taco.\n")
             .build())
@@ -333,19 +341,20 @@ public final class MethodSpecTest {
             .addJavadoc("the number of Tacos to buy.\n")
             .build())
         .build();
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "/**\n"
-        + " * @param money the amount required to buy the taco.\n"
-        + " * @param count the number of Tacos to buy.\n"
-        + " */\n"
-        + "void getTaco(double money, int count) {\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            /**
+             * @param money the amount required to buy the taco.
+             * @param count the number of Tacos to buy.
+             */
+            void getTaco(double money, int count) {
+            }
+            """);
   }
 
   @Test public void duplicateExceptionsIgnored() {
-    ClassName ioException = ClassName.get(IOException.class);
-    ClassName timeoutException = ClassName.get(TimeoutException.class);
-    MethodSpec methodSpec = MethodSpec.methodBuilder("duplicateExceptions")
+    var ioException = ClassName.get(IOException.class);
+    var timeoutException = ClassName.get(TimeoutException.class);
+    var methodSpec = MethodSpec.methodBuilder("duplicateExceptions")
       .addException(ioException)
       .addException(timeoutException)
       .addException(timeoutException)
@@ -376,17 +385,20 @@ public final class MethodSpecTest {
   }
 
   @Test public void modifyMethodName() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("initialMethod")
+    var methodSpec = MethodSpec.methodBuilder("initialMethod")
         .build()
         .toBuilder()
         .setName("revisedMethod")
         .build();
 
-    assertThat(methodSpec.toString()).isEqualTo("" + "void revisedMethod() {\n" + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            void revisedMethod() {
+            }
+            """);
   }
 
   @Test public void modifyAnnotations() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("foo")
+    var builder = MethodSpec.methodBuilder("foo")
             .addAnnotation(Override.class)
             .addAnnotation(SuppressWarnings.class);
 
@@ -395,7 +407,7 @@ public final class MethodSpecTest {
   }
 
   @Test public void modifyModifiers() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("foo")
+    var builder = MethodSpec.methodBuilder("foo")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
     builder.modifiers.remove(1);
@@ -403,16 +415,16 @@ public final class MethodSpecTest {
   }
 
   @Test public void modifyParameters() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("foo")
+    var builder = MethodSpec.methodBuilder("foo")
             .addParameter(int.class, "source");
 
-    builder.parameters.remove(0);
+    builder.parameters.removeFirst();
     assertThat(builder.build().parameters).isEmpty();
   }
 
   @Test public void modifyTypeVariables() {
-    TypeVariableName t = TypeVariableName.get("T");
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("foo")
+    var t = TypeVariableName.get("T");
+    var builder = MethodSpec.methodBuilder("foo")
             .addTypeVariable(t)
             .addTypeVariable(TypeVariableName.get("V"));
 
@@ -421,64 +433,68 @@ public final class MethodSpecTest {
   }
 
   @Test public void ensureTrailingNewline() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("method")
+    var methodSpec = MethodSpec.methodBuilder("method")
         .addCode("codeWithNoNewline();")
         .build();
 
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "void method() {\n"
-        + "  codeWithNoNewline();\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            void method() {
+              codeWithNoNewline();
+            }
+            """);
   }
 
   /** Ensures that we don't add a duplicate newline if one is already present. */
   @Test public void ensureTrailingNewlineWithExistingNewline() {
-    MethodSpec methodSpec = MethodSpec.methodBuilder("method")
+    var methodSpec = MethodSpec.methodBuilder("method")
         .addCode("codeWithNoNewline();\n") // Have a newline already, so ensure we're not adding one
         .build();
 
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "void method() {\n"
-        + "  codeWithNoNewline();\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            void method() {
+              codeWithNoNewline();
+            }
+            """);
   }
 
   @Test public void controlFlowWithNamedCodeBlocks() {
-    Map<String, Object> m = new HashMap<>();
+    var m = new HashMap<String, Object>();
     m.put("field", "valueField");
     m.put("threshold", "5");
 
-    MethodSpec methodSpec = MethodSpec.methodBuilder("method")
+    var methodSpec = MethodSpec.methodBuilder("method")
         .beginControlFlow(named("if ($field:N > $threshold:L)", m))
         .nextControlFlow(named("else if ($field:N == $threshold:L)", m))
         .endControlFlow()
         .build();
 
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "void method() {\n"
-        + "  if (valueField > 5) {\n"
-        + "  } else if (valueField == 5) {\n"
-        + "  }\n"
-        + "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            void method() {
+              if (valueField > 5) {
+              } else if (valueField == 5) {
+              }
+            }
+            """);
   }
 
   @Test public void doWhileWithNamedCodeBlocks() {
-    Map<String, Object> m = new HashMap<>();
+    var m = new HashMap<String, Object>();
     m.put("field", "valueField");
     m.put("threshold", "5");
 
-    MethodSpec methodSpec = MethodSpec.methodBuilder("method")
+    var methodSpec = MethodSpec.methodBuilder("method")
         .beginControlFlow("do")
         .addStatement(named("$field:N--", m))
         .endControlFlow(named("while ($field:N > $threshold:L)", m))
         .build();
 
-    assertThat(methodSpec.toString()).isEqualTo(""
-        + "void method() {\n" +
-        "  do {\n" +
-        "    valueField--;\n" +
-        "  } while (valueField > 5);\n" +
-        "}\n");
+    assertThat(methodSpec.toString()).isEqualTo("""
+            void method() {
+              do {
+                valueField--;
+              } while (valueField > 5);
+            }
+            """);
   }
 
   private static CodeBlock named(String format, Map<String, ?> args){

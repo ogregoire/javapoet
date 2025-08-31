@@ -66,10 +66,10 @@ public class TypeNameTest {
   }
 
   @Test public void genericType() throws Exception {
-    Method recursiveEnum = getClass().getDeclaredMethod("generic", Enum[].class);
+    var recursiveEnum = getClass().getDeclaredMethod("generic", Enum[].class);
     TypeName.get(recursiveEnum.getReturnType());
     TypeName.get(recursiveEnum.getGenericReturnType());
-    TypeName genericTypeName = TypeName.get(recursiveEnum.getParameterTypes()[0]);
+    var genericTypeName = TypeName.get(recursiveEnum.getParameterTypes()[0]);
     TypeName.get(recursiveEnum.getGenericParameterTypes()[0]);
 
     // Make sure the generic argument is present
@@ -77,9 +77,9 @@ public class TypeNameTest {
   }
 
   @Test public void innerClassInGenericType() throws Exception {
-    Method genericStringInner = getClass().getDeclaredMethod("testGenericStringInner");
+    var genericStringInner = getClass().getDeclaredMethod("testGenericStringInner");
     TypeName.get(genericStringInner.getReturnType());
-    TypeName genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
+    var genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
     assertNotEquals(TypeName.get(genericStringInner.getGenericReturnType()),
         TypeName.get(getClass().getDeclaredMethod("testGenericIntInner").getGenericReturnType()));
 
@@ -89,9 +89,9 @@ public class TypeNameTest {
   }
 
   @Test public void innerGenericInGenericType() throws Exception {
-    Method genericStringInner = getClass().getDeclaredMethod("testGenericInnerLong");
+    var genericStringInner = getClass().getDeclaredMethod("testGenericInnerLong");
     TypeName.get(genericStringInner.getReturnType());
-    TypeName genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
+    var genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
     assertNotEquals(TypeName.get(genericStringInner.getGenericReturnType()),
         TypeName.get(getClass().getDeclaredMethod("testGenericInnerInt").getGenericReturnType()));
 
@@ -101,9 +101,9 @@ public class TypeNameTest {
   }
 
   @Test public void innerStaticInGenericType() throws Exception {
-    Method staticInGeneric = getClass().getDeclaredMethod("testNestedNonGeneric");
+    var staticInGeneric = getClass().getDeclaredMethod("testNestedNonGeneric");
     TypeName.get(staticInGeneric.getReturnType());
-    TypeName typeName = TypeName.get(staticInGeneric.getGenericReturnType());
+    var typeName = TypeName.get(staticInGeneric.getGenericReturnType());
 
     // Make sure there are no generic arguments
     assertThat(typeName.toString()).isEqualTo(
@@ -148,8 +148,8 @@ public class TypeNameTest {
   @Test public void equalsAndHashCodeTypeVariableName() {
     assertEqualsHashCodeAndToString(TypeVariableName.get(Object.class),
         TypeVariableName.get(Object.class));
-    TypeVariableName typeVar1 = TypeVariableName.get("T", Comparator.class, Serializable.class);
-    TypeVariableName typeVar2 = TypeVariableName.get("T", Comparator.class, Serializable.class);
+    var typeVar1 = TypeVariableName.get("T", Comparator.class, Serializable.class);
+    var typeVar2 = TypeVariableName.get("T", Comparator.class, Serializable.class);
     assertEqualsHashCodeAndToString(typeVar1, typeVar2);
   }
 

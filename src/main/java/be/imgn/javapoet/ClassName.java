@@ -72,7 +72,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
 
   @Override public ClassName withoutAnnotations() {
     if (!isAnnotated()) return this;
-    ClassName resultEnclosingClassName = enclosingClassName != null
+    var resultEnclosingClassName = enclosingClassName != null
         ? enclosingClassName.withoutAnnotations()
         : null;
     return new ClassName(packageName, resultEnclosingClassName, simpleName);
@@ -121,8 +121,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     if (enclosingClassName == null) {
       simpleNames = Collections.singletonList(simpleName);
     } else {
-      List<String> mutableNames = new ArrayList<>();
-      mutableNames.addAll(enclosingClassName().simpleNames());
+      var mutableNames = new ArrayList<>(enclosingClassName().simpleNames());
       mutableNames.add(simpleName);
       simpleNames = Collections.unmodifiableList(mutableNames);
     }
@@ -165,18 +164,18 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     checkArgument(!void.class.equals(clazz), "'void' type cannot be represented as a ClassName");
     checkArgument(!clazz.isArray(), "array types cannot be represented as a ClassName");
 
-    String anonymousSuffix = "";
+    var anonymousSuffix = "";
     while (clazz.isAnonymousClass()) {
-      int lastDollar = clazz.getName().lastIndexOf('$');
+      var lastDollar = clazz.getName().lastIndexOf('$');
       anonymousSuffix = clazz.getName().substring(lastDollar) + anonymousSuffix;
       clazz = clazz.getEnclosingClass();
     }
-    String name = clazz.getSimpleName() + anonymousSuffix;
+    var name = clazz.getSimpleName() + anonymousSuffix;
 
     if (clazz.getEnclosingClass() == null) {
       // Avoid unreliable Class.getPackage(). https://github.com/square/javapoet/issues/295
-      int lastDot = clazz.getName().lastIndexOf('.');
-      String packageName = (lastDot != -1) ? clazz.getName().substring(0, lastDot) : NO_PACKAGE;
+      var lastDot = clazz.getName().lastIndexOf('.');
+      var packageName = (lastDot != -1) ? clazz.getName().substring(0, lastDot) : NO_PACKAGE;
       return new ClassName(packageName, null, name);
     }
 
@@ -193,16 +192,16 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
    */
   public static ClassName bestGuess(String classNameString) {
     // Add the package name, like "java.util.concurrent", or "" for no package.
-    int p = 0;
+    var p = 0;
     while (p < classNameString.length() && Character.isLowerCase(classNameString.codePointAt(p))) {
       p = classNameString.indexOf('.', p) + 1;
       checkArgument(p != 0, "couldn't make a guess for %s", classNameString);
     }
-    String packageName = p == 0 ? NO_PACKAGE : classNameString.substring(0, p - 1);
+    var packageName = p == 0 ? NO_PACKAGE : classNameString.substring(0, p - 1);
 
     // Add class names like "Map" and "Entry".
     ClassName className = null;
-    for (String simpleName : classNameString.substring(p).split("\\.", -1)) {
+    for (var simpleName : classNameString.substring(p).split("\\.", -1)) {
       checkArgument(!simpleName.isEmpty() && Character.isUpperCase(simpleName.codePointAt(0)),
           "couldn't make a guess for %s", classNameString);
       className = new ClassName(packageName, className, simpleName);
@@ -216,8 +215,8 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
    * {@code "java.util"} and simple names {@code "Map"}, {@code "Entry"} yields {@link Map.Entry}.
    */
   public static ClassName get(String packageName, String simpleName, String... simpleNames) {
-    ClassName className = new ClassName(packageName, null, simpleName);
-    for (String name : simpleNames) {
+    var className = new ClassName(packageName, null, simpleName);
+    for (var name : simpleNames) {
       className = className.nestedClass(name);
     }
     return className;
@@ -226,7 +225,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   /** Returns the class name for {@code element}. */
   public static ClassName get(TypeElement element) {
     checkNotNull(element, "element == null");
-    String simpleName = element.getSimpleName().toString();
+    var simpleName = element.getSimpleName().toString();
 
     return element.getEnclosingElement().accept(new SimpleElementVisitor8<ClassName, Void>() {
       @Override public ClassName visitPackage(PackageElement packageElement, Void p) {
@@ -252,7 +251,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   }
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
-    boolean charsEmitted = false;
+    var charsEmitted = false;
     for (ClassName className : enclosingClasses()) {
       String simpleName;
       if (charsEmitted) {
@@ -262,8 +261,8 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
 
       } else if (className.isAnnotated() || className == this) {
         // We encountered the first enclosing class that must be emitted.
-        String qualifiedName = out.lookupName(className);
-        int dot = qualifiedName.lastIndexOf('.');
+        var qualifiedName = out.lookupName(className);
+        var dot = qualifiedName.lastIndexOf('.');
         if (dot != -1) {
           out.emitAndIndent(qualifiedName.substring(0, dot + 1));
           simpleName = qualifiedName.substring(dot + 1);
@@ -291,8 +290,8 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
 
   /** Returns all enclosing classes in this, outermost first. */
   private List<ClassName> enclosingClasses() {
-    List<ClassName> result = new ArrayList<>();
-    for (ClassName c = this; c != null; c = c.enclosingClassName) {
+    var result = new ArrayList<ClassName>();
+    for (var c = this; c != null; c = c.enclosingClassName) {
       result.add(c);
     }
     Collections.reverse(result);

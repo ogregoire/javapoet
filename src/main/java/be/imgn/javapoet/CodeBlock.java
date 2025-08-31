@@ -92,7 +92,7 @@ public final class CodeBlock {
   }
 
   @Override public String toString() {
-    StringBuilder out = new StringBuilder();
+    var out = new StringBuilder();
     try {
       new CodeWriter(out).emit(this);
       return out.toString();
@@ -134,7 +134,7 @@ public final class CodeBlock {
    */
   public static Collector<CodeBlock, ?, CodeBlock> joining(
       String separator, String prefix, String suffix) {
-    Builder builder = builder().add("$N", prefix);
+    var builder = builder().add("$N", prefix);
     return Collector.of(
         () -> new CodeBlockJoiner(separator, builder),
         CodeBlockJoiner::add,
@@ -150,7 +150,7 @@ public final class CodeBlock {
   }
 
   public Builder toBuilder() {
-    Builder builder = new Builder();
+    var builder = new Builder();
     builder.formatParts.addAll(formatParts);
     builder.args.addAll(args);
     return builder;
@@ -181,13 +181,13 @@ public final class CodeBlock {
     public Builder addNamed(String format, Map<String, ?> arguments) {
       int p = 0;
 
-      for (String argument : arguments.keySet()) {
+      for (var argument : arguments.keySet()) {
         checkArgument(LOWERCASE.matcher(argument).matches(),
             "argument '%s' must start with a lowercase character", argument);
       }
 
       while (p < format.length()) {
-        int nextP = format.indexOf("$", p);
+        var nextP = format.indexOf("$", p);
         if (nextP == -1) {
           formatParts.add(format.substring(p));
           break;
@@ -199,16 +199,16 @@ public final class CodeBlock {
         }
 
         Matcher matcher = null;
-        int colon = format.indexOf(':', p);
+        var colon = format.indexOf(':', p);
         if (colon != -1) {
           int endIndex = Math.min(colon + 2, format.length());
           matcher = NAMED_ARGUMENT.matcher(format.substring(p, endIndex));
         }
         if (matcher != null && matcher.lookingAt()) {
-          String argumentName = matcher.group("argumentName");
+          var argumentName = matcher.group("argumentName");
           checkArgument(arguments.containsKey(argumentName), "Missing named argument for $%s",
               argumentName);
-          char formatChar = matcher.group("typeChar").charAt(0);
+          var formatChar = matcher.group("typeChar").charAt(0);
           addArgument(format, formatChar, arguments.get(argumentName));
           formatParts.add("$" + formatChar);
           p += matcher.regionEnd();
@@ -236,15 +236,15 @@ public final class CodeBlock {
      * error.
      */
     public Builder add(String format, Object... args) {
-      boolean hasRelative = false;
-      boolean hasIndexed = false;
+      var hasRelative = false;
+      var hasIndexed = false;
 
-      int relativeParameterCount = 0;
-      int[] indexedParameterCount = new int[args.length];
+      var relativeParameterCount = 0;
+      var indexedParameterCount = new int[args.length];
 
-      for (int p = 0; p < format.length(); ) {
+      for (var p = 0; p < format.length(); ) {
         if (format.charAt(p) != '$') {
-          int nextP = format.indexOf('$', p + 1);
+          var nextP = format.indexOf('$', p + 1);
           if (nextP == -1) nextP = format.length();
           formatParts.add(format.substring(p, nextP));
           p = nextP;
@@ -254,13 +254,13 @@ public final class CodeBlock {
         p++; // '$'.
 
         // Consume zero or more digits, leaving 'c' as the first non-digit char after the '$'.
-        int indexStart = p;
+        var indexStart = p;
         char c;
         do {
           checkArgument(p < format.length(), "dangling format characters in '%s'", format);
           c = format.charAt(p++);
         } while (c >= '0' && c <= '9');
-        int indexEnd = p - 1;
+        var indexEnd = p - 1;
 
         // If 'c' doesn't take an argument, we're done.
         if (isNoArgPlaceholder(c)) {
@@ -299,13 +299,13 @@ public final class CodeBlock {
             "unused arguments: expected %s, received %s", relativeParameterCount, args.length);
       }
       if (hasIndexed) {
-        List<String> unused = new ArrayList<>();
-        for (int i = 0; i < args.length; i++) {
+        var unused = new ArrayList<String>();
+        for (var i = 0; i < args.length; i++) {
           if (indexedParameterCount[i] == 0) {
             unused.add("$" + (i + 1));
           }
         }
-        String s = unused.size() == 1 ? "" : "s";
+        var s = unused.size() == 1 ? "" : "s";
         checkArgument(unused.isEmpty(), "unused argument%s: %s", s, String.join(", ", unused));
       }
       return this;
@@ -317,31 +317,24 @@ public final class CodeBlock {
 
     private void addArgument(String format, char c, Object arg) {
       switch (c) {
-        case 'N':
-          this.args.add(argToName(arg));
-          break;
-        case 'L':
-          this.args.add(argToLiteral(arg));
-          break;
-        case 'S':
-          this.args.add(argToString(arg));
-          break;
-        case 'T':
-          this.args.add(argToType(arg));
-          break;
-        default:
-          throw new IllegalArgumentException(
+        case 'N' -> this.args.add(argToName(arg));
+        case 'L' -> this.args.add(argToLiteral(arg));
+        case 'S' -> this.args.add(argToString(arg));
+        case 'T' -> this.args.add(argToType(arg));
+        default -> throw new IllegalArgumentException(
               String.format("invalid format string: '%s'", format));
       }
     }
 
     private String argToName(Object o) {
-      if (o instanceof CharSequence) return o.toString();
-      if (o instanceof ParameterSpec) return ((ParameterSpec) o).name;
-      if (o instanceof FieldSpec) return ((FieldSpec) o).name;
-      if (o instanceof MethodSpec) return ((MethodSpec) o).name;
-      if (o instanceof TypeSpec) return ((TypeSpec) o).name;
-      throw new IllegalArgumentException("expected name but was " + o);
+      return switch (o) {
+          case CharSequence cs ->  cs.toString();
+          case ParameterSpec ps -> ps.name;
+          case FieldSpec fs -> fs.name;
+          case MethodSpec ms -> ms.name;
+          case TypeSpec ts -> ts.name;
+          default -> throw new IllegalArgumentException("expected name but was " + o);
+      };
     }
 
     private Object argToLiteral(Object o) {
@@ -353,11 +346,13 @@ public final class CodeBlock {
     }
 
     private TypeName argToType(Object o) {
-      if (o instanceof TypeName) return (TypeName) o;
-      if (o instanceof TypeMirror) return TypeName.get((TypeMirror) o);
-      if (o instanceof Element) return TypeName.get(((Element) o).asType());
-      if (o instanceof Type) return TypeName.get((Type) o);
-      throw new IllegalArgumentException("expected type but was " + o);
+      return switch (o) {
+        case TypeName typeName -> typeName;
+        case TypeMirror typeMirror -> TypeName.get(typeMirror);
+        case Element element -> TypeName.get(element.asType());
+        case Type type -> TypeName.get(type);
+        default -> throw new IllegalArgumentException("expected type but was " + o);
+      };
     }
 
     /**
@@ -456,7 +451,7 @@ public final class CodeBlock {
     }
 
     CodeBlockJoiner merge(CodeBlockJoiner other) {
-      CodeBlock otherBlock = other.builder.build();
+      var otherBlock = other.builder.build();
       if (!otherBlock.isEmpty()) {
         add(otherBlock);
       }

@@ -65,8 +65,8 @@ public final class TypesEclipseTest extends AbstractTypesTest {
     public Statement apply(final Statement base, Description description) {
       return new Statement() {
         @Override public void evaluate() throws Throwable {
-          final AtomicReference<Throwable> thrown = new AtomicReference<>();
-          boolean successful = compile(ImmutableList.of(new AbstractProcessor() {
+          var thrown = new AtomicReference<Throwable>();
+          var successful = compile(ImmutableList.of(new AbstractProcessor() {
             @Override
             public SourceVersion getSupportedSourceVersion() {
               return SourceVersion.latest();
@@ -99,7 +99,7 @@ public final class TypesEclipseTest extends AbstractTypesTest {
             }
           }));
           checkState(successful);
-          Throwable t = thrown.get();
+          var t = thrown.get();
           if (t != null) {
             throw t;
           }
@@ -128,11 +128,10 @@ public final class TypesEclipseTest extends AbstractTypesTest {
     }
 
     static private boolean compile(Iterable<? extends Processor> processors) {
-      JavaCompiler compiler = new EclipseCompiler();
-      DiagnosticCollector<JavaFileObject> diagnosticCollector =
-          new DiagnosticCollector<>();
-      JavaFileManager fileManager = compiler.getStandardFileManager(diagnosticCollector, Locale.getDefault(), UTF_8);
-      JavaCompiler.CompilationTask task = compiler.getTask(
+      var compiler = new EclipseCompiler();
+      var diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
+      var fileManager = compiler.getStandardFileManager(diagnosticCollector, Locale.getDefault(), UTF_8);
+      var task = compiler.getTask(
           null,
           fileManager,
           diagnosticCollector,

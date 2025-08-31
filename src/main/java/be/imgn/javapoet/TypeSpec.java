@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -84,9 +83,8 @@ public final class TypeSpec {
     this.alwaysQualifiedNames = Util.immutableSet(builder.alwaysQualifiedNames);
 
     nestedTypesSimpleNames = new HashSet<>(builder.typeSpecs.size());
-    List<Element> originatingElementsMutable = new ArrayList<>();
-    originatingElementsMutable.addAll(builder.originatingElements);
-    for (TypeSpec typeSpec : builder.typeSpecs) {
+    var originatingElementsMutable = new ArrayList<>(builder.originatingElements);
+    for (var typeSpec : builder.typeSpecs) {
       nestedTypesSimpleNames.add(typeSpec.name);
       originatingElementsMutable.addAll(typeSpec.originatingElements);
     }
@@ -165,7 +163,7 @@ public final class TypeSpec {
   }
 
   public Builder toBuilder() {
-    Builder builder = new Builder(kind, name, anonymousTypeArguments);
+    var builder = new Builder(kind, name, anonymousTypeArguments);
     builder.javadoc.add(javadoc);
     builder.annotations.addAll(annotations);
     builder.modifiers.addAll(modifiers);
@@ -187,7 +185,7 @@ public final class TypeSpec {
       throws IOException {
     // Nested classes interrupt wrapped line indentation. Stash the current wrapping state and put
     // it back afterwards when this type is complete.
-    int previousStatementLine = codeWriter.statementLine;
+    var previousStatementLine = codeWriter.statementLine;
     codeWriter.statementLine = -1;
 
     try {
@@ -205,7 +203,7 @@ public final class TypeSpec {
         }
         codeWriter.emit(" {\n");
       } else if (anonymousTypeArguments != null) {
-        TypeName supertype = !superinterfaces.isEmpty() ? superinterfaces.get(0) : superclass;
+        var supertype = !superinterfaces.isEmpty() ? superinterfaces.get(0) : superclass;
         codeWriter.emit("new $T(", supertype);
         codeWriter.emit(anonymousTypeArguments);
         codeWriter.emit(") {\n");
@@ -237,8 +235,8 @@ public final class TypeSpec {
 
         if (!extendsTypes.isEmpty()) {
           codeWriter.emit(" extends");
-          boolean firstType = true;
-          for (TypeName type : extendsTypes) {
+          var firstType = true;
+          for (var type : extendsTypes) {
             if (!firstType) codeWriter.emit(",");
             codeWriter.emit(" $T", type);
             firstType = false;
@@ -247,8 +245,8 @@ public final class TypeSpec {
 
         if (!implementsTypes.isEmpty()) {
           codeWriter.emit(" implements");
-          boolean firstType = true;
-          for (TypeName type : implementsTypes) {
+          var firstType = true;
+          for (var type : implementsTypes) {
             if (!firstType) codeWriter.emit(",");
             codeWriter.emit(" $T", type);
             firstType = false;
@@ -262,12 +260,11 @@ public final class TypeSpec {
 
       codeWriter.pushType(this);
       codeWriter.indent();
-      boolean firstMember = true;
-      boolean needsSeparator = kind == Kind.ENUM
+      var firstMember = true;
+      var needsSeparator = kind == Kind.ENUM
               && (!fieldSpecs.isEmpty() || !methodSpecs.isEmpty() || !typeSpecs.isEmpty());
-      for (Iterator<Map.Entry<String, TypeSpec>> i = enumConstants.entrySet().iterator();
-          i.hasNext(); ) {
-        Map.Entry<String, TypeSpec> enumConstant = i.next();
+      for (var i = enumConstants.entrySet().iterator(); i.hasNext(); ) {
+        var enumConstant = i.next();
         if (!firstMember) codeWriter.emit("\n");
         enumConstant.getValue().emit(codeWriter, enumConstant.getKey(), Collections.emptySet());
         firstMember = false;
@@ -281,7 +278,7 @@ public final class TypeSpec {
       if (needsSeparator) codeWriter.emit(";\n");
 
       // Static fields.
-      for (FieldSpec fieldSpec : fieldSpecs) {
+      for (var fieldSpec : fieldSpecs) {
         if (!fieldSpec.hasModifier(Modifier.STATIC)) continue;
         if (!firstMember) codeWriter.emit("\n");
         fieldSpec.emit(codeWriter, kind.implicitFieldModifiers);
@@ -295,7 +292,7 @@ public final class TypeSpec {
       }
 
       // Non-static fields.
-      for (FieldSpec fieldSpec : fieldSpecs) {
+      for (var fieldSpec : fieldSpecs) {
         if (fieldSpec.hasModifier(Modifier.STATIC)) continue;
         if (!firstMember) codeWriter.emit("\n");
         fieldSpec.emit(codeWriter, kind.implicitFieldModifiers);
@@ -310,7 +307,7 @@ public final class TypeSpec {
       }
 
       // Constructors.
-      for (MethodSpec methodSpec : methodSpecs) {
+      for (var methodSpec : methodSpecs) {
         if (!methodSpec.isConstructor()) continue;
         if (!firstMember) codeWriter.emit("\n");
         methodSpec.emit(codeWriter, name, kind.implicitMethodModifiers);
@@ -318,7 +315,7 @@ public final class TypeSpec {
       }
 
       // Methods (static and non-static).
-      for (MethodSpec methodSpec : methodSpecs) {
+      for (var methodSpec : methodSpecs) {
         if (methodSpec.isConstructor()) continue;
         if (!firstMember) codeWriter.emit("\n");
         methodSpec.emit(codeWriter, name, kind.implicitMethodModifiers);
@@ -326,7 +323,7 @@ public final class TypeSpec {
       }
 
       // Types.
-      for (TypeSpec typeSpec : typeSpecs) {
+      for (var typeSpec : typeSpecs) {
         if (!firstMember) codeWriter.emit("\n");
         typeSpec.emit(codeWriter, null, kind.implicitTypeModifiers);
         firstMember = false;
@@ -357,9 +354,9 @@ public final class TypeSpec {
   }
 
   @Override public String toString() {
-    StringBuilder out = new StringBuilder();
+    var out = new StringBuilder();
     try {
-      CodeWriter codeWriter = new CodeWriter(out);
+      var codeWriter = new CodeWriter(out);
       emit(codeWriter, null, Collections.emptySet());
       return out.toString();
     } catch (IOException e) {
@@ -517,9 +514,9 @@ public final class TypeSpec {
 
     public Builder superclass(TypeMirror superclass, boolean avoidNestedTypeNameClashes) {
       superclass(TypeName.get(superclass));
-      if (avoidNestedTypeNameClashes && superclass instanceof DeclaredType) {
+      if (avoidNestedTypeNameClashes && superclass instanceof DeclaredType declaredType) {
         TypeElement superInterfaceElement =
-            (TypeElement) ((DeclaredType) superclass).asElement();
+            (TypeElement) declaredType.asElement();
         avoidClashesWithNestedClasses(superInterfaceElement);
       }
       return this;
@@ -555,13 +552,11 @@ public final class TypeSpec {
     }
 
     private Class<?> getRawType(Type type) {
-      if (type instanceof Class<?>) {
-        return (Class<?>) type;
-      } else if (type instanceof ParameterizedType) {
-        return getRawType(((ParameterizedType) type).getRawType());
-      } else {
-        return null;
-      }
+      return switch (type) {
+        case Class<?> clazz -> clazz;
+        case ParameterizedType parameterizedType -> getRawType(parameterizedType.getRawType());
+        default -> null;
+      };
     }
 
     public Builder addSuperinterface(TypeMirror superinterface) {
@@ -571,9 +566,8 @@ public final class TypeSpec {
     public Builder addSuperinterface(TypeMirror superinterface,
         boolean avoidNestedTypeNameClashes) {
       addSuperinterface(TypeName.get(superinterface));
-      if (avoidNestedTypeNameClashes && superinterface instanceof DeclaredType) {
-        TypeElement superInterfaceElement =
-            (TypeElement) ((DeclaredType) superinterface).asElement();
+      if (avoidNestedTypeNameClashes && superinterface instanceof DeclaredType declaredType) {
+        TypeElement superInterfaceElement = (TypeElement) declaredType.asElement();
         avoidClashesWithNestedClasses(superInterfaceElement);
       }
       return this;
@@ -696,18 +690,17 @@ public final class TypeSpec {
      */
     public Builder avoidClashesWithNestedClasses(TypeElement typeElement) {
       checkArgument(typeElement != null, "typeElement == null");
-      for (TypeElement nestedType : ElementFilter.typesIn(typeElement.getEnclosedElements())) {
+      for (var nestedType : ElementFilter.typesIn(typeElement.getEnclosedElements())) {
         alwaysQualify(nestedType.getSimpleName().toString());
       }
-      TypeMirror superclass = typeElement.getSuperclass();
-      if (!(superclass instanceof NoType) && superclass instanceof DeclaredType) {
-        TypeElement superclassElement = (TypeElement) ((DeclaredType) superclass).asElement();
+      var superclass = typeElement.getSuperclass();
+      if (!(superclass instanceof NoType) && superclass instanceof DeclaredType declaredType) {
+        var superclassElement = (TypeElement) declaredType.asElement();
         avoidClashesWithNestedClasses(superclassElement);
       }
-      for (TypeMirror superinterface : typeElement.getInterfaces()) {
-        if (superinterface instanceof DeclaredType) {
-          TypeElement superinterfaceElement
-              = (TypeElement) ((DeclaredType) superinterface).asElement();
+      for (var superinterface : typeElement.getInterfaces()) {
+        if (superinterface instanceof DeclaredType declaredType) {
+          var superinterfaceElement = (TypeElement) declaredType.asElement();
           avoidClashesWithNestedClasses(superinterfaceElement);
         }
       }
@@ -820,20 +813,20 @@ public final class TypeSpec {
         }
       }
 
-      for (TypeSpec typeSpec : typeSpecs) {
+      for (var typeSpec : typeSpecs) {
         checkArgument(typeSpec.modifiers.containsAll(kind.implicitTypeModifiers),
             "%s %s.%s requires modifiers %s", kind, name, typeSpec.name,
             kind.implicitTypeModifiers);
       }
 
       boolean isAbstract = modifiers.contains(Modifier.ABSTRACT) || kind != Kind.CLASS;
-      for (MethodSpec methodSpec : methodSpecs) {
+      for (var methodSpec : methodSpecs) {
         checkArgument(isAbstract || !methodSpec.hasModifier(Modifier.ABSTRACT),
             "non-abstract type %s cannot declare abstract method %s", name, methodSpec.name);
       }
 
-      boolean superclassIsObject = superclass.equals(ClassName.OBJECT);
-      int interestingSupertypeCount = (superclassIsObject ? 0 : 1) + superinterfaces.size();
+      var superclassIsObject = superclass.equals(ClassName.OBJECT);
+      var interestingSupertypeCount = (superclassIsObject ? 0 : 1) + superinterfaces.size();
       checkArgument(anonymousTypeArguments == null || interestingSupertypeCount <= 1,
           "anonymous type has too many supertypes");
 

@@ -24,8 +24,8 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(JUnit4.class)
 public final class LineWrapperTest {
   @Test public void wrap() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghij");
@@ -34,8 +34,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void noWrap() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghi");
@@ -44,8 +44,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void zeroWidthNoWrap() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghij");
@@ -54,8 +54,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void nospaceWrapMax() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghijk");
@@ -64,8 +64,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void multipleWrite() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("ab");
     lineWrapper.wrappingSpace(1);
     lineWrapper.append("cd");
@@ -88,8 +88,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void fencepost() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.append("fghij");
     lineWrapper.wrappingSpace(2);
@@ -100,8 +100,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void fencepostZeroWidth() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.append("fghij");
     lineWrapper.zeroWidthSpace(2);
@@ -112,16 +112,16 @@ public final class LineWrapperTest {
   }
 
   @Test public void overlyLongLinesWithoutLeadingSpace() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
     assertThat(out.toString()).isEqualTo("abcdefghijkl");
   }
 
   @Test public void overlyLongLinesWithLeadingSpace() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
@@ -129,8 +129,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void overlyLongLinesWithLeadingZeroWidth() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
@@ -138,8 +138,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void noWrapEmbeddedNewlines() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghi\njklmn");
@@ -149,8 +149,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void wrapEmbeddedNewlines() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghij\nklmn");
@@ -160,8 +160,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void noWrapEmbeddedNewlines_ZeroWidth() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghij\nklmn");
@@ -171,8 +171,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void wrapEmbeddedNewlines_ZeroWidth() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghijk\nlmn");
@@ -182,8 +182,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void noWrapMultipleNewlines() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghi\nklmnopq\nr");
@@ -194,8 +194,8 @@ public final class LineWrapperTest {
   }
 
   @Test public void wrapMultipleNewlines() throws Exception {
-    StringBuffer out = new StringBuffer();
-    LineWrapper lineWrapper = new LineWrapper(out, "  ", 10);
+    var out = new StringBuffer();
+    var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcde");
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghi\nklmnopq\nrs");

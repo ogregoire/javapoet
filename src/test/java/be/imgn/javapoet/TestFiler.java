@@ -40,7 +40,7 @@ final class TestFiler implements Filer {
       this.path = path;
     }
     @Override public OutputStream openOutputStream() throws IOException {
-      Path parent = path.getParent();
+      var parent = path.getParent();
       if (!Files.exists(parent)) fileSystemProvider.createDirectory(parent);
       return fileSystemProvider.newOutputStream(path);
     }
@@ -64,8 +64,8 @@ final class TestFiler implements Filer {
 
   @Override public JavaFileObject createSourceFile(
       CharSequence name, Element... originatingElements) throws IOException {
-    String relative = name.toString().replace(".", separator) + ".java"; // Assumes well-formed.
-    Path path = fileSystemRoot.resolve(relative);
+    var relative = name.toString().replace(".", separator) + ".java"; // Assumes well-formed.
+    var path = fileSystemRoot.resolve(relative);
     originatingElementsMap.put(path, Util.immutableSet(Arrays.asList(originatingElements)));
     return new Source(path);
   }

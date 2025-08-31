@@ -47,7 +47,7 @@ public final class ParameterizedTypeName extends TypeName {
 
     checkArgument(!this.typeArguments.isEmpty() || enclosingType != null,
         "no type arguments: %s", rawType);
-    for (TypeName typeArgument : this.typeArguments) {
+    for (var typeArgument : this.typeArguments) {
       checkArgument(!typeArgument.isPrimitive() && typeArgument != VOID,
           "invalid type parameter: %s", typeArgument);
     }
@@ -78,8 +78,8 @@ public final class ParameterizedTypeName extends TypeName {
     }
     if (!typeArguments.isEmpty()) {
       out.emitAndIndent("<");
-      boolean firstParameter = true;
-      for (TypeName parameter : typeArguments) {
+      var firstParameter = true;
+      for (var parameter : typeArguments) {
         if (!firstParameter) out.emitAndIndent(", ");
         parameter.emit(out);
         firstParameter = false;
@@ -126,11 +126,11 @@ public final class ParameterizedTypeName extends TypeName {
 
   /** Returns a parameterized type equivalent to {@code type}. */
   static ParameterizedTypeName get(ParameterizedType type, Map<Type, TypeVariableName> map) {
-    ClassName rawType = ClassName.get((Class<?>) type.getRawType());
-    ParameterizedType ownerType = (type.getOwnerType() instanceof ParameterizedType)
+    var rawType = ClassName.get((Class<?>) type.getRawType());
+    var ownerType = (type.getOwnerType() instanceof ParameterizedType parameterizedType)
         && !Modifier.isStatic(((Class<?>) type.getRawType()).getModifiers())
-        ? (ParameterizedType) type.getOwnerType() : null;
-    List<TypeName> typeArguments = TypeName.list(type.getActualTypeArguments(), map);
+        ? parameterizedType : null;
+    var typeArguments = TypeName.list(type.getActualTypeArguments(), map);
     return (ownerType != null)
         ? get(ownerType, map).nestedClass(rawType.simpleName(), typeArguments)
         : new ParameterizedTypeName(null, rawType, typeArguments);

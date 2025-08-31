@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
 import static be.imgn.javapoet.Util.checkArgument;
@@ -44,7 +43,7 @@ public final class TypeVariableName extends TypeName {
     this.name = checkNotNull(name, "name == null");
     this.bounds = bounds;
 
-    for (TypeName bound : this.bounds) {
+    for (var bound : this.bounds) {
       checkArgument(!bound.isPrimitive() && bound != VOID, "invalid bound: %s", bound);
     }
   }
@@ -66,15 +65,14 @@ public final class TypeVariableName extends TypeName {
   }
 
   public TypeVariableName withBounds(List<? extends TypeName> bounds) {
-    ArrayList<TypeName> newBounds = new ArrayList<>();
-    newBounds.addAll(this.bounds);
+    var newBounds = new ArrayList<>(this.bounds);
     newBounds.addAll(bounds);
     return new TypeVariableName(name, newBounds, annotations);
   }
 
   private static TypeVariableName of(String name, List<TypeName> bounds) {
     // Strip java.lang.Object from bounds if it is present.
-    List<TypeName> boundsNoObject = new ArrayList<>(bounds);
+    var boundsNoObject = new ArrayList<>(bounds);
     boundsNoObject.remove(OBJECT);
     return new TypeVariableName(name, Collections.unmodifiableList(boundsNoObject));
   }
@@ -114,16 +112,16 @@ public final class TypeVariableName extends TypeName {
    */
   static TypeVariableName get(
       TypeVariable mirror, Map<TypeParameterElement, TypeVariableName> typeVariables) {
-    TypeParameterElement element = (TypeParameterElement) mirror.asElement();
-    TypeVariableName typeVariableName = typeVariables.get(element);
+    var element = (TypeParameterElement) mirror.asElement();
+    var typeVariableName = typeVariables.get(element);
     if (typeVariableName == null) {
       // Since the bounds field is public, we need to make it an unmodifiableList. But we control
       // the List that that wraps, which means we can change it before returning.
-      List<TypeName> bounds = new ArrayList<>();
-      List<TypeName> visibleBounds = Collections.unmodifiableList(bounds);
+      var bounds = new ArrayList<TypeName>();
+      var visibleBounds = Collections.unmodifiableList(bounds);
       typeVariableName = new TypeVariableName(element.getSimpleName().toString(), visibleBounds);
       typeVariables.put(element, typeVariableName);
-      for (TypeMirror typeMirror : element.getBounds()) {
+      for (var typeMirror : element.getBounds()) {
         bounds.add(TypeName.get(typeMirror, typeVariables));
       }
       bounds.remove(OBJECT);
@@ -133,11 +131,11 @@ public final class TypeVariableName extends TypeName {
 
   /** Returns type variable equivalent to {@code element}. */
   public static TypeVariableName get(TypeParameterElement element) {
-    String name = element.getSimpleName().toString();
-    List<? extends TypeMirror> boundsMirrors = element.getBounds();
+    var name = element.getSimpleName().toString();
+    var boundsMirrors = element.getBounds();
 
-    List<TypeName> boundsTypeNames = new ArrayList<>();
-    for (TypeMirror typeMirror : boundsMirrors) {
+    var boundsTypeNames = new ArrayList<TypeName>();
+    for (var typeMirror : boundsMirrors) {
       boundsTypeNames.add(TypeName.get(typeMirror));
     }
 
@@ -152,13 +150,13 @@ public final class TypeVariableName extends TypeName {
   /** @see #get(java.lang.reflect.TypeVariable, Map) */
   static TypeVariableName get(java.lang.reflect.TypeVariable<?> type,
       Map<Type, TypeVariableName> map) {
-    TypeVariableName result = map.get(type);
+    var result = map.get(type);
     if (result == null) {
-      List<TypeName> bounds = new ArrayList<>();
-      List<TypeName> visibleBounds = Collections.unmodifiableList(bounds);
+      var bounds = new ArrayList<TypeName>();
+      var visibleBounds = Collections.unmodifiableList(bounds);
       result = new TypeVariableName(type.getName(), visibleBounds);
       map.put(type, result);
-      for (Type bound : type.getBounds()) {
+      for (var bound : type.getBounds()) {
         bounds.add(TypeName.get(bound, map));
       }
       bounds.remove(OBJECT);

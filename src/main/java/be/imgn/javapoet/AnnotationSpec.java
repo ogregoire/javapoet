@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import java.util.Objects;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -53,8 +51,8 @@ public final class AnnotationSpec {
   }
 
   void emit(CodeWriter codeWriter, boolean inline) throws IOException {
-    String whitespace = inline ? "" : "\n";
-    String memberSeparator = inline ? ", " : ",\n";
+    var whitespace = inline ? "" : "\n";
+    var memberSeparator = inline ? ", " : ",\n";
     if (members.isEmpty()) {
       // @Singleton
       codeWriter.emit("@$T", type);
@@ -74,9 +72,8 @@ public final class AnnotationSpec {
       //   )
       codeWriter.emit("@$T(" + whitespace, type);
       codeWriter.indent(2);
-      for (Iterator<Map.Entry<String, List<CodeBlock>>> i
-          = members.entrySet().iterator(); i.hasNext(); ) {
-        Map.Entry<String, List<CodeBlock>> entry = i.next();
+      for (var i = members.entrySet().iterator(); i.hasNext(); ) {
+        var entry = i.next();
         codeWriter.emit("$L = ", entry.getKey());
         emitAnnotationValues(codeWriter, whitespace, memberSeparator, entry.getValue());
         if (i.hasNext()) codeWriter.emit(memberSeparator);
@@ -97,8 +94,8 @@ public final class AnnotationSpec {
 
     codeWriter.emit("{" + whitespace);
     codeWriter.indent(2);
-    boolean first = true;
-    for (CodeBlock codeBlock : values) {
+    var first = true;
+    for (var codeBlock : values) {
       if (!first) codeWriter.emit(memberSeparator);
       codeWriter.emit(codeBlock);
       first = false;
@@ -112,12 +109,12 @@ public final class AnnotationSpec {
   }
 
   public static AnnotationSpec get(Annotation annotation, boolean includeDefaultValues) {
-    Builder builder = builder(annotation.annotationType());
+    var builder = builder(annotation.annotationType());
     try {
-      Method[] methods = annotation.annotationType().getDeclaredMethods();
+      var methods = annotation.annotationType().getDeclaredMethods();
       Arrays.sort(methods, Comparator.comparing(Method::getName));
-      for (Method method : methods) {
-        Object value = method.invoke(annotation);
+      for (var method : methods) {
+        var value = method.invoke(annotation);
         if (!includeDefaultValues) {
           if (Objects.deepEquals(value, method.getDefaultValue())) {
             continue;
@@ -129,8 +126,8 @@ public final class AnnotationSpec {
           }
           continue;
         }
-        if (value instanceof Annotation) {
-          builder.addMember(method.getName(), "$L", get((Annotation) value));
+        if (value instanceof Annotation annotationValue) {
+          builder.addMember(method.getName(), "$L", get(annotationValue));
           continue;
         }
         builder.addMemberForValue(method.getName(), value);
@@ -142,12 +139,12 @@ public final class AnnotationSpec {
   }
 
   public static AnnotationSpec get(AnnotationMirror annotation) {
-    TypeElement element = (TypeElement) annotation.getAnnotationType().asElement();
-    AnnotationSpec.Builder builder = AnnotationSpec.builder(ClassName.get(element));
-    Visitor visitor = new Visitor(builder);
-    for (ExecutableElement executableElement : annotation.getElementValues().keySet()) {
-      String name = executableElement.getSimpleName().toString();
-      AnnotationValue value = annotation.getElementValues().get(executableElement);
+    var element = (TypeElement) annotation.getAnnotationType().asElement();
+    var builder = AnnotationSpec.builder(ClassName.get(element));
+    var visitor = new Visitor(builder);
+    for (var executableElement : annotation.getElementValues().keySet()) {
+      var name = executableElement.getSimpleName().toString();
+      var value = annotation.getElementValues().get(executableElement);
       value.accept(visitor, name);
     }
     return builder.build();
@@ -163,8 +160,8 @@ public final class AnnotationSpec {
   }
 
   public Builder toBuilder() {
-    Builder builder = new Builder(type);
-    for (Map.Entry<String, List<CodeBlock>> entry : members.entrySet()) {
+    var builder = new Builder(type);
+    for (var entry : members.entrySet()) {
       builder.members.put(entry.getKey(), new ArrayList<>(entry.getValue()));
     }
     return builder;
@@ -182,9 +179,9 @@ public final class AnnotationSpec {
   }
 
   @Override public String toString() {
-    StringBuilder out = new StringBuilder();
+    var out = new StringBuilder();
     try {
-      CodeWriter codeWriter = new CodeWriter(out);
+      var codeWriter = new CodeWriter(out);
       codeWriter.emit("$L", this);
       return out.toString();
     } catch (IOException e) {
@@ -206,7 +203,7 @@ public final class AnnotationSpec {
     }
 
     public Builder addMember(String name, CodeBlock codeBlock) {
-      List<CodeBlock> values = members.computeIfAbsent(name, k -> new ArrayList<>());
+      var values = members.computeIfAbsent(name, k -> new ArrayList<>());
       values.add(codeBlock);
       return this;
     }
@@ -220,29 +217,26 @@ public final class AnnotationSpec {
       checkNotNull(memberName, "memberName == null");
       checkNotNull(value, "value == null, constant non-null value expected for %s", memberName);
       checkArgument(SourceVersion.isName(memberName), "not a valid name: %s", memberName);
-      if (value instanceof Class<?>) {
-        return addMember(memberName, "$T.class", value);
-      }
-      if (value instanceof Enum) {
-        return addMember(memberName, "$T.$L", value.getClass(), ((Enum<?>) value).name());
-      }
-      if (value instanceof String) {
-        return addMember(memberName, "$S", value);
-      }
-      if (value instanceof Float) {
-        return addMember(memberName, "$Lf", value);
-      }
-      if (value instanceof Long) {
-        return addMember(memberName, "$LL", value);
-      }
-      if (value instanceof Character) {
-        return addMember(memberName, "'$L'", characterLiteralWithoutSingleQuotes((char) value));
-      }
-      return addMember(memberName, "$L", value);
+      return switch (value) {
+        case Class<?> classValue ->
+          addMember(memberName, "$T.class", classValue);
+        case Enum<?> enumValue ->
+          addMember(memberName, "$T.$L", value.getClass(), enumValue.name());
+        case String stringValue ->
+          addMember(memberName, "$S", stringValue);
+        case Float floatValue ->
+          addMember(memberName, "$Lf", floatValue);
+        case Long longValue ->
+          addMember(memberName, "$LL", longValue);
+        case Character characterValue ->
+          addMember(memberName, "'$L'", characterLiteralWithoutSingleQuotes(characterValue));
+        default ->
+          addMember(memberName, "$L", value);
+      };
     }
 
     public AnnotationSpec build() {
-      for (String name : members.keySet()) {
+      for (var name : members.keySet()) {
         checkNotNull(name, "name == null");
         checkArgument(SourceVersion.isName(name), "not a valid name: %s", name);
       }
@@ -278,7 +272,7 @@ public final class AnnotationSpec {
     }
 
     @Override public Builder visitArray(List<? extends AnnotationValue> values, String name) {
-      for (AnnotationValue value : values) {
+      for (var value : values) {
         value.accept(this, name);
       }
       return builder;

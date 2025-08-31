@@ -40,7 +40,7 @@ public final class ClassNameTest {
   }
 
   @Test public void bestGuessNonAscii() {
-    ClassName className = ClassName.bestGuess(
+    var className = ClassName.bestGuess(
         "com.\ud835\udc1andro\ud835\udc22d.\ud835\udc00ctiv\ud835\udc22ty");
     assertEquals("com.\ud835\udc1andro\ud835\udc22d", className.packageName());
     assertEquals("\ud835\udc00ctiv\ud835\udc22ty", className.simpleName());
@@ -91,10 +91,10 @@ public final class ClassNameTest {
   }
 
   @Test public void createNestedClass() {
-    ClassName foo = ClassName.get("com.example", "Foo");
-    ClassName bar = foo.nestedClass("Bar");
+    var foo = ClassName.get("com.example", "Foo");
+    var bar = foo.nestedClass("Bar");
     assertThat(bar).isEqualTo(ClassName.get("com.example", "Foo", "Bar"));
-    ClassName baz = bar.nestedClass("Baz");
+    var baz = bar.nestedClass("Baz");
     assertThat(baz).isEqualTo(ClassName.get("com.example", "Foo", "Bar", "Baz"));
   }
 
@@ -103,12 +103,12 @@ public final class ClassNameTest {
   }
 
   @Test public void classNameFromTypeElement() {
-    Elements elements = compilationRule.getElements();
-    TypeElement object = elements.getTypeElement(Object.class.getCanonicalName());
+    var elements = compilationRule.getElements();
+    var object = elements.getTypeElement(Object.class.getCanonicalName());
     assertThat(ClassName.get(object).toString()).isEqualTo("java.lang.Object");
-    TypeElement outer = elements.getTypeElement($Outer.class.getCanonicalName());
+    var outer = elements.getTypeElement($Outer.class.getCanonicalName());
     assertThat(ClassName.get(outer).toString()).isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer");
-    TypeElement inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
+    var inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
     assertThat(ClassName.get(inner).toString()).isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer.$Inner");
   }
 
@@ -117,26 +117,26 @@ public final class ClassNameTest {
    * {@link TypeElement#getKind()}. Test to confirm that we don't use that API.
    */
   @Test public void classNameFromTypeElementDoesntUseGetKind() {
-    Elements elements = compilationRule.getElements();
-    TypeElement object = elements.getTypeElement(Object.class.getCanonicalName());
+    var elements = compilationRule.getElements();
+    var object = elements.getTypeElement(Object.class.getCanonicalName());
     assertThat(ClassName.get(preventGetKind(object)).toString())
         .isEqualTo("java.lang.Object");
-    TypeElement outer = elements.getTypeElement($Outer.class.getCanonicalName());
+    var outer = elements.getTypeElement($Outer.class.getCanonicalName());
     assertThat(ClassName.get(preventGetKind(outer)).toString())
         .isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer");
-    TypeElement inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
+    var inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
     assertThat(ClassName.get(preventGetKind(inner)).toString())
         .isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer.$Inner");
   }
 
   /** Returns a new instance like {@code object} that throws on {@code getKind()}. */
   private TypeElement preventGetKind(TypeElement object) {
-    TypeElement spy = Mockito.spy(object);
+    var spy = Mockito.spy(object);
     when(spy.getKind()).thenThrow(new AssertionError());
     when(spy.getEnclosingElement()).thenAnswer(invocation -> {
-      Object enclosingElement = invocation.callRealMethod();
-      return enclosingElement instanceof TypeElement
-          ? preventGetKind((TypeElement) enclosingElement)
+      var enclosingElement = invocation.callRealMethod();
+      return enclosingElement instanceof TypeElement typeElement
+          ? preventGetKind(typeElement)
           : enclosingElement;
     });
     return spy;
