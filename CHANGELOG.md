@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+JavaPoet 1.4.0
+--------------
+
+ * Change: Change the package name to `be.imgn.javapoet`.
+
 JavaPoet 1.13.0 *(2020-06-18)*
 -----------------------------
 
@@ -298,7 +303,7 @@ JavaWriter 2.0.1 *(2013-06-17)*
 JavaWriter 2.0.0 *(2013-06-06)*
 -------------------------------
 
- * Package name is now `com.squareup.javawriter`.
+ * Package name is now `be.imgn.javawriter`.
  * Support declaring `throws` clause on methods.
 
 

@@ -44,4 +44,4 @@ alias mvn-release='mvn clean source:jar javadoc:jar verify && mvn clean release:
 
 Refer to the [GPG Keys][gpg_keys] guide if you need to set up GPG keys for signing.
 
- [gpg_keys]: https://square.github.io/okio/releasing/#prerequisite-gpg-keys
+ [gpg_keys]: https://ogregoire.github.io/okio/releasing/#prerequisite-gpg-keys

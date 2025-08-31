@@ -9,13 +9,13 @@
     <version>7</version>
   </parent>
 
-  <groupId>com.squareup</groupId>
+  <groupId>be.imgn</groupId>
   <artifactId>javapoet</artifactId>
   <version>1.14.0-SNAPSHOT</version>
 
   <name>JavaPoet</name>
   <description>Use beautiful Java code to generate beautiful Java code.</description>
-  <url>http://github.com/square/javapoet/</url>
+  <url>http://github.com/ogregoire/javapoet/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,15 +27,15 @@
   </properties>
 
   <scm>
-    <url>http://github.com/square/javapoet/</url>
-    <connection>scm:git:git://github.com/square/javapoet.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/square/javapoet.git</developerConnection>
+    <url>http://github.com/ogregoire/javapoet/</url>
+    <connection>scm:git:git://github.com/ogregoire/javapoet.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/ogregoire/javapoet.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>http://github.com/square/javapoet/issues</url>
+    <url>http://github.com/ogregoire/javapoet/issues</url>
   </issueManagement>
 
   <licenses>
@@ -148,7 +148,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>com.squareup.javapoet</Automatic-Module-Name>
+              <Automatic-Module-Name>be.imgn.javapoet</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>

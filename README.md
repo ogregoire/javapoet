@@ -7,36 +7,25 @@ Source file generation can be useful when doing things such as annotation proces
 with metadata files (e.g., database schemas, protocol formats). By generating code, you eliminate
 the need to write boilerplate while also keeping a single source of truth for the metadata.
 
+Fork
+----
 
-Deprecated
-----------
+Following the deprecation of JavaPoet by Square, this project aims to keep JavaPoet alive and
+provide support for this library with the latest Java language features.
 
-As of 2020-10-10, Square's JavaPoet project is deprecated. We're proud of our work but we haven't
-kept up on maintaining it.
-
-If you'd like an alternative that supports the latest Java language features, one option is
-[Palantir's JavaPoet](https://github.com/palantir/javapoet).
-
-To switch to that project, you'll need new Maven coordinates:
+To switch project, you'll need to update the Maven dependency:
 
 ```diff
 - javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
-+ javapoet = { module = "com.palantir.javapoet:javapoet", version = "0.5.0" }
++ javapoet = { module = "be.imgn:javapoet", version = "1.14.0" }
 ```
 
-And new imports:
+And you'll need to update the new imports as well:
 
 ```
 sed -i "" \
-  's/com.squareup.javapoet.\([A-Za-z]*\)/com.palantir.javapoet.\1/g' \
+  's/com.squareup.javapoet.\([A-Za-z]*\)/be.imgn.javapoet.\1/g' \
   `find . -name "*.kt" -or -name "*.java"`
-```
-
-And you might need to track some API changes where fields became functions:
-
-```diff
-- javaFile.packageName
-+ javaFile.packageName()
 ```
 
 ### Example
@@ -921,14 +910,14 @@ Download
 Download [the latest .jar][dl] or depend via Maven:
 ```xml
 <dependency>
-  <groupId>com.squareup</groupId>
+  <groupId>be.imgn</groupId>
   <artifactId>javapoet</artifactId>
   <version>1.13.0</version>
 </dependency>
 ```
 or Gradle:
 ```groovy
-compile 'com.squareup:javapoet:1.13.0'
+compile 'be.imgn:javapoet:1.13.0'
 ```
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
@@ -967,8 +956,8 @@ JavaWriter continues to be available in [GitHub][javawriter] and [Maven Central]
 
  [dl]: https://search.maven.org/remote_content?g=com.squareup&a=javapoet&v=LATEST
  [snap]: https://oss.sonatype.org/content/repositories/snapshots/com/squareup/javapoet/
- [javadoc]: https://square.github.io/javapoet/1.x/javapoet/
- [javawriter]: https://github.com/square/javapoet/tree/javawriter_2
+ [javadoc]: https://ogregoire.github.io/javapoet/1.x/javapoet/
+ [javawriter]: https://github.com/ogregoire/javapoet/tree/javawriter_2
  [javawriter_maven]: https://search.maven.org/#artifactdetails%7Ccom.squareup%7Cjavawriter%7C2.5.1%7Cjar
  [formatter]: https://developer.android.com/reference/java/util/Formatter.html
  [modifier]: https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/Modifier.html
