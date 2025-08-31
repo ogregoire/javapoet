@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.lang.model.element.Modifier;
 import javax.tools.DiagnosticCollector;
@@ -105,7 +106,7 @@ public class FileReadingTest {
     CompilationTask task = compiler.getTask(null, 
         fileManager,
         diagnosticCollector,
-        Collections.emptySet(),
+        Set.of("-proc:full"),
         Collections.emptySet(),
         Collections.singleton(javaFile.toJavaFileObject()));
     

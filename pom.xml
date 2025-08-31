@@ -3,12 +3,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
-
   <groupId>be.imgn</groupId>
   <artifactId>javapoet</artifactId>
   <version>1.14.0-SNAPSHOT</version>
@@ -19,10 +13,10 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <java.version>1.8</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
     <junit.version>4.13.2</junit.version>
     <truth.version>1.4.4</truth.version>
+    <mockito.version>5.19.0</mockito.version>
     <compile-testing.version>0.21.0</compile-testing.version>
   </properties>
 
@@ -72,19 +66,19 @@
     <dependency>
       <groupId>com.google.jimfs</groupId>
       <artifactId>jimfs</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.11.0</version>
+      <version>5.19.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jdt.core.compiler</groupId>
+      <groupId>org.eclipse.jdt</groupId>
       <artifactId>ecj</artifactId>
-      <version>4.6.1</version>
+      <version>3.42.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -94,25 +88,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.12.1</version>
+        <version>3.14.0</version>
         <configuration>
-          <compilerId>javac-with-errorprone</compilerId>
-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <proc>full</proc>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-compiler-javac-errorprone</artifactId>
-            <version>2.8.2</version>
-          </dependency>
-          <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_core</artifactId>
-            <version>2.3.1</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <plugin>
@@ -153,6 +132,37 @@
           </archive>
         </configuration>
       </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>properties</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>properties</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.5.3</version>
+            <configuration>
+                <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+            </configuration>
+        </plugin>
 
     </plugins>
   </build>
