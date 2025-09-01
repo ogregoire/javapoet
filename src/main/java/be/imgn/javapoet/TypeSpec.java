@@ -69,17 +69,17 @@ public final class TypeSpec {
     this.name = builder.name;
     this.anonymousTypeArguments = builder.anonymousTypeArguments;
     this.javadoc = builder.javadoc.build();
-    this.annotations = Util.immutableList(builder.annotations);
+    this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
-    this.typeVariables = Util.immutableList(builder.typeVariables);
+    this.typeVariables = List.copyOf(builder.typeVariables);
     this.superclass = builder.superclass;
-    this.superinterfaces = Util.immutableList(builder.superinterfaces);
+    this.superinterfaces = List.copyOf(builder.superinterfaces);
     this.enumConstants = Util.immutableMap(builder.enumConstants);
-    this.fieldSpecs = Util.immutableList(builder.fieldSpecs);
+    this.fieldSpecs = List.copyOf(builder.fieldSpecs);
     this.staticBlock = builder.staticBlock.build();
     this.initializerBlock = builder.initializerBlock.build();
-    this.methodSpecs = Util.immutableList(builder.methodSpecs);
-    this.typeSpecs = Util.immutableList(builder.typeSpecs);
+    this.methodSpecs = List.copyOf(builder.methodSpecs);
+    this.typeSpecs = List.copyOf(builder.typeSpecs);
     this.alwaysQualifiedNames = Util.immutableSet(builder.alwaysQualifiedNames);
 
     nestedTypesSimpleNames = new HashSet<>(builder.typeSpecs.size());
@@ -89,7 +89,7 @@ public final class TypeSpec {
       originatingElementsMutable.addAll(typeSpec.originatingElements);
     }
 
-    this.originatingElements = Util.immutableList(originatingElementsMutable);
+    this.originatingElements = List.copyOf(originatingElementsMutable);
   }
 
   /**
@@ -203,7 +203,7 @@ public final class TypeSpec {
         }
         codeWriter.emit(" {\n");
       } else if (anonymousTypeArguments != null) {
-        var supertype = !superinterfaces.isEmpty() ? superinterfaces.get(0) : superclass;
+        var supertype = !superinterfaces.isEmpty() ? superinterfaces.getFirst() : superclass;
         codeWriter.emit("new $T(", supertype);
         codeWriter.emit(anonymousTypeArguments);
         codeWriter.emit(") {\n");
@@ -366,28 +366,28 @@ public final class TypeSpec {
 
   public enum Kind {
     CLASS(
-        Collections.emptySet(),
-        Collections.emptySet(),
-        Collections.emptySet(),
-        Collections.emptySet()),
+        Set.of(),
+        Set.of(),
+        Set.of(),
+        Set.of()),
 
     INTERFACE(
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)),
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT)),
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC)),
-        Util.immutableSet(Collections.singletonList(Modifier.STATIC))),
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)),
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.ABSTRACT)),
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC)),
+        Util.immutableSet(List.of(Modifier.STATIC))),
 
     ENUM(
-        Collections.emptySet(),
-        Collections.emptySet(),
-        Collections.emptySet(),
-        Collections.singleton(Modifier.STATIC)),
+        Set.of(),
+        Set.of(),
+        Set.of(),
+        Set.of(Modifier.STATIC)),
 
     ANNOTATION(
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)),
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT)),
-        Util.immutableSet(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC)),
-        Util.immutableSet(Collections.singletonList(Modifier.STATIC)));
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)),
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.ABSTRACT)),
+        Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC)),
+        Util.immutableSet(Set.of(Modifier.STATIC)));
 
     private final Set<Modifier> implicitFieldModifiers;
     private final Set<Modifier> implicitMethodModifiers;

@@ -19,7 +19,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -341,9 +340,9 @@ public final class MethodSpecTest {
       .addException(timeoutException)
       .addException(ioException)
       .build();
-    assertThat(methodSpec.exceptions).isEqualTo(Arrays.asList(ioException, timeoutException));
+    assertThat(methodSpec.exceptions).isEqualTo(List.of(ioException, timeoutException));
     assertThat(methodSpec.toBuilder().addException(ioException).build().exceptions)
-      .isEqualTo(Arrays.asList(ioException, timeoutException));
+      .isEqualTo(List.of(ioException, timeoutException));
   }
 
   @Test public void nullIsNotAValidMethodName() {

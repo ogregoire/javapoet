@@ -40,7 +40,7 @@ public final class ParameterSpec {
 
   private ParameterSpec(Builder builder) {
     this.name = checkNotNull(builder.name, "name == null");
-    this.annotations = Util.immutableList(builder.annotations);
+    this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
     this.type = checkNotNull(builder.type, "type == null");
     this.javadoc = builder.javadoc.build();

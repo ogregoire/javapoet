@@ -56,10 +56,10 @@ public final class AnnotationSpec {
     if (members.isEmpty()) {
       // @Singleton
       codeWriter.emit("@$T", type);
-    } else if (members.size() == 1 && members.containsKey("value")) {
+    } else if (members.size() == 1 && members.containsKey(VALUE)) {
       // @Named("foo")
       codeWriter.emit("@$T(", type);
-      emitAnnotationValues(codeWriter, whitespace, memberSeparator, members.get("value"));
+      emitAnnotationValues(codeWriter, whitespace, memberSeparator, members.get(VALUE));
       codeWriter.emit(")");
     } else {
       // Inline:
@@ -87,7 +87,7 @@ public final class AnnotationSpec {
       String memberSeparator, List<CodeBlock> values) throws IOException {
     if (values.size() == 1) {
       codeWriter.indent(2);
-      codeWriter.emit(values.get(0));
+      codeWriter.emit(values.getFirst());
       codeWriter.unindent(2);
       return;
     }

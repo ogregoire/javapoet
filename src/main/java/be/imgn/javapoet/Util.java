@@ -40,7 +40,7 @@ final class Util {
     var result = new LinkedHashMap<K, List<V>>();
     for (var entry : multimap.entrySet()) {
       if (entry.getValue().isEmpty()) continue;
-      result.put(entry.getKey(), immutableList(entry.getValue()));
+      result.put(entry.getKey(), List.copyOf(entry.getValue()));
     }
     return Collections.unmodifiableMap(result);
   }

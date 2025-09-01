@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.TypeParameterElement;
 
+import static be.imgn.javapoet.ClassName.OBJECT;
 import static be.imgn.javapoet.Util.checkArgument;
 
 public final class WildcardTypeName extends TypeName {
@@ -38,8 +39,8 @@ public final class WildcardTypeName extends TypeName {
   private WildcardTypeName(List<TypeName> upperBounds, List<TypeName> lowerBounds,
       List<AnnotationSpec> annotations) {
     super(annotations);
-    this.upperBounds = Util.immutableList(upperBounds);
-    this.lowerBounds = Util.immutableList(lowerBounds);
+    this.upperBounds = List.copyOf(upperBounds);
+    this.lowerBounds = List.copyOf(lowerBounds);
 
     checkArgument(this.upperBounds.size() == 1, "unexpected extends bounds: %s", upperBounds);
     for (var upperBound : this.upperBounds) {
@@ -62,11 +63,11 @@ public final class WildcardTypeName extends TypeName {
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
     if (lowerBounds.size() == 1) {
-      return out.emit("? super $T", lowerBounds.get(0));
+      return out.emit("? super $T", lowerBounds.getFirst());
     }
-    return upperBounds.get(0).equals(TypeName.OBJECT)
+    return upperBounds.getFirst().equals(OBJECT)
         ? out.emit("?")
-        : out.emit("? extends $T", upperBounds.get(0));
+        : out.emit("? extends $T", upperBounds.getFirst());
   }
 
   /**

@@ -15,11 +15,11 @@
  */
 package be.imgn.javapoet;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import static javax.lang.model.util.ElementFilter.fieldsIn;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.testing.compile.JavaFileObjects;
 import java.io.Serializable;
@@ -163,11 +163,10 @@ public abstract class AbstractTypesTest {
 
     var typeVariableName = (TypeVariableName) typeName.typeArguments.get(0);
 
-    try {
+    assertThatThrownBy(() -> {
       typeVariableName.bounds.set(0, null);
-      fail("Expected UnsupportedOperationException");
-    } catch (UnsupportedOperationException expected) {
-    }
+    })
+      .isInstanceOf(UnsupportedOperationException.class);
 
     assertThat(typeVariableName)
       .hasToString("T");
@@ -205,11 +204,10 @@ public abstract class AbstractTypesTest {
   }
 
   @Test public void getNullTypeMirror() {
-    try {
+    assertThatThrownBy(() -> {
       TypeName.get(getTypes().getNullType());
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    })
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test public void parameterizedType() throws Exception {
@@ -280,7 +278,7 @@ public abstract class AbstractTypesTest {
     assertThat(TypeName.VOID.box()).isEqualTo(ClassName.get(Void.class));
     assertThat(ClassName.get(Integer.class).box()).isEqualTo(ClassName.get(Integer.class));
     assertThat(ClassName.get(Void.class).box()).isEqualTo(ClassName.get(Void.class));
-    assertThat(TypeName.OBJECT.box()).isEqualTo(TypeName.OBJECT);
+    assertThat(ClassName.OBJECT.box()).isEqualTo(ClassName.OBJECT);
     assertThat(ClassName.get(String.class).box()).isEqualTo(ClassName.get(String.class));
   }
 
@@ -289,15 +287,13 @@ public abstract class AbstractTypesTest {
     assertThat(TypeName.VOID).isEqualTo(TypeName.VOID.unbox());
     assertThat(ClassName.get(Integer.class).unbox()).isEqualTo(TypeName.INT.unbox());
     assertThat(ClassName.get(Void.class).unbox()).isEqualTo(TypeName.VOID.unbox());
-    try {
-      TypeName.OBJECT.unbox();
-      fail();
-    } catch (UnsupportedOperationException expected) {
-    }
-    try {
+    assertThatThrownBy(() -> {
+      ClassName.OBJECT.unbox();
+    })
+      .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(() -> {
       ClassName.get(String.class).unbox();
-      fail();
-    } catch (UnsupportedOperationException expected) {
-    }
+    })
+      .isInstanceOf(UnsupportedOperationException.class);
   }
 }

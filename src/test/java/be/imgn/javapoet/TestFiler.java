@@ -21,10 +21,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.tools.FileObject;
@@ -66,7 +63,7 @@ final class TestFiler implements Filer {
       CharSequence name, Element... originatingElements) throws IOException {
     var relative = name.toString().replace(".", separator) + ".java"; // Assumes well-formed.
     var path = fileSystemRoot.resolve(relative);
-    originatingElementsMap.put(path, Util.immutableSet(Arrays.asList(originatingElements)));
+    originatingElementsMap.put(path, Util.immutableSet(List.of(originatingElements)));
     return new Source(path);
   }
 

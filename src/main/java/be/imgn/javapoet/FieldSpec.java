@@ -41,7 +41,7 @@ public final class FieldSpec {
     this.type = checkNotNull(builder.type, "type == null");
     this.name = checkNotNull(builder.name, "name == null");
     this.javadoc = builder.javadoc.build();
-    this.annotations = Util.immutableList(builder.annotations);
+    this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
     this.initializer = (builder.initializer == null)
         ? CodeBlock.builder().build()

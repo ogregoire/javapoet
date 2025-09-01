@@ -18,7 +18,6 @@ package be.imgn.javapoet;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import java.util.Map;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeVariable;
 
+import static be.imgn.javapoet.ClassName.OBJECT;
 import static be.imgn.javapoet.Util.checkArgument;
 import static be.imgn.javapoet.Util.checkNotNull;
 
@@ -61,7 +61,7 @@ public final class TypeVariableName extends TypeName {
   }
 
   public TypeVariableName withBounds(TypeName... bounds) {
-    return withBounds(Arrays.asList(bounds));
+    return withBounds(List.of(bounds));
   }
 
   public TypeVariableName withBounds(List<? extends TypeName> bounds) {
@@ -89,7 +89,7 @@ public final class TypeVariableName extends TypeName {
 
   /** Returns type variable named {@code name} with {@code bounds}. */
   public static TypeVariableName get(String name, TypeName... bounds) {
-    return TypeVariableName.of(name, Arrays.asList(bounds));
+    return TypeVariableName.of(name, List.of(bounds));
   }
 
   /** Returns type variable named {@code name} with {@code bounds}. */

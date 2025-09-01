@@ -247,7 +247,7 @@ public final class JavaFile {
       @Override public String getCharContent(boolean ignoreEncodingErrors) {
         return JavaFile.this.toString();
       }
-      @Override public InputStream openInputStream() throws IOException {
+      @Override public InputStream openInputStream() {
         return new ByteArrayInputStream(getCharContent(true).getBytes(UTF_8));
       }
       @Override public long getLastModified() {

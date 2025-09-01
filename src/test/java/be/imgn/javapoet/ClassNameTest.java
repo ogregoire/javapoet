@@ -188,7 +188,7 @@ public final class ClassNameTest {
 
   @Test
   public void reflectionName() {
-    assertThat(TypeName.OBJECT.reflectionName())
+    assertThat(ClassName.OBJECT.reflectionName())
       .isEqualTo("java.lang.Object");
     assertThat(ClassName.get(Thread.State.class).reflectionName())
       .isEqualTo("java.lang.Thread$State");
@@ -204,7 +204,7 @@ public final class ClassNameTest {
 
   @Test
   public void canonicalName() {
-    assertThat(TypeName.OBJECT.canonicalName())
+    assertThat(ClassName.OBJECT.canonicalName())
       .isEqualTo("java.lang.Object");
     assertThat(ClassName.get(Thread.State.class).canonicalName())
       .isEqualTo("java.lang.Thread.State");

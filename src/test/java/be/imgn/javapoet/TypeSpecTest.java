@@ -1718,9 +1718,10 @@ public final class TypeSpecTest {
     var type = TypeSpec.classBuilder("Taco")
         .build();
     assertThat(type)
-      .hasToString(""
-        + "class Taco {\n"
-        + "}\n");
+      .hasToString("""
+        class Taco {
+        }
+        """);
   }
 
   @Test public void anonymousClassToString() throws Exception {
@@ -1903,7 +1904,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleAnnotationAddition() {
     var taco = TypeSpec.classBuilder("Taco")
-        .addAnnotations(Arrays.asList(
+        .addAnnotations(List.of(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unchecked")
                 .build(),
@@ -1932,7 +1933,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleFieldAddition() {
     var taco = TypeSpec.classBuilder("Taco")
-        .addFields(Arrays.asList(
+        .addFields(List.of(
             FieldSpec.builder(int.class, "ANSWER", Modifier.STATIC, Modifier.FINAL).build(),
             FieldSpec.builder(BigDecimal.class, "price", Modifier.PRIVATE).build()))
         .build();
@@ -1959,7 +1960,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleMethodAddition() {
     var taco = TypeSpec.classBuilder("Taco")
-        .addMethods(Arrays.asList(
+        .addMethods(List.of(
             MethodSpec.methodBuilder("getAnswer")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(int.class)
@@ -2021,7 +2022,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleSuperinterfaceAddition() {
     var taco = TypeSpec.classBuilder("Taco")
-        .addSuperinterfaces(Arrays.asList(
+        .addSuperinterfaces(List.of(
             TypeName.get(Serializable.class),
             TypeName.get(EventListener.class)))
         .build();
@@ -2054,7 +2055,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleTypeVariableAddition() {
     var location = TypeSpec.classBuilder("Location")
-        .addTypeVariables(Arrays.asList(
+        .addTypeVariables(List.of(
             TypeVariableName.get("T"),
             TypeVariableName.get("P", Number.class)))
         .build();
@@ -2078,7 +2079,7 @@ public final class TypeSpecTest {
 
   @Test public void multipleTypeAddition() {
     var taco = TypeSpec.classBuilder("Taco")
-        .addTypes(Arrays.asList(
+        .addTypes(List.of(
             TypeSpec.classBuilder("Topping").build(),
             TypeSpec.classBuilder("Sauce").build()))
         .build();

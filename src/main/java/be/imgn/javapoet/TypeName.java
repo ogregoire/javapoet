@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,16 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor8;
+
+import static be.imgn.javapoet.ClassName.BOXED_BOOLEAN;
+import static be.imgn.javapoet.ClassName.BOXED_BYTE;
+import static be.imgn.javapoet.ClassName.BOXED_CHAR;
+import static be.imgn.javapoet.ClassName.BOXED_DOUBLE;
+import static be.imgn.javapoet.ClassName.BOXED_FLOAT;
+import static be.imgn.javapoet.ClassName.BOXED_INT;
+import static be.imgn.javapoet.ClassName.BOXED_LONG;
+import static be.imgn.javapoet.ClassName.BOXED_SHORT;
+import static be.imgn.javapoet.ClassName.BOXED_VOID;
 
 /**
  * Any type in Java's type system, plus {@code void}. This class is an identifier for primitive
@@ -75,17 +84,6 @@ public class TypeName {
   public static final TypeName CHAR = new TypeName("char");
   public static final TypeName FLOAT = new TypeName("float");
   public static final TypeName DOUBLE = new TypeName("double");
-  public static final ClassName OBJECT = ClassName.get("java.lang", "Object");
-
-  private static final ClassName BOXED_VOID = ClassName.get("java.lang", "Void");
-  private static final ClassName BOXED_BOOLEAN = ClassName.get("java.lang", "Boolean");
-  private static final ClassName BOXED_BYTE = ClassName.get("java.lang", "Byte");
-  private static final ClassName BOXED_SHORT = ClassName.get("java.lang", "Short");
-  private static final ClassName BOXED_INT = ClassName.get("java.lang", "Integer");
-  private static final ClassName BOXED_LONG = ClassName.get("java.lang", "Long");
-  private static final ClassName BOXED_CHAR = ClassName.get("java.lang", "Character");
-  private static final ClassName BOXED_FLOAT = ClassName.get("java.lang", "Float");
-  private static final ClassName BOXED_DOUBLE = ClassName.get("java.lang", "Double");
 
   /** The name of this type if it is a keyword, or null. */
   private final String keyword;
@@ -100,7 +98,7 @@ public class TypeName {
 
   private TypeName(String keyword, List<AnnotationSpec> annotations) {
     this.keyword = keyword;
-    this.annotations = Util.immutableList(annotations);
+    this.annotations = List.copyOf(annotations);
   }
 
   // Package-private constructor to prevent third-party subclasses.
@@ -109,7 +107,7 @@ public class TypeName {
   }
 
   public final TypeName annotated(AnnotationSpec... annotations) {
-    return annotated(Arrays.asList(annotations));
+    return annotated(List.of(annotations));
   }
 
   public TypeName annotated(List<AnnotationSpec> annotations) {

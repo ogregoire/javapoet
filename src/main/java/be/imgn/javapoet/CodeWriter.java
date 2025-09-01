@@ -214,7 +214,7 @@ final class CodeWriter {
     emit(">");
   }
 
-  public void popTypeVariables(List<TypeVariableName> typeVariables) throws IOException {
+  public void popTypeVariables(List<TypeVariableName> typeVariables) {
     typeVariables.forEach(typeVariable -> currentTypeVariables.remove(typeVariable.name));
   }
 
@@ -453,7 +453,7 @@ final class CodeWriter {
    * Returns the class named {@code simpleName} when nested in the class at {@code stackDepth}.
    */
   private ClassName stackClassName(int stackDepth, String simpleName) {
-    var className = ClassName.get(packageName, typeSpecStack.get(0).name);
+    var className = ClassName.get(packageName, typeSpecStack.getFirst().name);
     for (var i = 1; i <= stackDepth; i++) {
       className = className.nestedClass(typeSpecStack.get(i).name);
     }

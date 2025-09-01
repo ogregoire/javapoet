@@ -134,7 +134,7 @@ final class LineWrapper {
   }
 
   private enum FlushType {
-    WRAP, SPACE, EMPTY;
+    WRAP, SPACE, EMPTY
   }
 
   /** A delegating {@link Appendable} that records info about the chars passing through it. */

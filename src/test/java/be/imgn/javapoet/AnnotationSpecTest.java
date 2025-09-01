@@ -21,6 +21,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -396,7 +397,7 @@ public final class AnnotationSpecTest {
             .addMember("value", "$S", "Foo");
 
     builder.members.clear();
-    builder.members.put("value", Arrays.asList(CodeBlock.of("$S", "Bar")));
+    builder.members.put("value", List.of(CodeBlock.of("$S", "Bar")));
 
     assertThat(builder.build())
       .hasToString("@java.lang.SuppressWarnings(\"Bar\")");

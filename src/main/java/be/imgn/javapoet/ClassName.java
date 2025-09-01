@@ -20,18 +20,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.SimpleElementVisitor8;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /** A fully-qualified class name for top-level and member classes. */
 public final class ClassName extends TypeName implements Comparable<ClassName> {
-  public static final ClassName OBJECT = ClassName.get(Object.class);
+
+  public static final ClassName OBJECT = ClassName.get("java.lang", "Object");
+
+  static final ClassName BOXED_VOID = ClassName.get("java.lang", "Void");
+  static final ClassName BOXED_BOOLEAN = ClassName.get("java.lang", "Boolean");
+  static final ClassName BOXED_BYTE = ClassName.get("java.lang", "Byte");
+  static final ClassName BOXED_SHORT = ClassName.get("java.lang", "Short");
+  static final ClassName BOXED_INT = ClassName.get("java.lang", "Integer");
+  static final ClassName BOXED_LONG = ClassName.get("java.lang", "Long");
+  static final ClassName BOXED_CHAR = ClassName.get("java.lang", "Character");
+  static final ClassName BOXED_FLOAT = ClassName.get("java.lang", "Float");
+  static final ClassName BOXED_DOUBLE = ClassName.get("java.lang", "Double");
 
   /** The name representing the default Java package. */
   private static final String NO_PACKAGE = "";
@@ -57,7 +67,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   private ClassName(String packageName, ClassName enclosingClassName, String simpleName,
       List<AnnotationSpec> annotations) {
     super(annotations);
-    this.packageName = Objects.requireNonNull(packageName, "packageName == null");
+    this.packageName = requireNonNull(packageName, "packageName == null");
     this.enclosingClassName = enclosingClassName;
     this.simpleName = simpleName;
     this.canonicalName = enclosingClassName != null
@@ -159,15 +169,15 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   }
 
   public static ClassName get(Class<?> clazz) {
-    checkNotNull(clazz, "clazz == null");
+    requireNonNull(clazz, "clazz == null");
     checkArgument(!clazz.isPrimitive(), "primitive types cannot be represented as a ClassName");
     checkArgument(!void.class.equals(clazz), "'void' type cannot be represented as a ClassName");
     checkArgument(!clazz.isArray(), "array types cannot be represented as a ClassName");
 
-    var anonymousSuffix = "";
+    var anonymousSuffix = new StringBuilder(40);
     while (clazz.isAnonymousClass()) {
       var lastDollar = clazz.getName().lastIndexOf('$');
-      anonymousSuffix = clazz.getName().substring(lastDollar) + anonymousSuffix;
+      anonymousSuffix.insert(0, clazz.getName().substring(lastDollar));
       clazz = clazz.getEnclosingClass();
     }
     var name = clazz.getSimpleName() + anonymousSuffix;
@@ -224,7 +234,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
 
   /** Returns the class name for {@code element}. */
   public static ClassName get(TypeElement element) {
-    checkNotNull(element, "element == null");
+    requireNonNull(element, "element == null");
     var simpleName = element.getSimpleName().toString();
 
     return element.getEnclosingElement().accept(new SimpleElementVisitor8<ClassName, Void>() {
@@ -252,7 +262,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
     var charsEmitted = false;
-    for (ClassName className : enclosingClasses()) {
+    for (var className : enclosingClasses()) {
       String simpleName;
       if (charsEmitted) {
         // We've already emitted an enclosing class. Emit as we go.

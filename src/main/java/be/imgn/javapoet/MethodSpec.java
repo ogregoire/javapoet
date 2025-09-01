@@ -60,20 +60,20 @@ public final class MethodSpec {
 
     this.name = checkNotNull(builder.name, "name == null");
     this.javadoc = builder.javadoc.build();
-    this.annotations = Util.immutableList(builder.annotations);
+    this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
-    this.typeVariables = Util.immutableList(builder.typeVariables);
+    this.typeVariables = List.copyOf(builder.typeVariables);
     this.returnType = builder.returnType;
-    this.parameters = Util.immutableList(builder.parameters);
+    this.parameters = List.copyOf(builder.parameters);
     this.varargs = builder.varargs;
-    this.exceptions = Util.immutableList(builder.exceptions);
+    this.exceptions = List.copyOf(builder.exceptions);
     this.defaultValue = builder.defaultValue;
     this.code = code;
   }
 
   private boolean lastParameterIsArray(List<ParameterSpec> parameters) {
     return !parameters.isEmpty()
-        && TypeName.asArray((parameters.get(parameters.size() - 1).type)) != null;
+        && TypeName.asArray((parameters.getLast().type)) != null;
   }
 
   void emit(CodeWriter codeWriter, String enclosingName, Set<Modifier> implicitModifiers)
