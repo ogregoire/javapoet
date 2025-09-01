@@ -125,9 +125,9 @@ public final class FileWritingTest {
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
     var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
     var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
-    assertThat(Files.exists(fooPath)).isTrue();
-    assertThat(Files.exists(barPath)).isTrue();
-    assertThat(Files.exists(bazPath)).isTrue();
+    assertThat(fooPath).exists();
+    assertThat(barPath).exists();
+    assertThat(bazPath).exists();
   }
 
   @Test public void filerPassesOriginatingElements() throws IOException {
@@ -164,7 +164,7 @@ public final class FileWritingTest {
     JavaFile.builder("foo", test).indent("\t").build().writeTo(filer);
 
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
-    assertThat(Files.exists(fooPath)).isTrue();
+    assertThat(fooPath).exists();
     var source = new String(Files.readAllBytes(fooPath));
 
     assertThat(source).isEqualTo("""

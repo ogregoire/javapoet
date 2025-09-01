@@ -26,15 +26,15 @@ public class FieldSpecTest {
   @Test public void equalsAndHashCode() {
     var a = FieldSpec.builder(int.class, "foo").build();
     var b = FieldSpec.builder(int.class, "foo").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b)
       .hasToString(b.toString());
     a = FieldSpec.builder(int.class, "FOO", Modifier.PUBLIC, Modifier.STATIC).build();
     b = FieldSpec.builder(int.class, "FOO", Modifier.PUBLIC, Modifier.STATIC).build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b)
       .hasToString(b.toString());
   }
 

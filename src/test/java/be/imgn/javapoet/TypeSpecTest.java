@@ -2518,20 +2518,24 @@ public final class TypeSpecTest {
   @Test public void equalsAndHashCode() {
     var a = TypeSpec.interfaceBuilder("taco").build();
     var b = TypeSpec.interfaceBuilder("taco").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = TypeSpec.classBuilder("taco").build();
     b = TypeSpec.classBuilder("taco").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = TypeSpec.enumBuilder("taco").addEnumConstant("SALSA").build();
     b = TypeSpec.enumBuilder("taco").addEnumConstant("SALSA").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = TypeSpec.annotationBuilder("taco").build();
     b = TypeSpec.annotationBuilder("taco").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
   }
 
   @Test public void classNameFactories() {

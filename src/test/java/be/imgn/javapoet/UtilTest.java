@@ -16,45 +16,57 @@
 package be.imgn.javapoet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class UtilTest {
-  @Test public void characterLiteral() {
-    assertThat("a").isEqualTo(Util.characterLiteralWithoutSingleQuotes('a'));
-    assertThat("b").isEqualTo(Util.characterLiteralWithoutSingleQuotes('b'));
-    assertThat("c").isEqualTo(Util.characterLiteralWithoutSingleQuotes('c'));
-    assertThat("%").isEqualTo(Util.characterLiteralWithoutSingleQuotes('%'));
-    // common escapes
-    assertThat("\\b").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\b'));
-    assertThat("\\t").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\t'));
-    assertThat("\\n").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\n'));
-    assertThat("\\f").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\f'));
-    assertThat("\\r").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\r'));
-    assertThat("\"").isEqualTo(Util.characterLiteralWithoutSingleQuotes('"'));
-    assertThat("\\'").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\''));
-    assertThat("\\\\").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\\'));
-    // octal escapes
-    assertThat("\\u0000").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\0'));
-    assertThat("\\u0007").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\7'));
-    assertThat("?").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\77'));
-    assertThat("\\u007f").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\177'));
-    assertThat("¿").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\277'));
-    assertThat("ÿ").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\377'));
-    // unicode escapes
-    assertThat("\\u0000").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u0000'));
-    assertThat("\\u0001").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u0001'));
-    assertThat("\\u0002").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u0002'));
-    assertThat("€").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u20AC'));
-    assertThat("☃").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2603'));
-    assertThat("♠").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2660'));
-    assertThat("♣").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2663'));
-    assertThat("♥").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2665'));
-    assertThat("♦").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2666'));
-    assertThat("✵").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u2735'));
-    assertThat("✺").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\u273A'));
-    assertThat("／").isEqualTo(Util.characterLiteralWithoutSingleQuotes('\uFF0F'));
+  @ParameterizedTest
+  @MethodSource("provideCharacterLiterals")
+  public void characterLiteral(String expected, char inputChar) {
+    assertThat(expected).isEqualTo(Util.characterLiteralWithoutSingleQuotes(inputChar));
+  }
+
+  private static List<Arguments> provideCharacterLiterals() {
+    return List.of(
+      // normal characters
+      Arguments.of("a", 'a'),
+      Arguments.of("b", 'b'),
+      Arguments.of("c", 'c'),
+      Arguments.of("%", '%'),
+      // common escapes
+      Arguments.of("\\b", '\b'),
+      Arguments.of("\\t", '\t'),
+      Arguments.of("\\n", '\n'),
+      Arguments.of("\\f", '\f'),
+      Arguments.of("\\r", '\r'),
+      Arguments.of("\"", '"'),
+      Arguments.of("\\'", '\''),
+      Arguments.of("\\\\", '\\'),
+      // octal escapes
+      Arguments.of("\\u0000", '\0'),
+      Arguments.of("\\u0007", '\7'),
+      Arguments.of("?", '\77'),
+      Arguments.of("\\u007f", '\177'),
+      Arguments.of("¿", '\277'),
+      Arguments.of("ÿ", '\377'),
+      // unicode escapes
+      Arguments.of("\\u0000", '\u0000'),
+      Arguments.of("\\u0001", '\u0001'),
+      Arguments.of("\\u0002", '\u0002'),
+      Arguments.of("€", '\u20AC'),
+      Arguments.of("☃", '\u2603'),
+      Arguments.of("♠", '\u2660'),
+      Arguments.of("♣", '\u2663'),
+      Arguments.of("♥", '\u2665'),
+      Arguments.of("♦", '\u2666'),
+      Arguments.of("✵", '\u2735'),
+      Arguments.of("✺", '\u273A'),
+      Arguments.of("／", '\uFF0F')
+    );
   }
 
   @Test public void stringLiteral() {

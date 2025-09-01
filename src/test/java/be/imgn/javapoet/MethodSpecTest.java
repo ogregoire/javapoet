@@ -258,18 +258,21 @@ public final class MethodSpecTest {
   @Test public void equalsAndHashCode() {
     var a = MethodSpec.constructorBuilder().build();
     var b = MethodSpec.constructorBuilder().build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = MethodSpec.methodBuilder("taco").build();
     b = MethodSpec.methodBuilder("taco").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     var classElement = getElement(Everything.class);
     var methodElement = getOnlyElement(methodsIn(classElement.getEnclosedElements()));
     a = MethodSpec.overriding(methodElement).build();
     b = MethodSpec.overriding(methodElement).build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
   }
 
   @Test public void withoutParameterJavaDoc() {
@@ -340,9 +343,10 @@ public final class MethodSpecTest {
       .addException(timeoutException)
       .addException(ioException)
       .build();
-    assertThat(methodSpec.exceptions).isEqualTo(List.of(ioException, timeoutException));
+    assertThat(methodSpec.exceptions)
+      .containsExactly(ioException, timeoutException);
     assertThat(methodSpec.toBuilder().addException(ioException).build().exceptions)
-      .isEqualTo(List.of(ioException, timeoutException));
+      .containsExactly(ioException, timeoutException);
   }
 
   @Test public void nullIsNotAValidMethodName() {

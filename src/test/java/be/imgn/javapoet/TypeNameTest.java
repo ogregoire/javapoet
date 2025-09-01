@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -108,16 +111,24 @@ public class TypeNameTest {
         TestGeneric.class.getCanonicalName() + ".NestedNonGeneric");
   }
 
-  @Test public void equalsAndHashCodePrimitive() {
-    assertEqualsHashCodeAndToString(TypeName.BOOLEAN, TypeName.BOOLEAN);
-    assertEqualsHashCodeAndToString(TypeName.BYTE, TypeName.BYTE);
-    assertEqualsHashCodeAndToString(TypeName.CHAR, TypeName.CHAR);
-    assertEqualsHashCodeAndToString(TypeName.DOUBLE, TypeName.DOUBLE);
-    assertEqualsHashCodeAndToString(TypeName.FLOAT, TypeName.FLOAT);
-    assertEqualsHashCodeAndToString(TypeName.INT, TypeName.INT);
-    assertEqualsHashCodeAndToString(TypeName.LONG, TypeName.LONG);
-    assertEqualsHashCodeAndToString(TypeName.SHORT, TypeName.SHORT);
-    assertEqualsHashCodeAndToString(TypeName.VOID, TypeName.VOID);
+  @ParameterizedTest
+  @MethodSource("providePrimitiveTypes")
+  public void equalsAndHashCodePrimitive(TypeName primitiveType) {
+    assertEqualsHashCodeAndToString(primitiveType, primitiveType);
+  }
+
+  private static List<Arguments> providePrimitiveTypes() {
+    return List.of(
+      Arguments.of(TypeName.BOOLEAN),
+      Arguments.of(TypeName.BYTE),
+      Arguments.of(TypeName.CHAR),
+      Arguments.of(TypeName.DOUBLE),
+      Arguments.of(TypeName.FLOAT),
+      Arguments.of(TypeName.INT),
+      Arguments.of(TypeName.LONG),
+      Arguments.of(TypeName.SHORT),
+      Arguments.of(TypeName.VOID)
+    );
   }
 
   @Test public void equalsAndHashCodeArrayTypeName() {
@@ -160,39 +171,40 @@ public class TypeNameTest {
         WildcardTypeName.supertypeOf(String.class));
   }
 
-  @Test public void isPrimitive() throws Exception {
-    assertThat(TypeName.INT.isPrimitive()).isTrue();
-    assertThat(ClassName.get("java.lang", "Integer").isPrimitive()).isFalse();
-    assertThat(ClassName.get("java.lang", "String").isPrimitive()).isFalse();
-    assertThat(TypeName.VOID.isPrimitive()).isFalse();
-    assertThat(ClassName.get("java.lang", "Void").isPrimitive()).isFalse();
+  @ParameterizedTest
+  @MethodSource("providePrimitiveAndBoxedTypeChecks")
+  public void primitiveAndBoxedTypeChecks(TypeName typeName, boolean expectedIsPrimitive, boolean expectedIsBoxedPrimitive) {
+    assertThat(typeName.isPrimitive()).isEqualTo(expectedIsPrimitive);
+    assertThat(typeName.isBoxedPrimitive()).isEqualTo(expectedIsBoxedPrimitive);
   }
 
-  @Test public void isBoxedPrimitive() throws Exception {
-    assertThat(TypeName.INT.isBoxedPrimitive()).isFalse();
-    assertThat(ClassName.get("java.lang", "Integer").isBoxedPrimitive()).isTrue();
-    assertThat(ClassName.get("java.lang", "String").isBoxedPrimitive()).isFalse();
-    assertThat(TypeName.VOID.isBoxedPrimitive()).isFalse();
-    assertThat(ClassName.get("java.lang", "Void").isBoxedPrimitive()).isFalse();
-    assertThat(ClassName.get("java.lang", "Integer")
-            .annotated(ANNOTATION_SPEC).isBoxedPrimitive()).isTrue();
+  private static List<Arguments> providePrimitiveAndBoxedTypeChecks() {
+    return List.of(
+      Arguments.of(TypeName.INT, true, false),
+      Arguments.of(ClassName.get("java.lang", "Integer"), false, true),
+      Arguments.of(ClassName.get("java.lang", "String"), false, false),
+      Arguments.of(TypeName.VOID, false, false),
+      Arguments.of(ClassName.get("java.lang", "Void"), false, false),
+      Arguments.of(ClassName.get("java.lang", "Integer").annotated(ANNOTATION_SPEC), false, true)
+    );
   }
 
   @Test public void canBoxAnnotatedPrimitive() throws Exception {
-    assertThat(TypeName.BOOLEAN.annotated(ANNOTATION_SPEC).box()).isEqualTo(
-            ClassName.get("java.lang", "Boolean").annotated(ANNOTATION_SPEC));
+    assertThat(TypeName.BOOLEAN.annotated(ANNOTATION_SPEC).box())
+      .isEqualTo(ClassName.get("java.lang", "Boolean").annotated(ANNOTATION_SPEC));
   }
 
   @Test public void canUnboxAnnotatedPrimitive() throws Exception {
     assertThat(ClassName.get("java.lang", "Boolean").annotated(ANNOTATION_SPEC)
-            .unbox()).isEqualTo(TypeName.BOOLEAN.annotated(ANNOTATION_SPEC));
+            .unbox())
+      .isEqualTo(TypeName.BOOLEAN.annotated(ANNOTATION_SPEC));
   }
 
   private void assertEqualsHashCodeAndToString(TypeName a, TypeName b) {
     assertThat(a)
+      .isNotNull()
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b)
       .hasToString(b.toString());
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertThat(a.equals(null)).isFalse();
   }
 }

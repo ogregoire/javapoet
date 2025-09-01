@@ -446,7 +446,7 @@ public final class TypeSpec {
 
     public Builder addAnnotations(Iterable<AnnotationSpec> annotationSpecs) {
       checkArgument(annotationSpecs != null, "annotationSpecs == null");
-      for (AnnotationSpec annotationSpec : annotationSpecs) {
+      for (var annotationSpec : annotationSpecs) {
         this.annotations.add(annotationSpec);
       }
       return this;
@@ -473,7 +473,7 @@ public final class TypeSpec {
 
     public Builder addTypeVariables(Iterable<TypeVariableName> typeVariables) {
       checkArgument(typeVariables != null, "typeVariables == null");
-      for (TypeVariableName typeVariable : typeVariables) {
+      for (var typeVariable : typeVariables) {
         this.typeVariables.add(typeVariable);
       }
       return this;
@@ -500,7 +500,7 @@ public final class TypeSpec {
     public Builder superclass(Type superclass, boolean avoidNestedTypeNameClashes) {
       superclass(TypeName.get(superclass));
       if (avoidNestedTypeNameClashes) {
-        Class<?> clazz = getRawType(superclass);
+        var clazz = getRawType(superclass);
         if (clazz != null) {
           avoidClashesWithNestedClasses(clazz);
         }
@@ -524,7 +524,7 @@ public final class TypeSpec {
 
     public Builder addSuperinterfaces(Iterable<? extends TypeName> superinterfaces) {
       checkArgument(superinterfaces != null, "superinterfaces == null");
-      for (TypeName superinterface : superinterfaces) {
+      for (var superinterface : superinterfaces) {
         addSuperinterface(superinterface);
       }
       return this;
@@ -543,7 +543,7 @@ public final class TypeSpec {
     public Builder addSuperinterface(Type superinterface, boolean avoidNestedTypeNameClashes) {
       addSuperinterface(TypeName.get(superinterface));
       if (avoidNestedTypeNameClashes) {
-        Class<?> clazz = getRawType(superinterface);
+        var clazz = getRawType(superinterface);
         if (clazz != null) {
           avoidClashesWithNestedClasses(clazz);
         }
@@ -584,7 +584,7 @@ public final class TypeSpec {
 
     public Builder addFields(Iterable<FieldSpec> fieldSpecs) {
       checkArgument(fieldSpecs != null, "fieldSpecs == null");
-      for (FieldSpec fieldSpec : fieldSpecs) {
+      for (var fieldSpec : fieldSpecs) {
         addField(fieldSpec);
       }
       return this;
@@ -622,7 +622,7 @@ public final class TypeSpec {
 
     public Builder addMethods(Iterable<MethodSpec> methodSpecs) {
       checkArgument(methodSpecs != null, "methodSpecs == null");
-      for (MethodSpec methodSpec : methodSpecs) {
+      for (var methodSpec : methodSpecs) {
         addMethod(methodSpec);
       }
       return this;
@@ -635,7 +635,7 @@ public final class TypeSpec {
 
     public Builder addTypes(Iterable<TypeSpec> typeSpecs) {
       checkArgument(typeSpecs != null, "typeSpecs == null");
-      for (TypeSpec typeSpec : typeSpecs) {
+      for (var typeSpec : typeSpecs) {
         addType(typeSpec);
       }
       return this;
@@ -653,7 +653,7 @@ public final class TypeSpec {
 
     public Builder alwaysQualify(String... simpleNames) {
       checkArgument(simpleNames != null, "simpleNames == null");
-      for (String name : simpleNames) {
+      for (var name : simpleNames) {
         checkArgument(
             name != null,
             "null entry in simpleNames array: %s",
@@ -736,7 +736,7 @@ public final class TypeSpec {
       for (Class<?> nestedType : clazz.getDeclaredClasses()) {
         alwaysQualify(nestedType.getSimpleName());
       }
-      Class<?> superclass = clazz.getSuperclass();
+      var superclass = clazz.getSuperclass();
       if (superclass != null && !Object.class.equals(superclass)) {
         avoidClashesWithNestedClasses(superclass);
       }
@@ -747,25 +747,25 @@ public final class TypeSpec {
     }
 
     public TypeSpec build() {
-      for (AnnotationSpec annotationSpec : annotations) {
+      for (var annotationSpec : annotations) {
         checkNotNull(annotationSpec, "annotationSpec == null");
       }
 
       if (!modifiers.isEmpty()) {
         checkState(anonymousTypeArguments == null, "forbidden on anonymous types.");
-        for (Modifier modifier : modifiers) {
+        for (var modifier : modifiers) {
           checkArgument(modifier != null, "modifiers contain null");
         }
       }
 
-      for (TypeName superinterface : superinterfaces) {
+      for (var superinterface : superinterfaces) {
         checkArgument(superinterface != null, "superinterfaces contains null");
       }
 
       if (!typeVariables.isEmpty()) {
         checkState(anonymousTypeArguments == null,
             "typevariables are forbidden on anonymous types.");
-        for (TypeVariableName typeVariableName : typeVariables) {
+        for (var typeVariableName : typeVariables) {
           checkArgument(typeVariableName != null, "typeVariables contain null");
         }
       }
@@ -777,16 +777,16 @@ public final class TypeSpec {
         checkArgument(SourceVersion.isName(name), "not a valid enum constant: %s", name);
       }
 
-      for (FieldSpec fieldSpec : fieldSpecs) {
+      for (var fieldSpec : fieldSpecs) {
         if (kind == Kind.INTERFACE || kind == Kind.ANNOTATION) {
           requireExactlyOneOf(fieldSpec.modifiers, Modifier.PUBLIC, Modifier.PRIVATE);
-          Set<Modifier> check = EnumSet.of(Modifier.STATIC, Modifier.FINAL);
+          var check = EnumSet.of(Modifier.STATIC, Modifier.FINAL);
           checkState(fieldSpec.modifiers.containsAll(check), "%s %s.%s requires modifiers %s",
               kind, name, fieldSpec.name, check);
         }
       }
 
-      for (MethodSpec methodSpec : methodSpecs) {
+      for (var methodSpec : methodSpecs) {
         if (kind == Kind.INTERFACE) {
           requireExactlyOneOf(methodSpec.modifiers, Modifier.PUBLIC, Modifier.PRIVATE);
           if (methodSpec.modifiers.contains(Modifier.PRIVATE)) {

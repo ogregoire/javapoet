@@ -52,15 +52,15 @@ public class ParameterSpecTest {
   @Test public void equalsAndHashCode() {
     var a = ParameterSpec.builder(int.class, "foo").build();
     var b = ParameterSpec.builder(int.class, "foo").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b)
       .hasToString(b.toString());
     a = ParameterSpec.builder(int.class, "i").addModifiers(Modifier.STATIC).build();
     b = ParameterSpec.builder(int.class, "i").addModifiers(Modifier.STATIC).build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
     assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b)
       .hasToString(b.toString());
   }
 

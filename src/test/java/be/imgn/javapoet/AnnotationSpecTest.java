@@ -123,12 +123,14 @@ public final class AnnotationSpecTest {
   @Test public void equalsAndHashCode() {
     var a = AnnotationSpec.builder(AnnotationC.class).build();
     var b = AnnotationSpec.builder(AnnotationC.class).build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = AnnotationSpec.builder(AnnotationC.class).addMember("value", "$S", "123").build();
     b = AnnotationSpec.builder(AnnotationC.class).addMember("value", "$S", "123").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
   }
 
   @Test public void defaultAnnotation() {

@@ -19,6 +19,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,12 +30,14 @@ public final class CodeBlockTest {
   @Test public void equalsAndHashCode() {
     var a = CodeBlock.builder().build();
     var b = CodeBlock.builder().build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
     a = CodeBlock.builder().add("$L", "taco").build();
     b = CodeBlock.builder().add("$L", "taco").build();
-    assertThat(a.equals(b)).isTrue();
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a)
+      .isEqualTo(b)
+      .hasSameHashCodeAs(b);
   }
 
   @Test public void of() {
@@ -50,58 +55,38 @@ public final class CodeBlockTest {
       .isFalse();
   }
 
-  @Test public void indentCannotBeIndexed() {
-    assertThatThrownBy(() -> CodeBlock.builder().add("$1>", "taco").build())
+  @ParameterizedTest
+  @MethodSource("provideFormatsCannotBeIndexed")
+  public void formatCannotBeIndexed(String format) {
+    assertThatThrownBy(() -> CodeBlock.builder().add(format, "taco").build())
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
-  @Test public void deindentCannotBeIndexed() {
-    assertThatThrownBy(() -> CodeBlock.builder().add("$1<", "taco").build())
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
+  private static List<Arguments> provideFormatsCannotBeIndexed() {
+    return List.of(
+      Arguments.of("$1>"), // indent
+      Arguments.of("$1<"), // deindent
+      Arguments.of("$1$"), // dollar sign escape
+      Arguments.of("$1["), // statement beginning
+      Arguments.of("$1]")  // statement ending
+    );
   }
 
-  @Test public void dollarSignEscapeCannotBeIndexed() {
-    assertThatThrownBy(() -> CodeBlock.builder().add("$1$", "taco").build())
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
+  @ParameterizedTest
+  @MethodSource("provideFormatsCanBeIndexed")
+  public void formatCanBeIndexed(String format, Object argument, String expectedOutput) {
+    var block = CodeBlock.builder().add(format, argument).build();
+    assertThat(block).hasToString(expectedOutput);
   }
 
-  @Test public void statementBeginningCannotBeIndexed() {
-    assertThatThrownBy(() -> CodeBlock.builder().add("$1[", "taco").build())
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-  }
-
-  @Test public void statementEndingCannotBeIndexed() {
-    assertThatThrownBy(() -> CodeBlock.builder().add("$1]", "taco").build())
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-  }
-
-  @Test public void nameFormatCanBeIndexed() {
-    var block = CodeBlock.builder().add("$1N", "taco").build();
-    assertThat(block)
-      .hasToString("taco");
-  }
-
-  @Test public void literalFormatCanBeIndexed() {
-    var block = CodeBlock.builder().add("$1L", "taco").build();
-    assertThat(block)
-      .hasToString("taco");
-  }
-
-  @Test public void stringFormatCanBeIndexed() {
-    var block = CodeBlock.builder().add("$1S", "taco").build();
-    assertThat(block)
-      .hasToString("\"taco\"");
-  }
-
-  @Test public void typeFormatCanBeIndexed() {
-    var block = CodeBlock.builder().add("$1T", String.class).build();
-    assertThat(block)
-      .hasToString("java.lang.String");
+  private static List<Arguments> provideFormatsCanBeIndexed() {
+    return List.of(
+      Arguments.of("$1N", "taco", "taco"),              // name format
+      Arguments.of("$1L", "taco", "taco"),              // literal format
+      Arguments.of("$1S", "taco", "\"taco\""),          // string format
+      Arguments.of("$1T", String.class, "java.lang.String") // type format
+    );
   }
 
   @Test public void simpleNamedArgument() {

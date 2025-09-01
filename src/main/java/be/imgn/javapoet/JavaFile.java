@@ -189,7 +189,7 @@ public final class JavaFile {
     }
 
     if (!staticImports.isEmpty()) {
-      for (String signature : staticImports) {
+      for (var signature : staticImports) {
         codeWriter.emit("import static $L;\n", signature);
       }
       codeWriter.emit("\n");
