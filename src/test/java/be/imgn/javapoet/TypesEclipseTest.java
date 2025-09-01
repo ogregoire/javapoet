@@ -31,8 +31,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
@@ -46,7 +44,6 @@ import org.junit.runners.model.Statement;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-@RunWith(JUnit4.class)
 public final class TypesEclipseTest extends AbstractTypesTest {
   /**
    * A {@link JUnit4} {@link Rule} that executes tests such that a instances of {@link Elements} and
@@ -143,15 +140,4 @@ public final class TypesEclipseTest extends AbstractTypesTest {
     }
   }
 
-  @Rule public final CompilationRule compilation = new CompilationRule();
-
-  @Override
-  protected Elements getElements() {
-    return compilation.getElements();
-  }
-
-  @Override
-  protected Types getTypes() {
-    return compilation.getTypes();
-  }
 }

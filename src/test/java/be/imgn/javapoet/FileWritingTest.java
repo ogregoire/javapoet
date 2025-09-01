@@ -17,7 +17,6 @@ package be.imgn.javapoet;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -25,21 +24,19 @@ import java.nio.file.Path;
 import java.util.Date;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@RunWith(JUnit4.class)
 public final class FileWritingTest {
   // Used for testing java.io File behavior.
-  @Rule public final TemporaryFolder tmp = new TemporaryFolder();
+  @TempDir
+  public Path tmp;
 
   // Used for testing java.nio.file Path behavior.
   private final FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
@@ -54,26 +51,20 @@ public final class FileWritingTest {
     var path = fs.getPath("/foo/bar");
     Files.createDirectories(path.getParent());
     Files.createFile(path);
-    try {
-      javaFile.writeTo(path);
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo("path /foo/bar exists but is not a directory.");
-    }
+    assertThatThrownBy(() -> javaFile.writeTo(path))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("path /foo/bar exists but is not a directory.");
   }
 
   @Test public void fileNotDirectory() throws IOException {
     var type = TypeSpec.classBuilder("Test").build();
     var javaFile = JavaFile.builder("example", type).build();
-    var file = new File(tmp.newFolder("foo"), "bar");
-    file.createNewFile();
-    try {
-      javaFile.writeTo(file);
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo(
-          "path " + file.getPath() + " exists but is not a directory.");
-    }
+    var file = tmp.resolve("foo").resolve("bar");
+    Files.createDirectories(file.getParent());
+        Files.createFile(file);
+    assertThatThrownBy(() -> javaFile.writeTo(file))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("path " + file + " exists but is not a directory.");
   }
 
   @Test public void pathDefaultPackage() throws IOException {
@@ -81,15 +72,15 @@ public final class FileWritingTest {
     JavaFile.builder("", type).build().writeTo(fsRoot);
 
     var testPath = fsRoot.resolve("Test.java");
-    assertThat(Files.exists(testPath)).isTrue();
+    assertThat(testPath).exists();
   }
 
   @Test public void fileDefaultPackage() throws IOException {
     var type = TypeSpec.classBuilder("Test").build();
-    JavaFile.builder("", type).build().writeTo(tmp.getRoot());
+    JavaFile.builder("", type).build().writeTo(tmp);
 
-    var testFile = new File(tmp.getRoot(), "Test.java");
-    assertThat(testFile.exists()).isTrue();
+    var testFile = tmp.resolve("Test.java");
+    assertThat(testFile).exists();
   }
 
   @Test public void filerDefaultPackage() throws IOException {
@@ -97,7 +88,7 @@ public final class FileWritingTest {
     JavaFile.builder("", type).build().writeTo(filer);
 
     var testPath = fsRoot.resolve("Test.java");
-    assertThat(Files.exists(testPath)).isTrue();
+    assertThat(testPath).exists();
   }
 
   @Test public void pathNestedClasses() throws IOException {
@@ -109,26 +100,20 @@ public final class FileWritingTest {
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
     var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
     var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
-    assertThat(Files.exists(fooPath)).isTrue();
-    assertThat(Files.exists(barPath)).isTrue();
-    assertThat(Files.exists(bazPath)).isTrue();
+    assertThat(fooPath).exists();
+    assertThat(barPath).exists();
+    assertThat(bazPath).exists();
   }
 
   @Test public void fileNestedClasses() throws IOException {
     var type = TypeSpec.classBuilder("Test").build();
-    JavaFile.builder("foo", type).build().writeTo(tmp.getRoot());
-    JavaFile.builder("foo.bar", type).build().writeTo(tmp.getRoot());
-    JavaFile.builder("foo.bar.baz", type).build().writeTo(tmp.getRoot());
+    JavaFile.builder("foo", type).build().writeTo(tmp);
+    JavaFile.builder("foo.bar", type).build().writeTo(tmp);
+    JavaFile.builder("foo.bar.baz", type).build().writeTo(tmp);
 
-    var fooDir = new File(tmp.getRoot(), "foo");
-    var fooFile = new File(fooDir, "Test.java");
-    var barDir = new File(fooDir, "bar");
-    var barFile = new File(barDir, "Test.java");
-    var bazDir = new File(barDir, "baz");
-    var bazFile = new File(bazDir, "Test.java");
-    assertThat(fooFile.exists()).isTrue();
-    assertThat(barFile.exists()).isTrue();
-    assertThat(bazFile.exists()).isTrue();
+    assertThat(tmp.resolve("foo/Test.java")).exists();
+    assertThat(tmp.resolve("foo/bar/Test.java")).exists();
+    assertThat(tmp.resolve("foo/bar/baz/Test.java")).exists();
   }
 
   @Test public void filerNestedClasses() throws IOException {
@@ -184,14 +169,14 @@ public final class FileWritingTest {
 
     assertThat(source).isEqualTo("""
             package foo;
-            
+
             import java.lang.String;
             import java.lang.System;
             import java.util.Date;
-            
+
             class Test {
             \tDate madeFreshDate;
-            
+
             \tpublic static void main(String[] args) {
             \t\tSystem.out.println("Hello World!");
             \t}
@@ -213,7 +198,7 @@ public final class FileWritingTest {
     assertThat(new String(Files.readAllBytes(fooPath), UTF_8)).isEqualTo("""
             // Pi\u00f1ata\u00a1
             package foo;
-            
+
             class Taco {
             }
             """);

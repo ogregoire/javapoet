@@ -1,10 +1,10 @@
 package be.imgn.javapoet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CodeWriterTest {
 
@@ -13,7 +13,8 @@ public class CodeWriterTest {
         var javadocCodeBlock = CodeBlock.of("A\r\n\r\nB\r\n");
         var out = new StringBuilder();
         new CodeWriter(out).emitJavadoc(javadocCodeBlock);
-        assertThat(out.toString()).isEqualTo(
+        assertThat(out)
+      .hasToString(
                 "/**\n" +
                         " * A\n" +
                         " *\n" +

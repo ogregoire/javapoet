@@ -15,10 +15,10 @@
  */
 package be.imgn.javapoet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import javax.lang.model.element.Modifier;
 
@@ -28,27 +28,24 @@ public class FieldSpecTest {
     var b = FieldSpec.builder(int.class, "foo").build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertThat(a.toString()).isEqualTo(b.toString());
+    assertThat(a)
+      .hasToString(b.toString());
     a = FieldSpec.builder(int.class, "FOO", Modifier.PUBLIC, Modifier.STATIC).build();
     b = FieldSpec.builder(int.class, "FOO", Modifier.PUBLIC, Modifier.STATIC).build();
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertThat(a.toString()).isEqualTo(b.toString());
+    assertThat(a)
+      .hasToString(b.toString());
   }
 
   @Test public void nullAnnotationsAddition() {
-    try {
-      FieldSpec.builder(int.class, "foo").addAnnotations(null);
-      fail();
-    }
-    catch (IllegalArgumentException expected) {
-      assertThat(expected.getMessage())
-          .isEqualTo("annotationSpecs == null");
-    }
+    assertThatThrownBy(() -> FieldSpec.builder(int.class, "foo").addAnnotations(null))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("annotationSpecs == null");
   }
 
   @Test public void modifyAnnotations() {
-    FieldSpec.Builder builder = FieldSpec.builder(int.class, "foo")
+    var builder = FieldSpec.builder(int.class, "foo")
           .addAnnotation(Override.class)
           .addAnnotation(SuppressWarnings.class);
 

@@ -17,6 +17,11 @@ package be.imgn.javapoet;
 
 import java.io.File;
 import com.google.testing.compile.CompilationRule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -26,30 +31,34 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public final class JavaFileTest {
 
-  @Rule public final CompilationRule compilation = new CompilationRule();
+  private Elements elements;
+  private Types types;
 
-  private TypeElement getElement(Class<?> clazz) {
-    return compilation.getElements().getTypeElement(clazz.getCanonicalName());
+  @BeforeEach
+  public void setUp(Elements elements, Types types) {
+    this.elements = elements;
+    this.types = types;
   }
 
-  @Test public void importStaticReadmeExample() {
-    ClassName hoverboard = ClassName.get("com.mattel", "Hoverboard");
-    ClassName namedBoards = ClassName.get("com.mattel", "Hoverboard", "Boards");
-    ClassName list = ClassName.get("java.util", "List");
-    ClassName arrayList = ClassName.get("java.util", "ArrayList");
-    TypeName listOfHoverboards = ParameterizedTypeName.get(list, hoverboard);
-    MethodSpec beyond = MethodSpec.methodBuilder("beyond")
+  private TypeElement getElement(Class<?> clazz) {
+    return elements.getTypeElement(clazz.getCanonicalName());
+  }
+
+  @Test  public void importStaticReadmeExample() {
+    var hoverboard = ClassName.get("com.mattel", "Hoverboard");
+    var namedBoards = ClassName.get("com.mattel", "Hoverboard", "Boards");
+    var list = ClassName.get("java.util", "List");
+    var arrayList = ClassName.get("java.util", "ArrayList");
+    var listOfHoverboards = ParameterizedTypeName.get(list, hoverboard);
+    var beyond = MethodSpec.methodBuilder("beyond")
         .returns(listOfHoverboards)
         .addStatement("$T result = new $T<>()", listOfHoverboards, arrayList)
         .addStatement("result.add($T.createNimbus(2000))", hoverboard)
@@ -58,25 +67,26 @@ public final class JavaFileTest {
         .addStatement("$T.sort(result)", Collections.class)
         .addStatement("return result.isEmpty() ? $T.emptyList() : result", Collections.class)
         .build();
-    TypeSpec hello = TypeSpec.classBuilder("HelloWorld")
+    var hello = TypeSpec.classBuilder("HelloWorld")
         .addMethod(beyond)
         .build();
-    JavaFile example = JavaFile.builder("com.example.helloworld", hello)
+    var example = JavaFile.builder("com.example.helloworld", hello)
         .addStaticImport(hoverboard, "createNimbus")
         .addStaticImport(namedBoards, "*")
         .addStaticImport(Collections.class, "*")
         .build();
-    assertThat(example.toString()).isEqualTo("""
+    assertThat(example)
+      .hasToString("""
             package com.example.helloworld;
-            
+
             import static com.mattel.Hoverboard.Boards.*;
             import static com.mattel.Hoverboard.createNimbus;
             import static java.util.Collections.*;
-            
+
             import com.mattel.Hoverboard;
             import java.util.ArrayList;
             import java.util.List;
-            
+
             class HelloWorld {
               List<Hoverboard> beyond() {
                 List<Hoverboard> result = new ArrayList<>();
@@ -90,7 +100,7 @@ public final class JavaFileTest {
             """);
   }
   @Test public void importStaticForCrazyFormatsWorks() {
-    MethodSpec method = MethodSpec.methodBuilder("method").build();
+    var method = MethodSpec.methodBuilder("method").build();
     JavaFile.builder("be.imgn.tacos",
         TypeSpec.classBuilder("Taco")
             .addStaticBlock(CodeBlock.builder()
@@ -114,7 +124,7 @@ public final class JavaFileTest {
   }
 
   @Test public void importStaticMixed() {
-    JavaFile source = JavaFile.builder("be.imgn.tacos",
+    var source = JavaFile.builder("be.imgn.tacos",
         TypeSpec.classBuilder("Taco")
             .addStaticBlock(CodeBlock.builder()
                 .addStatement("assert $1T.valueOf(\"BLOCKED\") == $1T.BLOCKED", Thread.State.class)
@@ -130,31 +140,32 @@ public final class JavaFileTest {
         .addStaticImport(System.class, "*")
         .addStaticImport(Thread.State.class, "valueOf")
         .build();
-    assertThat(source.toString()).isEqualTo("""
+    assertThat(source)
+      .hasToString("""
             package be.imgn.tacos;
-            
+
             import static java.lang.System.*;
             import static java.lang.Thread.State.BLOCKED;
             import static java.lang.Thread.State.valueOf;
-            
+
             import java.lang.Thread;
-            
+
             class Taco {
               static {
                 assert valueOf("BLOCKED") == BLOCKED;
                 gc();
                 out.println(nanoTime());
               }
-            
+
               Taco(Thread.State... states) {
               }
             }
             """);
   }
 
-  @Ignore("addStaticImport doesn't support members with $L")
+  @Disabled("addStaticImport doesn't support members with $L")
   @Test public void importStaticDynamic() {
-    JavaFile source = JavaFile.builder("be.imgn.tacos",
+    var source = JavaFile.builder("be.imgn.tacos",
         TypeSpec.classBuilder("Taco")
             .addMethod(MethodSpec.methodBuilder("main")
                 .addStatement("$T.$L.println($S)", System.class, "out", "hello")
@@ -162,11 +173,12 @@ public final class JavaFileTest {
             .build())
         .addStaticImport(System.class, "out")
         .build();
-    assertThat(source.toString()).isEqualTo("""
+    assertThat(source)
+      .hasToString("""
             package be.imgn.tacos;
-            
+
             import static java.lang.System.out;
-            
+
             class Taco {
               void main() {
                 out.println("hello");
@@ -177,12 +189,13 @@ public final class JavaFileTest {
 
   @Test public void importStaticNone() {
     assertThat(JavaFile.builder("readme", importStaticTypeSpec("Util"))
-        .build().toString()).isEqualTo("""
+        .build())
+      .hasToString("""
             package readme;
-            
+
             import java.lang.System;
             import java.util.concurrent.TimeUnit;
-            
+
             class Util {
               public static long minutesToSeconds(long minutes) {
                 System.gc();
@@ -195,14 +208,15 @@ public final class JavaFileTest {
   @Test public void importStaticOnce() {
     assertThat(JavaFile.builder("readme", importStaticTypeSpec("Util"))
         .addStaticImport(TimeUnit.SECONDS)
-        .build().toString()).isEqualTo("""
+        .build())
+      .hasToString("""
             package readme;
-            
+
             import static java.util.concurrent.TimeUnit.SECONDS;
-            
+
             import java.lang.System;
             import java.util.concurrent.TimeUnit;
-            
+
             class Util {
               public static long minutesToSeconds(long minutes) {
                 System.gc();
@@ -216,14 +230,15 @@ public final class JavaFileTest {
     assertThat(JavaFile.builder("readme", importStaticTypeSpec("Util"))
         .addStaticImport(TimeUnit.SECONDS)
         .addStaticImport(TimeUnit.MINUTES)
-        .build().toString()).isEqualTo("""
+        .build())
+      .hasToString("""
             package readme;
-            
+
             import static java.util.concurrent.TimeUnit.MINUTES;
             import static java.util.concurrent.TimeUnit.SECONDS;
-            
+
             import java.lang.System;
-            
+
             class Util {
               public static long minutesToSeconds(long minutes) {
                 System.gc();
@@ -237,12 +252,13 @@ public final class JavaFileTest {
     assertThat(JavaFile.builder("readme", importStaticTypeSpec("Util"))
         .addStaticImport(TimeUnit.class, "*")
         .addStaticImport(System.class, "*")
-        .build().toString()).isEqualTo("""
+        .build())
+      .hasToString("""
             package readme;
-            
+
             import static java.lang.System.*;
             import static java.util.concurrent.TimeUnit.*;
-            
+
             class Util {
               public static long minutesToSeconds(long minutes) {
                 gc();
@@ -270,7 +286,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco {
             }
             """);
@@ -285,9 +301,9 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import java.util.Date;
-            
+
             class Taco {
               Date madeFreshDate;
             }
@@ -304,12 +320,12 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import java.util.Date;
-            
+
             class Taco {
               Date madeFreshDate;
-            
+
               java.sql.Date madeFreshDatabaseDate;
             }
             """);
@@ -327,10 +343,10 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.meat.Chorizo;
             import java.util.List;
-            
+
             class Taco {
               List<@Spicy Chorizo> chorizo;
             }
@@ -350,10 +366,10 @@ public final class JavaFileTest {
       // Second 'Float' is fully qualified.
       assertThat(source).isEqualTo("""
               package be.imgn.tacos;
-              
+
               class Taco {
                 Float litres;
-              
+
                 be.imgn.soda.Float beverage;
               }
               """);
@@ -372,12 +388,12 @@ public final class JavaFileTest {
       // Second 'Float' is fully qualified.
       assertThat(source).isEqualTo("""
               package be.imgn.tacos;
-              
+
               import be.imgn.soda.Float;
-              
+
               class Taco {
                 Float beverage;
-              
+
                 java.lang.Float litres;
               }
               """);
@@ -401,17 +417,17 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class A {
               class B {
                 class Twin {
                 }
-            
+
                 class C {
                   A.Twin.D d;
                 }
               }
-            
+
               class Twin {
                 class D {
                 }
@@ -438,17 +454,17 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class A {
               class B {
                 class C {
                   A.Twin.D d;
-            
+
                   class Twin {
                   }
                 }
               }
-            
+
               class Twin {
                 class D {
                 }
@@ -477,19 +493,19 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class A {
               class B {
                 class C {
                   Twin.D d;
-            
+
                   class Nested {
                     class Twin {
                     }
                   }
                 }
               }
-            
+
               class Twin {
                 class D {
                 }
@@ -510,9 +526,9 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.wire.Message;
-            
+
             class Taco extends Message {
               class Builder extends Message.Builder {
               }
@@ -529,7 +545,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco extends com.taco.bell.Taco {
             }
             """);
@@ -544,7 +560,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             @com.taco.bell.Taco
             class Taco {
             }
@@ -562,7 +578,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             @MyAnno(com.taco.bell.Taco.class)
             class Taco {
             }
@@ -579,7 +595,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco<T extends com.taco.bell.Taco> {
             }
             """);
@@ -595,9 +611,9 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import java.lang.Comparable;
-            
+
             class Taco extends Comparable<Taco> {
             }
             """);
@@ -616,9 +632,9 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import dagger.Component;
-            
+
             @Component
             class TestComponent {
               @Component.Builder
@@ -642,7 +658,7 @@ public final class JavaFileTest {
     assertThat(source).isEqualTo("""
             import java.lang.String;
             import java.lang.System;
-            
+
             class HelloWorld {
               public static void main(String[] args) {
                 System.out.println("Hello World!");
@@ -658,7 +674,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package hello;
-            
+
             class World implements Test {
             }
             """);
@@ -673,7 +689,7 @@ public final class JavaFileTest {
     assertThat(source).isEqualTo("""
             // Generated 2015-01-13 by JavaPoet. DO NOT EDIT!
             package be.imgn.tacos;
-            
+
             class Taco {
             }
             """);
@@ -692,7 +708,7 @@ public final class JavaFileTest {
             // DO NOT EDIT!
             //
             package be.imgn.tacos;
-            
+
             class Taco {
             }
             """);
@@ -708,10 +724,10 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco {
               be.imgn.tacos.A a;
-            
+
               class A {
               }
             }
@@ -728,7 +744,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco extends com.taco.bell.A {
               A a;
             }
@@ -748,9 +764,9 @@ public final class JavaFileTest {
 
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import static java.io.File.separatorChar;
-            
+
             class Taco {
             }
             """);
@@ -766,7 +782,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco {
               java.lang.Thread thread;
             }
@@ -784,7 +800,7 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             class Taco {
               java.lang.Thread thread;
             }
@@ -807,17 +823,17 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import other.Foo;
             import other.NestedTypeC;
-            
+
             class Taco {
               other.NestedTypeA nestedA;
-            
+
               other.NestedTypeB nestedB;
-            
+
               NestedTypeC nestedC;
-            
+
               Foo foo;
             }
             """);
@@ -839,17 +855,17 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import other.Foo;
             import other.NestedTypeC;
-            
+
             class Taco {
               other.NestedTypeA nestedA;
-            
+
               other.NestedTypeB nestedB;
-            
+
               NestedTypeC nestedC;
-            
+
               Foo foo;
             }
             """);
@@ -873,23 +889,23 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.javapoet.JavaFileTest;
             import other.Foo;
             import other.NestedTypeC;
-            
+
             class Taco implements JavaFileTest.FooInterface {
               other.NestedTypeA nestedA;
-            
+
               other.NestedTypeB nestedB;
-            
+
               NestedTypeC nestedC;
-            
+
               Foo foo;
-            
+
               class NestedTypeA {
               }
-            
+
               class NestedTypeB {
               }
             }
@@ -934,14 +950,14 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.javapoet;
-            
+
             import java.lang.String;
-            
+
             class Child extends JavaFileTest.Parent {
               java.util.Optional<String> optionalString() {
                 return java.util.Optional.empty();
               }
-            
+
               java.util.regex.Pattern pattern() {
                 return null;
               }
@@ -957,14 +973,14 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.javapoet;
-            
+
             import java.lang.String;
-            
+
             class Child extends JavaFileTest.Parent {
               java.util.Optional<String> optionalString() {
                 return java.util.Optional.empty();
               }
-            
+
               java.util.regex.Pattern pattern() {
                 return null;
               }
@@ -980,15 +996,15 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.javapoet;
-            
+
             import java.lang.String;
             import java.util.regex.Pattern;
-            
+
             class Child implements JavaFileTest.ParentInterface {
               java.util.Optional<String> optionalString() {
                 return java.util.Optional.empty();
               }
-            
+
               Pattern pattern() {
                 return null;
               }
@@ -1004,15 +1020,15 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.javapoet;
-            
+
             import java.lang.String;
             import java.util.regex.Pattern;
-            
+
             class Child implements JavaFileTest.ParentInterface {
               java.util.Optional<String> optionalString() {
                 return java.util.Optional.empty();
               }
-            
+
               Pattern pattern() {
                 return null;
               }
@@ -1049,9 +1065,9 @@ public final class JavaFileTest {
         .toString();
     assertThat(source).isEqualTo("""
             package be.imgn.javapoet;
-            
+
             import java.util.Map;
-            
+
             class MapType implements Map {
               com.foo.Entry optionalString() {
                 return null;

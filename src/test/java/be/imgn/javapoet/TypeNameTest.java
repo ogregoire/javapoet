@@ -16,18 +16,13 @@
 package be.imgn.javapoet;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeNameTest {
 
@@ -80,11 +75,12 @@ public class TypeNameTest {
     var genericStringInner = getClass().getDeclaredMethod("testGenericStringInner");
     TypeName.get(genericStringInner.getReturnType());
     var genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
-    assertNotEquals(TypeName.get(genericStringInner.getGenericReturnType()),
-        TypeName.get(getClass().getDeclaredMethod("testGenericIntInner").getGenericReturnType()));
+    assertThat(TypeName.get(genericStringInner.getGenericReturnType()))
+      .isNotEqualTo(TypeName.get(getClass().getDeclaredMethod("testGenericIntInner").getGenericReturnType()));
 
     // Make sure the generic argument is present
-    assertThat(genericTypeName.toString()).isEqualTo(
+    assertThat(genericTypeName)
+      .hasToString(
         TestGeneric.class.getCanonicalName() + "<java.lang.String>.Inner");
   }
 
@@ -92,11 +88,12 @@ public class TypeNameTest {
     var genericStringInner = getClass().getDeclaredMethod("testGenericInnerLong");
     TypeName.get(genericStringInner.getReturnType());
     var genericTypeName = TypeName.get(genericStringInner.getGenericReturnType());
-    assertNotEquals(TypeName.get(genericStringInner.getGenericReturnType()),
-        TypeName.get(getClass().getDeclaredMethod("testGenericInnerInt").getGenericReturnType()));
+    assertThat(TypeName.get(genericStringInner.getGenericReturnType()))
+      .isNotEqualTo(TypeName.get(getClass().getDeclaredMethod("testGenericInnerInt").getGenericReturnType()));
 
     // Make sure the generic argument is present
-    assertThat(genericTypeName.toString()).isEqualTo(
+    assertThat(genericTypeName)
+      .hasToString(
         TestGeneric.class.getCanonicalName() + "<java.lang.Short>.InnerGeneric<java.lang.Long>");
   }
 
@@ -106,7 +103,8 @@ public class TypeNameTest {
     var typeName = TypeName.get(staticInGeneric.getGenericReturnType());
 
     // Make sure there are no generic arguments
-    assertThat(typeName.toString()).isEqualTo(
+    assertThat(typeName)
+      .hasToString(
         TestGeneric.class.getCanonicalName() + ".NestedNonGeneric");
   }
 
@@ -141,8 +139,8 @@ public class TypeNameTest {
         ParameterizedTypeName.get(Object.class));
     assertEqualsHashCodeAndToString(ParameterizedTypeName.get(Set.class, UUID.class),
         ParameterizedTypeName.get(Set.class, UUID.class));
-    assertNotEquals(ClassName.get(List.class), ParameterizedTypeName.get(List.class,
-        String.class));
+    assertThat(ClassName.get(List.class))
+      .isNotEqualTo(ParameterizedTypeName.get(List.class, String.class));
   }
 
   @Test public void equalsAndHashCodeTypeVariableName() {
@@ -191,9 +189,10 @@ public class TypeNameTest {
   }
 
   private void assertEqualsHashCodeAndToString(TypeName a, TypeName b) {
-    assertEquals(a.toString(), b.toString());
+    assertThat(a)
+      .hasToString(b.toString());
     assertThat(a.equals(b)).isTrue();
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertFalse(a.equals(null));
+    assertThat(a.equals(null)).isFalse();
   }
 }

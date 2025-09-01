@@ -15,84 +15,98 @@
  */
 package be.imgn.javapoet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public final class NameAllocatorTest {
 
   @Test public void usage() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("foo", 1)).isEqualTo("foo");
-    assertThat(nameAllocator.newName("bar", 2)).isEqualTo("bar");
-    assertThat(nameAllocator.get(1)).isEqualTo("foo");
-    assertThat(nameAllocator.get(2)).isEqualTo("bar");
+    assertThat(nameAllocator.newName("foo", 1))
+      .isEqualTo("foo");
+    assertThat(nameAllocator.newName("bar", 2))
+      .isEqualTo("bar");
+    assertThat(nameAllocator.get(1))
+      .isEqualTo("foo");
+    assertThat(nameAllocator.get(2))
+      .isEqualTo("bar");
   }
 
   @Test public void nameCollision() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("foo")).isEqualTo("foo");
-    assertThat(nameAllocator.newName("foo")).isEqualTo("foo_");
-    assertThat(nameAllocator.newName("foo")).isEqualTo("foo__");
+    assertThat(nameAllocator.newName("foo"))
+      .isEqualTo("foo");
+    assertThat(nameAllocator.newName("foo"))
+      .isEqualTo("foo_");
+    assertThat(nameAllocator.newName("foo"))
+      .isEqualTo("foo__");
   }
 
   @Test public void nameCollisionWithTag() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("foo", 1)).isEqualTo("foo");
-    assertThat(nameAllocator.newName("foo", 2)).isEqualTo("foo_");
-    assertThat(nameAllocator.newName("foo", 3)).isEqualTo("foo__");
-    assertThat(nameAllocator.get(1)).isEqualTo("foo");
-    assertThat(nameAllocator.get(2)).isEqualTo("foo_");
-    assertThat(nameAllocator.get(3)).isEqualTo("foo__");
+    assertThat(nameAllocator.newName("foo", 1))
+      .isEqualTo("foo");
+    assertThat(nameAllocator.newName("foo", 2))
+      .isEqualTo("foo_");
+    assertThat(nameAllocator.newName("foo", 3))
+      .isEqualTo("foo__");
+    assertThat(nameAllocator.get(1))
+      .isEqualTo("foo");
+    assertThat(nameAllocator.get(2))
+      .isEqualTo("foo_");
+    assertThat(nameAllocator.get(3))
+      .isEqualTo("foo__");
   }
 
   @Test public void characterMappingSubstitute() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("a-b", 1)).isEqualTo("a_b");
+    assertThat(nameAllocator.newName("a-b", 1))
+      .isEqualTo("a_b");
   }
 
   @Test public void characterMappingSurrogate() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("a\uD83C\uDF7Ab", 1)).isEqualTo("a_b");
+    assertThat(nameAllocator.newName("a\uD83C\uDF7Ab", 1))
+      .isEqualTo("a_b");
   }
 
   @Test public void characterMappingInvalidStartButValidPart() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("1ab", 1)).isEqualTo("_1ab");
-    assertThat(nameAllocator.newName("a-1", 2)).isEqualTo("a_1");
+    assertThat(nameAllocator.newName("1ab", 1))
+      .isEqualTo("_1ab");
+    assertThat(nameAllocator.newName("a-1", 2))
+      .isEqualTo("a_1");
   }
 
   @Test public void characterMappingInvalidStartIsInvalidPart() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("&ab", 1)).isEqualTo("_ab");
+    assertThat(nameAllocator.newName("&ab", 1))
+      .isEqualTo("_ab");
   }
 
   @Test public void javaKeyword() throws Exception {
     var nameAllocator = new NameAllocator();
-    assertThat(nameAllocator.newName("public", 1)).isEqualTo("public_");
-    assertThat(nameAllocator.get(1)).isEqualTo("public_");
+    assertThat(nameAllocator.newName("public", 1))
+      .isEqualTo("public_");
+    assertThat(nameAllocator.get(1))
+      .isEqualTo("public_");
   }
 
   @Test public void tagReuseForbidden() throws Exception {
     var nameAllocator = new NameAllocator();
     nameAllocator.newName("foo", 1);
-    try {
-      nameAllocator.newName("bar", 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("tag 1 cannot be used for both 'foo' and 'bar'");
-    }
+    assertThatThrownBy(() -> nameAllocator.newName("bar", 1))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tag 1 cannot be used for both 'foo' and 'bar'");
   }
 
   @Test public void useBeforeAllocateForbidden() throws Exception {
     var nameAllocator = new NameAllocator();
-    try {
-      nameAllocator.get(1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("unknown tag: 1");
-    }
+    assertThatThrownBy(() -> nameAllocator.get(1))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("unknown tag: 1");
   }
 
   @Test public void cloneUsage() throws Exception {
@@ -100,11 +114,15 @@ public final class NameAllocatorTest {
     outterAllocator.newName("foo", 1);
 
     var innerAllocator1 = outterAllocator.clone();
-    assertThat(innerAllocator1.newName("bar", 2)).isEqualTo("bar");
-    assertThat(innerAllocator1.newName("foo", 3)).isEqualTo("foo_");
+    assertThat(innerAllocator1.newName("bar", 2))
+      .isEqualTo("bar");
+    assertThat(innerAllocator1.newName("foo", 3))
+      .isEqualTo("foo_");
 
     var innerAllocator2 = outterAllocator.clone();
-    assertThat(innerAllocator2.newName("foo", 2)).isEqualTo("foo_");
-    assertThat(innerAllocator2.newName("bar", 3)).isEqualTo("bar");
+    assertThat(innerAllocator2.newName("foo", 2))
+      .isEqualTo("foo_");
+    assertThat(innerAllocator2.newName("bar", 3))
+      .isEqualTo("bar");
   }
 }

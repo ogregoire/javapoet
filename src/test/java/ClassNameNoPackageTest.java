@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import be.imgn.javapoet.ClassName;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Since it is impossible to import classes from the default package into other
@@ -28,6 +28,7 @@ public final class ClassNameNoPackageTest {
     var className = ClassName.get(ClassNameNoPackageTest.class);
     assertThat(className.packageName()).isEqualTo("");
     assertThat(className.simpleName()).isEqualTo("ClassNameNoPackageTest");
-    assertThat(className.toString()).isEqualTo("ClassNameNoPackageTest");
+    assertThat(className)
+      .hasToString("ClassNameNoPackageTest");
   }
 }

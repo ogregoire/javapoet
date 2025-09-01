@@ -15,13 +15,10 @@
  */
 package be.imgn.javapoet;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
 public final class LineWrapperTest {
   @Test public void wrap() throws Exception {
     var out = new StringBuffer();
@@ -30,7 +27,8 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghij");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde\n    fghij");
+    assertThat(out)
+      .hasToString("abcde\n    fghij");
   }
 
   @Test public void noWrap() throws Exception {
@@ -40,7 +38,8 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("fghi");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde fghi");
+    assertThat(out)
+      .hasToString("abcde fghi");
   }
 
   @Test public void zeroWidthNoWrap() throws Exception {
@@ -50,7 +49,8 @@ public final class LineWrapperTest {
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghij");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghij");
+    assertThat(out)
+      .hasToString("abcdefghij");
   }
 
   @Test public void nospaceWrapMax() throws Exception {
@@ -60,7 +60,8 @@ public final class LineWrapperTest {
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("fghijk");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde\n    fghijk");
+    assertThat(out)
+      .hasToString("abcde\n    fghijk");
   }
 
   @Test public void multipleWrite() throws Exception {
@@ -84,7 +85,8 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(1);
     lineWrapper.append("qr");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("ab cd ef\n  gh ij kl\n  mn op qr");
+    assertThat(out)
+      .hasToString("ab cd ef\n  gh ij kl\n  mn op qr");
   }
 
   @Test public void fencepost() throws Exception {
@@ -96,7 +98,8 @@ public final class LineWrapperTest {
     lineWrapper.append("k");
     lineWrapper.append("lmnop");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghij\n    klmnop");
+    assertThat(out)
+      .hasToString("abcdefghij\n    klmnop");
   }
 
   @Test public void fencepostZeroWidth() throws Exception {
@@ -108,7 +111,8 @@ public final class LineWrapperTest {
     lineWrapper.append("k");
     lineWrapper.append("lmnop");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghij\n    klmnop");
+    assertThat(out)
+      .hasToString("abcdefghij\n    klmnop");
   }
 
   @Test public void overlyLongLinesWithoutLeadingSpace() throws Exception {
@@ -116,7 +120,8 @@ public final class LineWrapperTest {
     var lineWrapper = new LineWrapper(out, "  ", 10);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghijkl");
+    assertThat(out)
+      .hasToString("abcdefghijkl");
   }
 
   @Test public void overlyLongLinesWithLeadingSpace() throws Exception {
@@ -125,7 +130,8 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("\n    abcdefghijkl");
+    assertThat(out)
+      .hasToString("\n    abcdefghijkl");
   }
 
   @Test public void overlyLongLinesWithLeadingZeroWidth() throws Exception {
@@ -134,7 +140,8 @@ public final class LineWrapperTest {
     lineWrapper.zeroWidthSpace(2);
     lineWrapper.append("abcdefghijkl");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghijkl");
+    assertThat(out)
+      .hasToString("abcdefghijkl");
   }
 
   @Test public void noWrapEmbeddedNewlines() throws Exception {
@@ -145,7 +152,8 @@ public final class LineWrapperTest {
     lineWrapper.append("fghi\njklmn");
     lineWrapper.append("opqrstuvwxy");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde fghi\njklmnopqrstuvwxy");
+    assertThat(out)
+      .hasToString("abcde fghi\njklmnopqrstuvwxy");
   }
 
   @Test public void wrapEmbeddedNewlines() throws Exception {
@@ -156,7 +164,8 @@ public final class LineWrapperTest {
     lineWrapper.append("fghij\nklmn");
     lineWrapper.append("opqrstuvwxy");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde\n    fghij\nklmnopqrstuvwxy");
+    assertThat(out)
+      .hasToString("abcde\n    fghij\nklmnopqrstuvwxy");
   }
 
   @Test public void noWrapEmbeddedNewlines_ZeroWidth() throws Exception {
@@ -167,7 +176,8 @@ public final class LineWrapperTest {
     lineWrapper.append("fghij\nklmn");
     lineWrapper.append("opqrstuvwxyz");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcdefghij\nklmnopqrstuvwxyz");
+    assertThat(out)
+      .hasToString("abcdefghij\nklmnopqrstuvwxyz");
   }
 
   @Test public void wrapEmbeddedNewlines_ZeroWidth() throws Exception {
@@ -178,7 +188,8 @@ public final class LineWrapperTest {
     lineWrapper.append("fghijk\nlmn");
     lineWrapper.append("opqrstuvwxy");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde\n    fghijk\nlmnopqrstuvwxy");
+    assertThat(out)
+      .hasToString("abcde\n    fghijk\nlmnopqrstuvwxy");
   }
 
   @Test public void noWrapMultipleNewlines() throws Exception {
@@ -190,7 +201,8 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("stuvwxyz");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde fghi\nklmnopq\nr stuvwxyz");
+    assertThat(out)
+      .hasToString("abcde fghi\nklmnopq\nr stuvwxyz");
   }
 
   @Test public void wrapMultipleNewlines() throws Exception {
@@ -202,6 +214,7 @@ public final class LineWrapperTest {
     lineWrapper.wrappingSpace(2);
     lineWrapper.append("tuvwxyz1");
     lineWrapper.close();
-    assertThat(out.toString()).isEqualTo("abcde fghi\nklmnopq\nrs\n    tuvwxyz1");
+    assertThat(out)
+      .hasToString("abcde fghi\nklmnopq\nrs\n    tuvwxyz1");
   }
 }

@@ -15,16 +15,13 @@
  */
 package be.imgn.javapoet;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public final class CodeBlockTest {
   @Test public void equalsAndHashCode() {
@@ -40,95 +37,79 @@ public final class CodeBlockTest {
 
   @Test public void of() {
     var a = CodeBlock.of("$L taco", "delicious");
-    assertThat(a.toString()).isEqualTo("delicious taco");
+    assertThat(a)
+      .hasToString("delicious taco");
   }
 
   @Test public void isEmpty() {
-    assertTrue(CodeBlock.builder().isEmpty());
-    assertTrue(CodeBlock.builder().add("").isEmpty());
-    assertFalse(CodeBlock.builder().add(" ").isEmpty());
+    assertThat(CodeBlock.builder().isEmpty())
+      .isTrue();
+    assertThat(CodeBlock.builder().add("").isEmpty())
+      .isTrue();
+    assertThat(CodeBlock.builder().add(" ").isEmpty())
+      .isFalse();
   }
 
   @Test public void indentCannotBeIndexed() {
-    try {
-      CodeBlock.builder().add("$1>", "taco").build();
-      fail();
-    } catch (IllegalArgumentException exp) {
-      assertThat(exp)
-          .hasMessageThat()
-          .isEqualTo("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1>", "taco").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
   @Test public void deindentCannotBeIndexed() {
-    try {
-      CodeBlock.builder().add("$1<", "taco").build();
-      fail();
-    } catch (IllegalArgumentException exp) {
-      assertThat(exp)
-          .hasMessageThat()
-          .isEqualTo("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1<", "taco").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
   @Test public void dollarSignEscapeCannotBeIndexed() {
-    try {
-      CodeBlock.builder().add("$1$", "taco").build();
-      fail();
-    } catch (IllegalArgumentException exp) {
-      assertThat(exp)
-          .hasMessageThat()
-          .isEqualTo("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1$", "taco").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
   @Test public void statementBeginningCannotBeIndexed() {
-    try {
-      CodeBlock.builder().add("$1[", "taco").build();
-      fail();
-    } catch (IllegalArgumentException exp) {
-      assertThat(exp)
-          .hasMessageThat()
-          .isEqualTo("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1[", "taco").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
   @Test public void statementEndingCannotBeIndexed() {
-    try {
-      CodeBlock.builder().add("$1]", "taco").build();
-      fail();
-    } catch (IllegalArgumentException exp) {
-      assertThat(exp)
-          .hasMessageThat()
-          .isEqualTo("$$, $>, $<, $[, $], $W, and $Z may not have an index");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1]", "taco").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("$$, $>, $<, $[, $], $W, and $Z may not have an index");
   }
 
   @Test public void nameFormatCanBeIndexed() {
     var block = CodeBlock.builder().add("$1N", "taco").build();
-    assertThat(block.toString()).isEqualTo("taco");
+    assertThat(block)
+      .hasToString("taco");
   }
 
   @Test public void literalFormatCanBeIndexed() {
     var block = CodeBlock.builder().add("$1L", "taco").build();
-    assertThat(block.toString()).isEqualTo("taco");
+    assertThat(block)
+      .hasToString("taco");
   }
 
   @Test public void stringFormatCanBeIndexed() {
     var block = CodeBlock.builder().add("$1S", "taco").build();
-    assertThat(block.toString()).isEqualTo("\"taco\"");
+    assertThat(block)
+      .hasToString("\"taco\"");
   }
 
   @Test public void typeFormatCanBeIndexed() {
     var block = CodeBlock.builder().add("$1T", String.class).build();
-    assertThat(block.toString()).isEqualTo("java.lang.String");
+    assertThat(block)
+      .hasToString("java.lang.String");
   }
 
   @Test public void simpleNamedArgument() {
     var map = new LinkedHashMap<String, Object>();
     map.put("text", "taco");
     var block = CodeBlock.builder().addNamed("$text:S", map).build();
-    assertThat(block.toString()).isEqualTo("\"taco\"");
+    assertThat(block)
+      .hasToString("\"taco\"");
   }
 
   @Test public void repeatedNamedArgument() {
@@ -137,8 +118,8 @@ public final class CodeBlockTest {
     var block = CodeBlock.builder()
         .addNamed("\"I like \" + $text:S + \". Do you like \" + $text:S + \"?\"", map)
         .build();
-    assertThat(block.toString()).isEqualTo(
-        "\"I like \" + \"tacos\" + \". Do you like \" + \"tacos\" + \"?\"");
+    assertThat(block)
+      .hasToString("\"I like \" + \"tacos\" + \". Do you like \" + \"tacos\" + \"?\"");
   }
 
   @Test public void namedAndNoArgFormat() {
@@ -146,198 +127,161 @@ public final class CodeBlockTest {
     map.put("text", "tacos");
     var block = CodeBlock.builder()
         .addNamed("$>\n$text:L for $$3.50", map).build();
-    assertThat(block.toString()).isEqualTo("\n  tacos for $3.50");
+    assertThat(block)
+      .hasToString("\n  tacos for $3.50");
   }
 
   @Test public void missingNamedArgument() {
-    try {
-      var map = new LinkedHashMap<String, Object>();
-      CodeBlock.builder().addNamed("$text:S", map).build();
-      fail();
-    } catch(IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("Missing named argument for $text");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().addNamed("$text:S", Map.of()).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Missing named argument for $text");
   }
 
   @Test public void lowerCaseNamed() {
-    try {
-      var map = new LinkedHashMap<String, Object>();
-      map.put("Text", "tacos");
-      var block = CodeBlock.builder().addNamed("$Text:S", map).build();
-      fail();
-    } catch(IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("argument 'Text' must start with a lowercase character");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().addNamed("$text:S", Map.of()).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Missing named argument for $text");
   }
 
   @Test public void multipleNamedArguments() {
-    var map = new LinkedHashMap<String, Object>();
-    map.put("pipe", System.class);
-    map.put("text", "tacos");
+    var map = Map.of(
+      "pipe", System.class,
+      "text", "tacos");
 
     var block = CodeBlock.builder()
         .addNamed("$pipe:T.out.println(\"Let's eat some $text:L\");", map)
         .build();
 
-    assertThat(block.toString()).isEqualTo(
+    assertThat(block)
+      .hasToString(
         "java.lang.System.out.println(\"Let's eat some tacos\");");
   }
 
   @Test public void namedNewline() {
-    var map = new LinkedHashMap<String, Object>();
-    map.put("clazz", Integer.class);
+    var map = Map.of("clazz", Integer.class);
     var block = CodeBlock.builder().addNamed("$clazz:T\n", map).build();
-    assertThat(block.toString()).isEqualTo("java.lang.Integer\n");
+    assertThat(block)
+      .hasToString("java.lang.Integer\n");
   }
 
   @Test public void danglingNamed() {
-    var map = new LinkedHashMap<String, Object>();
-    map.put("clazz", Integer.class);
-    try {
-      CodeBlock.builder().addNamed("$clazz:T$", map).build();
-      fail();
-    } catch(IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("dangling $ at end");
-    }
+    var map = Map.of("clazz", Integer.class);
+    assertThatThrownBy(() -> CodeBlock.builder().addNamed("$clazz:T$", map).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("dangling $ at end");
   }
 
   @Test public void indexTooHigh() {
-    try {
-      CodeBlock.builder().add("$2T", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("index 2 for '$2T' not in range (received 1 arguments)");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$2T", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("index 2 for '$2T' not in range (received 1 arguments)");
   }
 
   @Test public void indexIsZero() {
-    try {
-      CodeBlock.builder().add("$0T", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("index 0 for '$0T' not in range (received 1 arguments)");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$0T", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("index 0 for '$0T' not in range (received 1 arguments)");
   }
 
   @Test public void indexIsNegative() {
-    try {
-      CodeBlock.builder().add("$-1T", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("invalid format string: '$-1T'");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$-1T", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("invalid format string: '$-1T'");
   }
 
   @Test public void indexWithoutFormatType() {
-    try {
-      CodeBlock.builder().add("$1", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("dangling format characters in '$1'");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("dangling format characters in '$1'");
   }
 
   @Test public void indexWithoutFormatTypeNotAtStringEnd() {
-    try {
-      CodeBlock.builder().add("$1 taco", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("invalid format string: '$1 taco'");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1 taco", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("invalid format string: '$1 taco'");
   }
 
   @Test public void indexButNoArguments() {
-    try {
-      CodeBlock.builder().add("$1T").build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("index 1 for '$1T' not in range (received 0 arguments)");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$1T").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("index 1 for '$1T' not in range (received 0 arguments)");
   }
 
   @Test public void formatIndicatorAlone() {
-    try {
-      CodeBlock.builder().add("$", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("dangling format characters in '$'");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("dangling format characters in '$'");
   }
 
   @Test public void formatIndicatorWithoutIndexOrFormatType() {
-    try {
-      CodeBlock.builder().add("$ tacoString", String.class).build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("invalid format string: '$ tacoString'");
-    }
+    assertThatThrownBy(() -> CodeBlock.builder().add("$ tacoString", String.class).build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("invalid format string: '$ tacoString'");
   }
 
   @Test public void sameIndexCanBeUsedWithDifferentFormats() {
     var block = CodeBlock.builder()
         .add("$1T.out.println($1S)", ClassName.get(System.class))
         .build();
-    assertThat(block.toString()).isEqualTo("java.lang.System.out.println(\"java.lang.System\")");
+    assertThat(block)
+      .hasToString("java.lang.System.out.println(\"java.lang.System\")");
   }
 
   @Test public void tooManyStatementEnters() {
     var codeBlock = CodeBlock.builder().add("$[$[").build();
-    try {
-      // We can't report this error until rendering type because code blocks might be composed.
-      codeBlock.toString();
-      fail();
-    } catch (IllegalStateException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("statement enter $[ followed by statement enter $[");
-    }
+    // We can't report this error until rendering type because code blocks might be composed.
+    assertThatThrownBy(() -> codeBlock.toString())
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("statement enter $[ followed by statement enter $[");
   }
 
   @Test public void statementExitWithoutStatementEnter() {
     var codeBlock = CodeBlock.builder().add("$]").build();
-    try {
-      // We can't report this error until rendering type because code blocks might be composed.
-      codeBlock.toString();
-      fail();
-    } catch (IllegalStateException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("statement exit $] has no matching statement enter $[");
-    }
+    // We can't report this error until rendering type because code blocks might be composed.
+    assertThatThrownBy(() -> codeBlock.toString())
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("statement exit $] has no matching statement enter $[");
   }
 
   @Test public void join() {
-    var codeBlocks = new ArrayList<CodeBlock>();
-    codeBlocks.add(CodeBlock.of("$S", "hello"));
-    codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
-    codeBlocks.add(CodeBlock.of("need tacos"));
+    var codeBlocks = List.of(
+      CodeBlock.of("$S", "hello"),
+      CodeBlock.of("$T", ClassName.get("world", "World")),
+      CodeBlock.of("need tacos"));
 
     var joined = CodeBlock.join(codeBlocks, " || ");
-    assertThat(joined.toString()).isEqualTo("\"hello\" || world.World || need tacos");
+    assertThat(joined)
+      .hasToString("\"hello\" || world.World || need tacos");
   }
 
   @Test public void joining() {
-    var codeBlocks = new ArrayList<CodeBlock>();
-    codeBlocks.add(CodeBlock.of("$S", "hello"));
-    codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
-    codeBlocks.add(CodeBlock.of("need tacos"));
+    var codeBlocks = List.of(
+      CodeBlock.of("$S", "hello"),
+      CodeBlock.of("$T", ClassName.get("world", "World")),
+      CodeBlock.of("need tacos"));
 
     var joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
-    assertThat(joined.toString()).isEqualTo("\"hello\" || world.World || need tacos");
+    assertThat(joined)
+      .hasToString("\"hello\" || world.World || need tacos");
   }
 
   @Test public void joiningSingle() {
-    var codeBlocks = new ArrayList<CodeBlock>();
-    codeBlocks.add(CodeBlock.of("$S", "hello"));
+    var codeBlocks = List.of(CodeBlock.of("$S", "hello"));
 
     var joined = codeBlocks.stream().collect(CodeBlock.joining(" || "));
-    assertThat(joined.toString()).isEqualTo("\"hello\"");
+    assertThat(joined)
+      .hasToString("\"hello\"");
   }
 
   @Test public void joiningWithPrefixAndSuffix() {
-    var codeBlocks = new ArrayList<CodeBlock>();
-    codeBlocks.add(CodeBlock.of("$S", "hello"));
-    codeBlocks.add(CodeBlock.of("$T", ClassName.get("world", "World")));
-    codeBlocks.add(CodeBlock.of("need tacos"));
+    var codeBlocks = List.of(
+      CodeBlock.of("$S", "hello"),
+      CodeBlock.of("$T", ClassName.get("world", "World")),
+      CodeBlock.of("need tacos"));
 
     var joined = codeBlocks.stream().collect(CodeBlock.joining(" || ", "start {", "} end"));
-    assertThat(joined.toString()).isEqualTo("start {\"hello\" || world.World || need tacos} end");
+    assertThat(joined)
+      .hasToString("start {\"hello\" || world.World || need tacos} end");
   }
 
   @Test public void clear() {

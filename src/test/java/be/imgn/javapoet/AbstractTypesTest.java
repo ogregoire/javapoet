@@ -15,11 +15,11 @@
  */
 package be.imgn.javapoet;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import static javax.lang.model.util.ElementFilter.fieldsIn;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.google.testing.compile.JavaFileObjects;
 import java.io.Serializable;
@@ -37,11 +37,29 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(CompilationExtension.class)
 public abstract class AbstractTypesTest {
-  protected abstract Elements getElements();
-  protected abstract Types getTypes();
+
+  private Elements elements;
+  private Types types;
+
+  @BeforeEach
+  public void setUp(Elements elements, Types types) {
+    this.elements = elements;
+    this.types = types;
+  }
+
+  protected final Elements getElements() {
+    return elements;
+  }
+
+  protected final Types getTypes() {
+    return types;
+  }
 
   private TypeElement getElement(Class<?> clazz) {
     return getElements().getTypeElement(clazz.getCanonicalName());
@@ -140,7 +158,8 @@ public abstract class AbstractTypesTest {
     var typeMirror = getElement(Recursive.class).asType();
     var typeName = (ParameterizedTypeName) TypeName.get(typeMirror);
     var className = Recursive.class.getCanonicalName();
-    assertThat(typeName.toString()).isEqualTo(className + "<T>");
+    assertThat(typeName)
+      .hasToString(className + "<T>");
 
     var typeVariableName = (TypeVariableName) typeName.typeArguments.get(0);
 
@@ -150,7 +169,8 @@ public abstract class AbstractTypesTest {
     } catch (UnsupportedOperationException expected) {
     }
 
-    assertThat(typeVariableName.toString()).isEqualTo("T");
+    assertThat(typeVariableName)
+      .hasToString("T");
     assertThat(typeVariableName.bounds.toString())
         .isEqualTo("[java.util.Map<java.util.List<T>, java.util.Set<T[]>>]");
   }
@@ -194,33 +214,39 @@ public abstract class AbstractTypesTest {
 
   @Test public void parameterizedType() throws Exception {
     var type = ParameterizedTypeName.get(Map.class, String.class, Long.class);
-    assertThat(type.toString()).isEqualTo("java.util.Map<java.lang.String, java.lang.Long>");
+    assertThat(type)
+      .hasToString("java.util.Map<java.lang.String, java.lang.Long>");
   }
 
   @Test public void arrayType() throws Exception {
     var type = ArrayTypeName.of(String.class);
-    assertThat(type.toString()).isEqualTo("java.lang.String[]");
+    assertThat(type)
+      .hasToString("java.lang.String[]");
   }
 
   @Test public void wildcardExtendsType() throws Exception {
     var type = WildcardTypeName.subtypeOf(CharSequence.class);
-    assertThat(type.toString()).isEqualTo("? extends java.lang.CharSequence");
+    assertThat(type)
+      .hasToString("? extends java.lang.CharSequence");
   }
 
   @Test public void wildcardExtendsObject() throws Exception {
     var type = WildcardTypeName.subtypeOf(Object.class);
-    assertThat(type.toString()).isEqualTo("?");
+    assertThat(type)
+      .hasToString("?");
   }
 
   @Test public void wildcardSuperType() throws Exception {
     var type = WildcardTypeName.supertypeOf(String.class);
-    assertThat(type.toString()).isEqualTo("? super java.lang.String");
+    assertThat(type)
+      .hasToString("? super java.lang.String");
   }
 
   @Test public void wildcardMirrorNoBounds() throws Exception {
     var wildcard = getTypes().getWildcardType(null, null);
     var type = TypeName.get(wildcard);
-    assertThat(type.toString()).isEqualTo("?");
+    assertThat(type)
+      .hasToString("?");
   }
 
   @Test public void wildcardMirrorExtendsType() throws Exception {
@@ -229,7 +255,8 @@ public abstract class AbstractTypesTest {
     var charSequence = elements.getTypeElement(CharSequence.class.getName()).asType();
     var wildcard = types.getWildcardType(charSequence, null);
     var type = TypeName.get(wildcard);
-    assertThat(type.toString()).isEqualTo("? extends java.lang.CharSequence");
+    assertThat(type)
+      .hasToString("? extends java.lang.CharSequence");
   }
 
   @Test public void wildcardMirrorSuperType() throws Exception {
@@ -238,12 +265,14 @@ public abstract class AbstractTypesTest {
     var string = elements.getTypeElement(String.class.getName()).asType();
     var wildcard = types.getWildcardType(null, string);
     var type = TypeName.get(wildcard);
-    assertThat(type.toString()).isEqualTo("? super java.lang.String");
+    assertThat(type)
+      .hasToString("? super java.lang.String");
   }
 
   @Test public void typeVariable() throws Exception {
     var type = TypeVariableName.get("T", CharSequence.class);
-    assertThat(type.toString()).isEqualTo("T"); // (Bounds are only emitted in declaration.)
+    assertThat(type)
+      .hasToString("T"); // (Bounds are only emitted in declaration.)
   }
 
   @Test public void box() throws Exception {

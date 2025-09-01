@@ -16,6 +16,8 @@
 package be.imgn.javapoet;
 
 import com.google.common.io.ByteStreams;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -24,27 +26,21 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.lang.model.element.Modifier;
 import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@RunWith(JUnit4.class)
 public class FileReadingTest {
-  
+
   // Used for storing compilation output.
-  @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  File temporaryFolder;
 
   @Test public void javaFileObjectUri() {
     var type = TypeSpec.classBuilder("Test").build();
@@ -55,12 +51,12 @@ public class FileReadingTest {
     assertThat(JavaFile.builder("com.example", type).build().toJavaFileObject().toUri())
         .isEqualTo(URI.create("com/example/Test.java"));
   }
-  
+
   @Test public void javaFileObjectKind() {
     var javaFile = JavaFile.builder("", TypeSpec.classBuilder("Test").build()).build();
     assertThat(javaFile.toJavaFileObject().getKind()).isEqualTo(Kind.SOURCE);
   }
-  
+
   @Test public void javaFileObjectCharacterContent() throws IOException {
     var type = TypeSpec.classBuilder("Test")
         .addJavadoc("Pi\u00f1ata\u00a1")
@@ -68,22 +64,22 @@ public class FileReadingTest {
         .build();
     var javaFile = JavaFile.builder("foo", type).build();
     var javaFileObject = javaFile.toJavaFileObject();
-    
+
     // We can never have encoding issues (everything is in process)
     assertThat(javaFileObject.getCharContent(true)).isEqualTo(javaFile.toString());
     assertThat(javaFileObject.getCharContent(false)).isEqualTo(javaFile.toString());
   }
-  
+
   @Test public void javaFileObjectInputStreamIsUtf8() throws IOException {
     var javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Test").build())
         .addFileComment("Pi\u00f1ata\u00a1")
         .build();
     var bytes = ByteStreams.toByteArray(javaFile.toJavaFileObject().openInputStream());
-    
+
     // JavaPoet always uses UTF-8.
     assertThat(bytes).isEqualTo(javaFile.toString().getBytes(UTF_8));
   }
-  
+
   @Test public void compileJavaFile() throws Exception {
     var value = "Hello World!";
     var type = TypeSpec.classBuilder("Test")
@@ -102,14 +98,14 @@ public class FileReadingTest {
     var fileManager = compiler.getStandardFileManager(diagnosticCollector,
         Locale.getDefault(), UTF_8);
     fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-        Collections.singleton(temporaryFolder.newFolder()));
+        Set.of(temporaryFolder));
     var task = compiler.getTask(null,
         fileManager,
         diagnosticCollector,
         Set.of("-proc:full"),
-        Collections.emptySet(),
-        Collections.singleton(javaFile.toJavaFileObject()));
-    
+        Set.of(),
+        Set.of(javaFile.toJavaFileObject()));
+
     assertThat(task.call()).isTrue();
     assertThat(diagnosticCollector.getDiagnostics()).isEmpty();
 

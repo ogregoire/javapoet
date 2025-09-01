@@ -15,24 +15,31 @@
  */
 package be.imgn.javapoet;
 
-import com.google.testing.compile.CompilationRule;
 import java.util.Map;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import javax.lang.model.util.Types;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnit4.class)
+@ExtendWith(CompilationExtension.class)
 public final class ClassNameTest {
-  @Rule public CompilationRule compilationRule = new CompilationRule();
+  private Elements elements;
+  private Types types;
+
+  @BeforeEach
+  public void setUp(Elements elements, Types types) {
+    this.elements = elements;
+    this.types = types;
+  }
+
 
   @Test public void bestGuessForString_simpleClass() {
     assertThat(ClassName.bestGuess(String.class.getName()))
@@ -42,8 +49,8 @@ public final class ClassNameTest {
   @Test public void bestGuessNonAscii() {
     var className = ClassName.bestGuess(
         "com.\ud835\udc1andro\ud835\udc22d.\ud835\udc00ctiv\ud835\udc22ty");
-    assertEquals("com.\ud835\udc1andro\ud835\udc22d", className.packageName());
-    assertEquals("\ud835\udc00ctiv\ud835\udc22ty", className.simpleName());
+    assertThat("com.\ud835\udc1andro\ud835\udc22d").isEqualTo(className.packageName());
+    assertThat("\ud835\udc00ctiv\ud835\udc22ty").isEqualTo(className.simpleName());
   }
 
   static class OuterClass {
@@ -83,11 +90,8 @@ public final class ClassNameTest {
   }
 
   private void assertBestGuessThrows(String s) {
-    try {
-      ClassName.bestGuess(s);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThatThrownBy(() -> ClassName.bestGuess(s))
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test public void createNestedClass() {
@@ -103,13 +107,15 @@ public final class ClassNameTest {
   }
 
   @Test public void classNameFromTypeElement() {
-    var elements = compilationRule.getElements();
     var object = elements.getTypeElement(Object.class.getCanonicalName());
-    assertThat(ClassName.get(object).toString()).isEqualTo("java.lang.Object");
+    assertThat(ClassName.get(object))
+      .hasToString("java.lang.Object");
     var outer = elements.getTypeElement($Outer.class.getCanonicalName());
-    assertThat(ClassName.get(outer).toString()).isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer");
+    assertThat(ClassName.get(outer))
+      .hasToString("be.imgn.javapoet.ClassNameTest.$Outer");
     var inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
-    assertThat(ClassName.get(inner).toString()).isEqualTo("be.imgn.javapoet.ClassNameTest.$Outer.$Inner");
+    assertThat(ClassName.get(inner))
+      .hasToString("be.imgn.javapoet.ClassNameTest.$Outer.$Inner");
   }
 
   /**
@@ -117,7 +123,6 @@ public final class ClassNameTest {
    * {@link TypeElement#getKind()}. Test to confirm that we don't use that API.
    */
   @Test public void classNameFromTypeElementDoesntUseGetKind() {
-    var elements = compilationRule.getElements();
     var object = elements.getTypeElement(Object.class.getCanonicalName());
     assertThat(ClassName.get(preventGetKind(object)).toString())
         .isEqualTo("java.lang.Object");
@@ -167,40 +172,49 @@ public final class ClassNameTest {
   }
 
   @Test public void fromClassRejectionTypes() {
-    try {
+    assertThatThrownBy(() -> {
       ClassName.get(int.class);
-      fail();
-    } catch (IllegalArgumentException ignored) {
-    }
-    try {
+    })
+      .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> {
       ClassName.get(void.class);
-      fail();
-    } catch (IllegalArgumentException ignored) {
-    }
-    try {
+    })
+      .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> {
       ClassName.get(Object[].class);
-      fail();
-    } catch (IllegalArgumentException ignored) {
-    }
+    })
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   public void reflectionName() {
-    assertEquals("java.lang.Object", TypeName.OBJECT.reflectionName());
-    assertEquals("java.lang.Thread$State", ClassName.get(Thread.State.class).reflectionName());
-    assertEquals("java.util.Map$Entry", ClassName.get(Map.Entry.class).reflectionName());
-    assertEquals("Foo", ClassName.get("", "Foo").reflectionName());
-    assertEquals("Foo$Bar$Baz", ClassName.get("", "Foo", "Bar", "Baz").reflectionName());
-    assertEquals("a.b.c.Foo$Bar$Baz", ClassName.get("a.b.c", "Foo", "Bar", "Baz").reflectionName());
+    assertThat(TypeName.OBJECT.reflectionName())
+      .isEqualTo("java.lang.Object");
+    assertThat(ClassName.get(Thread.State.class).reflectionName())
+      .isEqualTo("java.lang.Thread$State");
+    assertThat(ClassName.get(Map.Entry.class).reflectionName())
+      .isEqualTo("java.util.Map$Entry");
+    assertThat(ClassName.get("", "Foo").reflectionName())
+      .isEqualTo("Foo");
+    assertThat(ClassName.get("", "Foo", "Bar", "Baz").reflectionName())
+      .isEqualTo("Foo$Bar$Baz");
+    assertThat(ClassName.get("a.b.c", "Foo", "Bar", "Baz").reflectionName())
+      .isEqualTo("a.b.c.Foo$Bar$Baz");
   }
 
   @Test
   public void canonicalName() {
-    assertEquals("java.lang.Object", TypeName.OBJECT.canonicalName());
-    assertEquals("java.lang.Thread.State", ClassName.get(Thread.State.class).canonicalName());
-    assertEquals("java.util.Map.Entry", ClassName.get(Map.Entry.class).canonicalName());
-    assertEquals("Foo", ClassName.get("", "Foo").canonicalName());
-    assertEquals("Foo.Bar.Baz", ClassName.get("", "Foo", "Bar", "Baz").canonicalName());
-    assertEquals("a.b.c.Foo.Bar.Baz", ClassName.get("a.b.c", "Foo", "Bar", "Baz").canonicalName());
+    assertThat(TypeName.OBJECT.canonicalName())
+      .isEqualTo("java.lang.Object");
+    assertThat(ClassName.get(Thread.State.class).canonicalName())
+      .isEqualTo("java.lang.Thread.State");
+    assertThat(ClassName.get(Map.Entry.class).canonicalName())
+      .isEqualTo("java.util.Map.Entry");
+    assertThat(ClassName.get("", "Foo").canonicalName())
+      .isEqualTo("Foo");
+    assertThat(ClassName.get("", "Foo", "Bar", "Baz").canonicalName())
+      .isEqualTo("Foo.Bar.Baz");
+    assertThat(ClassName.get("a.b.c", "Foo", "Bar", "Baz").canonicalName())
+      .isEqualTo("a.b.c.Foo.Bar.Baz");
   }
 }

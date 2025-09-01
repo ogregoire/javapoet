@@ -22,13 +22,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
-import javax.lang.model.element.TypeElement;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@ExtendWith(CompilationExtension.class)
 public final class AnnotationSpecTest {
 
   @Retention(RetentionPolicy.RUNTIME)
@@ -104,7 +108,16 @@ public final class AnnotationSpecTest {
     // empty
   }
 
-  @Rule public final CompilationRule compilation = new CompilationRule();
+  private Elements elements;
+  private Types types;
+
+  @BeforeEach
+  public void setUp(Elements elements, Types types) {
+    this.elements = elements;
+    this.types = types;
+  }
+
+
 
   @Test public void equalsAndHashCode() {
     var a = AnnotationSpec.builder(AnnotationC.class).build();
@@ -119,7 +132,7 @@ public final class AnnotationSpecTest {
 
   @Test public void defaultAnnotation() {
     var name = IsAnnotated.class.getCanonicalName();
-    var element = compilation.getElements().getTypeElement(name);
+    var element = elements.getTypeElement(name);
     var annotation = AnnotationSpec.get(element.getAnnotationMirrors().getFirst());
 
     var taco = TypeSpec.classBuilder("Taco")
@@ -127,12 +140,12 @@ public final class AnnotationSpecTest {
         .build();
     assertThat(toString(taco)).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.javapoet.AnnotationSpecTest;
             import java.lang.Double;
             import java.lang.Float;
             import java.lang.Override;
-            
+
             @AnnotationSpecTest.HasDefaultsAnnotation(
                 o = AnnotationSpecTest.Breakfast.PANCAKES,
                 p = 1701,
@@ -157,19 +170,20 @@ public final class AnnotationSpecTest {
 
   @Test public void defaultAnnotationWithImport() {
     var name = IsAnnotated.class.getCanonicalName();
-    var element = compilation.getElements().getTypeElement(name);
+    var element = elements.getTypeElement(name);
     var annotation = AnnotationSpec.get(element.getAnnotationMirrors().get(0));
     var typeBuilder = TypeSpec.classBuilder(IsAnnotated.class.getSimpleName());
     typeBuilder.addAnnotation(annotation);
     var file = JavaFile.builder("be.imgn.javapoet", typeBuilder.build()).build();
-    assertThat(file.toString()).isEqualTo(
+    assertThat(file)
+      .hasToString(
             """
                     package be.imgn.javapoet;
-                    
+
                     import java.lang.Double;
                     import java.lang.Float;
                     import java.lang.Override;
-                    
+
                     @AnnotationSpecTest.HasDefaultsAnnotation(
                         o = AnnotationSpecTest.Breakfast.PANCAKES,
                         p = 1701,
@@ -196,11 +210,11 @@ public final class AnnotationSpecTest {
   @Test public void emptyArray() {
     var builder = AnnotationSpec.builder(HasDefaultsAnnotation.class);
     builder.addMember("n", "$L", "{}");
-    assertThat(builder.build().toString()).isEqualTo(
-        "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation(" + "n = {}" + ")");
+    assertThat(builder.build())
+      .hasToString("@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation(" + "n = {}" + ")");
     builder.addMember("m", "$L", "{}");
-    assertThat(builder.build().toString())
-        .isEqualTo(
+    assertThat(builder.build())
+        .hasToString(
             "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
                 + "n = {}, m = {}"
                 + ")");
@@ -209,7 +223,8 @@ public final class AnnotationSpecTest {
   @Test public void dynamicArrayOfEnumConstants() {
     var builder = AnnotationSpec.builder(HasDefaultsAnnotation.class);
     builder.addMember("n", "$T.$L", Breakfast.class, Breakfast.PANCAKES.name());
-    assertThat(builder.build().toString()).isEqualTo(
+    assertThat(builder.build())
+      .hasToString(
         "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
             + "n = be.imgn.javapoet.AnnotationSpecTest.Breakfast.PANCAKES"
             + ")");
@@ -217,7 +232,8 @@ public final class AnnotationSpecTest {
     // builder = AnnotationSpec.builder(HasDefaultsAnnotation.class);
     builder.addMember("n", "$T.$L", Breakfast.class, Breakfast.WAFFLES.name());
     builder.addMember("n", "$T.$L", Breakfast.class, Breakfast.PANCAKES.name());
-    assertThat(builder.build().toString()).isEqualTo(
+    assertThat(builder.build())
+      .hasToString(
         "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
             + "n = {"
             + "be.imgn.javapoet.AnnotationSpecTest.Breakfast.PANCAKES"
@@ -226,7 +242,8 @@ public final class AnnotationSpecTest {
             + "})");
 
     builder = builder.build().toBuilder(); // idempotent
-    assertThat(builder.build().toString()).isEqualTo(
+    assertThat(builder.build())
+      .hasToString(
         "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
             + "n = {"
             + "be.imgn.javapoet.AnnotationSpecTest.Breakfast.PANCAKES"
@@ -235,7 +252,8 @@ public final class AnnotationSpecTest {
             + "})");
 
     builder.addMember("n", "$T.$L", Breakfast.class, Breakfast.WAFFLES.name());
-    assertThat(builder.build().toString()).isEqualTo(
+    assertThat(builder.build())
+      .hasToString(
         "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
             + "n = {"
             + "be.imgn.javapoet.AnnotationSpecTest.Breakfast.PANCAKES"
@@ -247,11 +265,12 @@ public final class AnnotationSpecTest {
 
   @Test public void defaultAnnotationToBuilder() {
     var name = IsAnnotated.class.getCanonicalName();
-    var element = compilation.getElements().getTypeElement(name);
+    var element = elements.getTypeElement(name);
     var builder = AnnotationSpec.get(element.getAnnotationMirrors().get(0))
         .toBuilder();
     builder.addMember("m", "$L", 123);
-    assertThat(builder.build().toString()).isEqualTo(
+    assertThat(builder.build())
+      .hasToString(
         "@be.imgn.javapoet.AnnotationSpecTest.HasDefaultsAnnotation("
             + "o = be.imgn.javapoet.AnnotationSpecTest.Breakfast.PANCAKES"
             + ", p = 1701"
@@ -272,12 +291,12 @@ public final class AnnotationSpecTest {
         .build();
     assertThat(toString(taco)).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.javapoet.AnnotationSpecTest;
             import java.lang.Double;
             import java.lang.Float;
             import java.lang.Override;
-            
+
             @AnnotationSpecTest.HasDefaultsAnnotation(
                 f = 11.1,
                 l = Override.class,
@@ -307,12 +326,12 @@ public final class AnnotationSpecTest {
         .build();
     assertThat(toString(taco)).isEqualTo("""
             package be.imgn.tacos;
-            
+
             import be.imgn.javapoet.AnnotationSpecTest;
             import java.lang.Double;
             import java.lang.Float;
             import java.lang.Override;
-            
+
             @AnnotationSpecTest.HasDefaultsAnnotation(
                 a = 5,
                 b = 6,
@@ -360,32 +379,27 @@ public final class AnnotationSpecTest {
 
   @Test public void disallowsNullMemberName() {
     var builder = AnnotationSpec.builder(HasDefaultsAnnotation.class);
-    try {
-      AnnotationSpec.Builder $L = builder.addMember(null, "$L", "");
-      fail($L.build().toString());
-    } catch (NullPointerException e) {
-      assertThat(e).hasMessageThat().isEqualTo("name == null");
-    }
+    assertThatThrownBy(() -> builder.addMember(null, "$L", "").build())
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("name == null");
   }
 
   @Test public void requiresValidMemberName() {
     var builder = AnnotationSpec.builder(HasDefaultsAnnotation.class);
-    try {
-      var $L = builder.addMember("@", "$L", "");
-      fail($L.build().toString());
-    } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessageThat().isEqualTo("not a valid name: @");
-    }
+    assertThatThrownBy(() -> builder.addMember("@", "$L", "").build())
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("not a valid name: @");
   }
 
   @Test public void modifyMembers() {
     var builder = AnnotationSpec.builder(SuppressWarnings.class)
             .addMember("value", "$S", "Foo");
-    
+
     builder.members.clear();
     builder.members.put("value", Arrays.asList(CodeBlock.of("$S", "Bar")));
 
-    assertThat(builder.build().toString()).isEqualTo("@java.lang.SuppressWarnings(\"Bar\")");
+    assertThat(builder.build())
+      .hasToString("@java.lang.SuppressWarnings(\"Bar\")");
   }
 
   private String toString(TypeSpec typeSpec) {
