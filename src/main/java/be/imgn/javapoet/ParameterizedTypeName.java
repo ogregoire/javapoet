@@ -29,8 +29,8 @@ import static be.imgn.javapoet.Util.checkNotNull;
 
 public final class ParameterizedTypeName extends TypeName {
   private final ParameterizedTypeName enclosingType;
-  public final ClassName rawType;
-  public final List<TypeName> typeArguments;
+  private final ClassName rawType;
+  private final List<TypeName> typeArguments;
 
   ParameterizedTypeName(ParameterizedTypeName enclosingType, ClassName rawType,
       List<TypeName> typeArguments) {
@@ -52,15 +52,23 @@ public final class ParameterizedTypeName extends TypeName {
     }
   }
 
+  public ClassName rawType() {
+    return rawType;
+  }
+
+  public List<TypeName> typeArguments() {
+    return typeArguments;
+  }
+
   @Override public ParameterizedTypeName annotated(List<AnnotationSpec> annotations) {
     return new ParameterizedTypeName(
-        enclosingType, rawType, typeArguments, concatAnnotations(annotations));
+        enclosingType, rawType(), typeArguments(), concatAnnotations(annotations));
   }
 
   @Override
   public TypeName withoutAnnotations() {
     return new ParameterizedTypeName(
-        enclosingType, rawType.withoutAnnotations(), typeArguments, new ArrayList<>());
+        enclosingType, rawType().withoutAnnotations(), typeArguments(), new ArrayList<>());
   }
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
@@ -71,14 +79,14 @@ public final class ParameterizedTypeName extends TypeName {
         out.emit(" ");
         emitAnnotations(out);
       }
-      out.emit(rawType.simpleName());
+      out.emit(rawType().simpleName());
     } else {
-      rawType.emit(out);
+      rawType().emit(out);
     }
-    if (!typeArguments.isEmpty()) {
+    if (!typeArguments().isEmpty()) {
       out.emitAndIndent("<");
       var firstParameter = true;
-      for (var parameter : typeArguments) {
+      for (var parameter : typeArguments()) {
         if (!firstParameter) out.emitAndIndent(", ");
         parameter.emit(out);
         firstParameter = false;
@@ -94,7 +102,7 @@ public final class ParameterizedTypeName extends TypeName {
    */
   public ParameterizedTypeName nestedClass(String name) {
     checkNotNull(name, "name == null");
-    return new ParameterizedTypeName(this, rawType.nestedClass(name), new ArrayList<>(),
+    return new ParameterizedTypeName(this, rawType().nestedClass(name), new ArrayList<>(),
         new ArrayList<>());
   }
 
@@ -104,7 +112,7 @@ public final class ParameterizedTypeName extends TypeName {
    */
   public ParameterizedTypeName nestedClass(String name, List<TypeName> typeArguments) {
     checkNotNull(name, "name == null");
-    return new ParameterizedTypeName(this, rawType.nestedClass(name), typeArguments,
+    return new ParameterizedTypeName(this, rawType().nestedClass(name), typeArguments,
         new ArrayList<>());
   }
 

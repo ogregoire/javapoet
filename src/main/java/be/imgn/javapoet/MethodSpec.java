@@ -39,17 +39,17 @@ import static be.imgn.javapoet.Util.checkState;
 public final class MethodSpec {
   static final String CONSTRUCTOR = "<init>";
 
-  public final String name;
-  public final CodeBlock javadoc;
-  public final List<AnnotationSpec> annotations;
-  public final Set<Modifier> modifiers;
-  public final List<TypeVariableName> typeVariables;
-  public final TypeName returnType;
-  public final List<ParameterSpec> parameters;
-  public final boolean varargs;
-  public final List<TypeName> exceptions;
-  public final CodeBlock code;
-  public final CodeBlock defaultValue;
+  private final String name;
+  private final CodeBlock javadoc;
+  private final List<AnnotationSpec> annotations;
+  private final Set<Modifier> modifiers;
+  private final List<TypeVariableName> typeVariables;
+  private final TypeName returnType;
+  private final List<ParameterSpec> parameters;
+  private final boolean varargs;
+  private final List<TypeName> exceptions;
+  private final CodeBlock code;
+  private final CodeBlock defaultValue;
   private final boolean compactConstructor;
 
   private MethodSpec(Builder builder) {
@@ -75,7 +75,7 @@ public final class MethodSpec {
 
   private boolean lastParameterIsArray(List<ParameterSpec> parameters) {
     return !parameters.isEmpty()
-        && TypeName.asArray((parameters.getLast().type)) != null;
+        && TypeName.asArray((parameters.getLast().type())) != null;
   }
 
   void emit(CodeWriter codeWriter, String enclosingName, Set<Modifier> implicitModifiers)
@@ -134,6 +134,50 @@ public final class MethodSpec {
 
   public boolean hasModifier(Modifier modifier) {
     return modifiers.contains(modifier);
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public CodeBlock javadoc() {
+    return javadoc;
+  }
+
+  public List<AnnotationSpec> annotations() {
+    return annotations;
+  }
+
+  public Set<Modifier> modifiers() {
+    return modifiers;
+  }
+
+  public List<TypeVariableName> typeVariables() {
+    return typeVariables;
+  }
+
+  public TypeName returnType() {
+    return returnType;
+  }
+
+  public List<ParameterSpec> parameters() {
+    return parameters;
+  }
+
+  public boolean varargs() {
+    return varargs;
+  }
+
+  public List<TypeName> exceptions() {
+    return exceptions;
+  }
+
+  public CodeBlock code() {
+    return code;
+  }
+
+  public CodeBlock defaultValue() {
+    return defaultValue;
   }
 
   public boolean isConstructor() {
@@ -248,7 +292,7 @@ public final class MethodSpec {
     for (int i = 0, size = builder.parameters.size(); i < size; i++) {
       var parameter = builder.parameters.get(i);
       var type = TypeName.get(resolvedParameterTypes.get(i));
-      builder.parameters.set(i, parameter.toBuilder(type, parameter.name).build());
+      builder.parameters.set(i, parameter.toBuilder(type, parameter.name()).build());
     }
     builder.exceptions.clear();
     for (var resolvedThrownType : resolvedThrownTypes) {

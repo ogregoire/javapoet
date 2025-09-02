@@ -329,10 +329,10 @@ public final class CodeBlock {
     private String argToName(Object o) {
       return switch (o) {
           case CharSequence cs ->  cs.toString();
-          case ParameterSpec ps -> ps.name;
-          case FieldSpec fs -> fs.name;
-          case MethodSpec ms -> ms.name;
-          case TypeSpec ts -> ts.name;
+          case ParameterSpec ps -> ps.name();
+          case FieldSpec fs -> fs.name();
+          case MethodSpec ms -> ms.name();
+          case TypeSpec ts -> ts.name();
           default -> throw new IllegalArgumentException("expected name but was " + o);
       };
     }

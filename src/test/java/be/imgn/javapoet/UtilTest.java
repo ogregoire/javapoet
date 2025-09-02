@@ -27,7 +27,8 @@ public class UtilTest {
   @ParameterizedTest
   @MethodSource("provideCharacterLiterals")
   public void characterLiteral(String expected, char inputChar) {
-    assertThat(expected).isEqualTo(Util.characterLiteralWithoutSingleQuotes(inputChar));
+    assertThat(expected)
+      .isEqualTo(Util.characterLiteralWithoutSingleQuotes(inputChar));
   }
 
   private static List<Arguments> provideCharacterLiterals() {

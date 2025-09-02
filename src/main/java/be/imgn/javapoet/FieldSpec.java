@@ -30,12 +30,12 @@ import static be.imgn.javapoet.Util.checkState;
 
 /** A generated field declaration. */
 public final class FieldSpec {
-  public final TypeName type;
-  public final String name;
-  public final CodeBlock javadoc;
-  public final List<AnnotationSpec> annotations;
-  public final Set<Modifier> modifiers;
-  public final CodeBlock initializer;
+  private final TypeName type;
+  private final String name;
+  private final CodeBlock javadoc;
+  private final List<AnnotationSpec> annotations;
+  private final Set<Modifier> modifiers;
+  private final CodeBlock initializer;
 
   private FieldSpec(Builder builder) {
     this.type = checkNotNull(builder.type, "type == null");
@@ -50,6 +50,30 @@ public final class FieldSpec {
 
   public boolean hasModifier(Modifier modifier) {
     return modifiers.contains(modifier);
+  }
+
+  public TypeName type() {
+    return type;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public CodeBlock javadoc() {
+    return javadoc;
+  }
+
+  public List<AnnotationSpec> annotations() {
+    return annotations;
+  }
+
+  public Set<Modifier> modifiers() {
+    return modifiers;
+  }
+
+  public CodeBlock initializer() {
+    return initializer;
   }
 
   void emit(CodeWriter codeWriter, Set<Modifier> implicitModifiers) throws IOException {
@@ -98,11 +122,11 @@ public final class FieldSpec {
   }
 
   public Builder toBuilder() {
-    var builder = new Builder(type, name);
-    builder.javadoc.add(javadoc);
-    builder.annotations.addAll(annotations);
-    builder.modifiers.addAll(modifiers);
-    builder.initializer = initializer.isEmpty() ? null : initializer;
+    var builder = new Builder(type(), name());
+    builder.javadoc.add(javadoc());
+    builder.annotations.addAll(annotations());
+    builder.modifiers.addAll(modifiers());
+    builder.initializer = initializer().isEmpty() ? null : initializer();
     return builder;
   }
 

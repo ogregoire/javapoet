@@ -66,12 +66,14 @@ public class ParameterSpecTest {
 
   @Test public void receiverParameterInstanceMethod() {
     var builder = ParameterSpec.builder(int.class, "this");
-    assertThat(builder.build().name).isEqualTo("this");
+    assertThat(builder.build().name())
+      .isEqualTo("this");
   }
 
   @Test public void receiverParameterNestedClass() {
     var builder = ParameterSpec.builder(int.class, "Foo.this");
-    assertThat(builder.build().name).isEqualTo("Foo.this");
+    assertThat(builder.build().name())
+      .isEqualTo("Foo.this");
   }
 
   @Test public void keywordName() {
@@ -128,7 +130,7 @@ public class ParameterSpecTest {
             .addAnnotation(SuppressWarnings.class);
 
     builder.annotations.remove(1);
-    assertThat(builder.build().annotations).hasSize(1);
+    assertThat(builder.build().annotations()).hasSize(1);
   }
 
   @Test public void modifyModifiers() {
@@ -136,6 +138,6 @@ public class ParameterSpecTest {
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
     builder.modifiers.remove(1);
-    assertThat(builder.build().modifiers).containsExactly(Modifier.PUBLIC);
+    assertThat(builder.build().modifiers()).containsExactly(Modifier.PUBLIC);
   }
 }

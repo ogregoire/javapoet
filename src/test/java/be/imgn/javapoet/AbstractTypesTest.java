@@ -105,8 +105,10 @@ public abstract class AbstractTypesTest {
         var topLevel = (ErrorType) fields.get(0).asType();
         var member = (ErrorType) fields.get(1).asType();
 
-        assertThat(TypeName.get(topLevel)).isEqualTo(ClassName.get("", "Tacos"));
-        assertThat(TypeName.get(member)).isEqualTo(ClassName.get("Ingredients", "Guacamole"));
+        assertThat(TypeName.get(topLevel))
+      .isEqualTo(ClassName.get("", "Tacos"));
+        assertThat(TypeName.get(member))
+      .isEqualTo(ClassName.get("Ingredients", "Guacamole"));
         return false;
       }
 
@@ -147,7 +149,7 @@ public abstract class AbstractTypesTest {
         .isEqualTo(TypeVariableName.get("Intersection", number, runnable));
     assertThat(TypeName.get(typeVariables.get(5).asType()))
         .isEqualTo(TypeVariableName.get("IntersectionOfInterfaces", runnable, serializable));
-    assertThat(((TypeVariableName) TypeName.get(typeVariables.get(4).asType())).bounds)
+    assertThat(((TypeVariableName) TypeName.get(typeVariables.get(4).asType())).bounds())
         .containsExactly(number, runnable);
   }
 
@@ -161,16 +163,16 @@ public abstract class AbstractTypesTest {
     assertThat(typeName)
       .hasToString(className + "<T>");
 
-    var typeVariableName = (TypeVariableName) typeName.typeArguments.get(0);
+    var typeVariableName = (TypeVariableName) typeName.typeArguments().getFirst();
 
     assertThatThrownBy(() -> {
-      typeVariableName.bounds.set(0, null);
+      typeVariableName.bounds().set(0, null);
     })
       .isInstanceOf(UnsupportedOperationException.class);
 
     assertThat(typeVariableName)
       .hasToString("T");
-    assertThat(typeVariableName.bounds.toString())
+    assertThat(typeVariableName.bounds().toString())
         .isEqualTo("[java.util.Map<java.util.List<T>, java.util.Set<T[]>>]");
   }
 
@@ -274,19 +276,29 @@ public abstract class AbstractTypesTest {
   }
 
   @Test public void box() throws Exception {
-    assertThat(TypeName.INT.box()).isEqualTo(ClassName.get(Integer.class));
-    assertThat(TypeName.VOID.box()).isEqualTo(ClassName.get(Void.class));
-    assertThat(ClassName.get(Integer.class).box()).isEqualTo(ClassName.get(Integer.class));
-    assertThat(ClassName.get(Void.class).box()).isEqualTo(ClassName.get(Void.class));
-    assertThat(ClassName.OBJECT.box()).isEqualTo(ClassName.OBJECT);
-    assertThat(ClassName.get(String.class).box()).isEqualTo(ClassName.get(String.class));
+    assertThat(TypeName.INT.box())
+      .isEqualTo(ClassName.get(Integer.class));
+    assertThat(TypeName.VOID.box())
+      .isEqualTo(ClassName.get(Void.class));
+    assertThat(ClassName.get(Integer.class).box())
+      .isEqualTo(ClassName.get(Integer.class));
+    assertThat(ClassName.get(Void.class).box())
+      .isEqualTo(ClassName.get(Void.class));
+    assertThat(ClassName.OBJECT.box())
+      .isEqualTo(ClassName.OBJECT);
+    assertThat(ClassName.get(String.class).box())
+      .isEqualTo(ClassName.get(String.class));
   }
 
   @Test public void unbox() throws Exception {
-    assertThat(TypeName.INT).isEqualTo(TypeName.INT.unbox());
-    assertThat(TypeName.VOID).isEqualTo(TypeName.VOID.unbox());
-    assertThat(ClassName.get(Integer.class).unbox()).isEqualTo(TypeName.INT.unbox());
-    assertThat(ClassName.get(Void.class).unbox()).isEqualTo(TypeName.VOID.unbox());
+    assertThat(TypeName.INT)
+      .isEqualTo(TypeName.INT.unbox());
+    assertThat(TypeName.VOID)
+      .isEqualTo(TypeName.VOID.unbox());
+    assertThat(ClassName.get(Integer.class).unbox())
+      .isEqualTo(TypeName.INT.unbox());
+    assertThat(ClassName.get(Void.class).unbox())
+      .isEqualTo(TypeName.VOID.unbox());
     assertThatThrownBy(() -> {
       ClassName.OBJECT.unbox();
     })

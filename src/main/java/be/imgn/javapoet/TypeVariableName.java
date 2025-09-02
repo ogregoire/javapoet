@@ -31,8 +31,8 @@ import static be.imgn.javapoet.Util.checkArgument;
 import static be.imgn.javapoet.Util.checkNotNull;
 
 public final class TypeVariableName extends TypeName {
-  public final String name;
-  public final List<TypeName> bounds;
+  private final String name;
+  private final List<TypeName> bounds;
 
   private TypeVariableName(String name, List<TypeName> bounds) {
     this(name, bounds, new ArrayList<>());
@@ -48,12 +48,20 @@ public final class TypeVariableName extends TypeName {
     }
   }
 
+  public String name() {
+    return name;
+  }
+
+  public List<TypeName> bounds() {
+    return bounds;
+  }
+
   @Override public TypeVariableName annotated(List<AnnotationSpec> annotations) {
-    return new TypeVariableName(name, bounds, annotations);
+    return new TypeVariableName(name(), bounds(), annotations);
   }
 
   @Override public TypeName withoutAnnotations() {
-    return new TypeVariableName(name, bounds);
+    return new TypeVariableName(name(), bounds());
   }
 
   public TypeVariableName withBounds(Type... bounds) {
@@ -65,9 +73,9 @@ public final class TypeVariableName extends TypeName {
   }
 
   public TypeVariableName withBounds(List<? extends TypeName> bounds) {
-    var newBounds = new ArrayList<>(this.bounds);
+    var newBounds = new ArrayList<>(this.bounds());
     newBounds.addAll(bounds);
-    return new TypeVariableName(name, newBounds, annotations);
+    return new TypeVariableName(name(), newBounds, annotations());
   }
 
   private static TypeVariableName of(String name, List<TypeName> bounds) {
@@ -79,7 +87,7 @@ public final class TypeVariableName extends TypeName {
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
     emitAnnotations(out);
-    return out.emitAndIndent(name);
+    return out.emitAndIndent(name());
   }
 
   /** Returns type variable named {@code name} without bounds. */

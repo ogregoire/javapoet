@@ -42,12 +42,20 @@ import static be.imgn.javapoet.Util.checkNotNull;
 public final class AnnotationSpec {
   public static final String VALUE = "value";
 
-  public final TypeName type;
-  public final Map<String, List<CodeBlock>> members;
+  private final TypeName type;
+  private final Map<String, List<CodeBlock>> members;
 
   private AnnotationSpec(Builder builder) {
     this.type = builder.type;
     this.members = Util.immutableMultimap(builder.members);
+  }
+
+  public TypeName type() {
+    return type;
+  }
+
+  public Map<String, List<CodeBlock>> members() {
+    return members;
   }
 
   void emit(CodeWriter codeWriter, boolean inline) throws IOException {
@@ -160,8 +168,8 @@ public final class AnnotationSpec {
   }
 
   public Builder toBuilder() {
-    var builder = new Builder(type);
-    for (var entry : members.entrySet()) {
+    var builder = new Builder(type());
+    for (var entry : members().entrySet()) {
       builder.members.put(entry.getKey(), new ArrayList<>(entry.getValue()));
     }
     return builder;

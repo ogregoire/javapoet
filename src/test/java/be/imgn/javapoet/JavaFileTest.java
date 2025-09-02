@@ -284,7 +284,8 @@ public final class JavaFileTest {
         TypeSpec.classBuilder("Taco").build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco {
@@ -299,7 +300,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import java.util.Date;
@@ -318,7 +320,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import java.util.Date;
@@ -341,7 +344,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.meat.Chorizo;
@@ -364,7 +368,8 @@ public final class JavaFileTest {
         .build()
         .toString();
       // Second 'Float' is fully qualified.
-      assertThat(source).isEqualTo("""
+      assertThat(source)
+      .isEqualTo("""
               package be.imgn.tacos;
 
               class Taco {
@@ -386,7 +391,8 @@ public final class JavaFileTest {
         .build()
         .toString();
       // Second 'Float' is fully qualified.
-      assertThat(source).isEqualTo("""
+      assertThat(source)
+      .isEqualTo("""
               package be.imgn.tacos;
 
               import be.imgn.soda.Float;
@@ -415,7 +421,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class A {
@@ -452,7 +459,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class A {
@@ -491,7 +499,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class A {
@@ -524,7 +533,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.wire.Message;
@@ -543,7 +553,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco extends com.taco.bell.Taco {
@@ -558,7 +569,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             @com.taco.bell.Taco
@@ -576,7 +588,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             @MyAnno(com.taco.bell.Taco.class)
@@ -593,7 +606,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco<T extends com.taco.bell.Taco> {
@@ -609,7 +623,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import java.lang.Comparable;
@@ -630,7 +645,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import dagger.Component;
@@ -655,7 +671,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             import java.lang.String;
             import java.lang.System;
 
@@ -672,7 +689,8 @@ public final class JavaFileTest {
           TypeSpec.classBuilder("World").addSuperinterface(ClassName.get("", "Test")).build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package hello;
 
             class World implements Test {
@@ -686,7 +704,8 @@ public final class JavaFileTest {
         .addFileComment("Generated $L by JavaPoet. DO NOT EDIT!", "2015-01-13")
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             // Generated 2015-01-13 by JavaPoet. DO NOT EDIT!
             package be.imgn.tacos;
 
@@ -701,7 +720,8 @@ public final class JavaFileTest {
         .addFileComment("\nGENERATED FILE:\n\nDO NOT EDIT!\n")
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             //
             // GENERATED FILE:
             //
@@ -722,7 +742,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco {
@@ -742,7 +763,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco extends com.taco.bell.A {
@@ -762,7 +784,8 @@ public final class JavaFileTest {
 
     var source = builder.build().toString();
 
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import static java.io.File.separatorChar;
@@ -780,7 +803,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco {
@@ -798,7 +822,8 @@ public final class JavaFileTest {
         .skipJavaLangImports(true)
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             class Taco {
@@ -821,7 +846,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import other.Foo;
@@ -853,7 +879,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import other.Foo;
@@ -887,7 +914,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.javapoet.JavaFileTest;
@@ -948,7 +976,8 @@ public final class JavaFileTest {
         childTypeBuilder().superclass(Parent.class).build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.javapoet;
 
             import java.lang.String;
@@ -971,7 +1000,8 @@ public final class JavaFileTest {
         childTypeBuilder().superclass(getElement(Parent.class).asType()).build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.javapoet;
 
             import java.lang.String;
@@ -994,7 +1024,8 @@ public final class JavaFileTest {
         childTypeBuilder().addSuperinterface(ParentInterface.class).build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.javapoet;
 
             import java.lang.String;

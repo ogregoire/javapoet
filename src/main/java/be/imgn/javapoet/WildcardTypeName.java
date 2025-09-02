@@ -29,8 +29,8 @@ import static be.imgn.javapoet.ClassName.OBJECT;
 import static be.imgn.javapoet.Util.checkArgument;
 
 public final class WildcardTypeName extends TypeName {
-  public final List<TypeName> upperBounds;
-  public final List<TypeName> lowerBounds;
+  private final List<TypeName> upperBounds;
+  private final List<TypeName> lowerBounds;
 
   private WildcardTypeName(List<TypeName> upperBounds, List<TypeName> lowerBounds) {
     this(upperBounds, lowerBounds, new ArrayList<>());
@@ -53,21 +53,29 @@ public final class WildcardTypeName extends TypeName {
     }
   }
 
+  public List<TypeName> upperBounds() {
+    return upperBounds;
+  }
+
+  public List<TypeName> lowerBounds() {
+    return lowerBounds;
+  }
+
   @Override public WildcardTypeName annotated(List<AnnotationSpec> annotations) {
-    return new WildcardTypeName(upperBounds, lowerBounds, concatAnnotations(annotations));
+    return new WildcardTypeName(upperBounds(), lowerBounds(), concatAnnotations(annotations));
   }
 
   @Override public TypeName withoutAnnotations() {
-    return new WildcardTypeName(upperBounds, lowerBounds);
+    return new WildcardTypeName(upperBounds(), lowerBounds());
   }
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
-    if (lowerBounds.size() == 1) {
-      return out.emit("? super $T", lowerBounds.getFirst());
+    if (lowerBounds().size() == 1) {
+      return out.emit("? super $T", lowerBounds().getFirst());
     }
-    return upperBounds.getFirst().equals(OBJECT)
+    return upperBounds().getFirst().equals(OBJECT)
         ? out.emit("?")
-        : out.emit("? extends $T", upperBounds.getFirst());
+        : out.emit("? extends $T", upperBounds().getFirst());
   }
 
   /**

@@ -343,9 +343,9 @@ public final class MethodSpecTest {
       .addException(timeoutException)
       .addException(ioException)
       .build();
-    assertThat(methodSpec.exceptions)
+    assertThat(methodSpec.exceptions())
       .containsExactly(ioException, timeoutException);
-    assertThat(methodSpec.toBuilder().addException(ioException).build().exceptions)
+    assertThat(methodSpec.toBuilder().addException(ioException).build().exceptions())
       .containsExactly(ioException, timeoutException);
   }
 
@@ -381,7 +381,7 @@ public final class MethodSpecTest {
             .addAnnotation(SuppressWarnings.class);
 
     builder.annotations.remove(1);
-    assertThat(builder.build().annotations)
+    assertThat(builder.build().annotations())
       .hasSize(1);
   }
 
@@ -390,7 +390,7 @@ public final class MethodSpecTest {
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
     builder.modifiers.remove(1);
-    assertThat(builder.build().modifiers)
+    assertThat(builder.build().modifiers())
       .containsExactly(Modifier.PUBLIC);
   }
 
@@ -399,7 +399,7 @@ public final class MethodSpecTest {
             .addParameter(int.class, "source");
 
     builder.parameters.removeFirst();
-    assertThat(builder.build().parameters)
+    assertThat(builder.build().parameters())
       .isEmpty();
   }
 
@@ -410,7 +410,7 @@ public final class MethodSpecTest {
             .addTypeVariable(TypeVariableName.get("V"));
 
     builder.typeVariables.remove(1);
-    assertThat(builder.build().typeVariables).containsExactly(t);
+    assertThat(builder.build().typeVariables()).containsExactly(t);
   }
 
   @Test public void ensureTrailingNewline() {

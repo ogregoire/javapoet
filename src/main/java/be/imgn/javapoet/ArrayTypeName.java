@@ -28,7 +28,7 @@ import javax.lang.model.type.ArrayType;
 import static be.imgn.javapoet.Util.checkNotNull;
 
 public final class ArrayTypeName extends TypeName {
-  public final TypeName componentType;
+  private final TypeName componentType;
 
   private ArrayTypeName(TypeName componentType) {
     this(componentType, new ArrayList<>());
@@ -39,12 +39,16 @@ public final class ArrayTypeName extends TypeName {
     this.componentType = checkNotNull(componentType, "rawType == null");
   }
 
+  public TypeName componentType() {
+    return componentType;
+  }
+
   @Override public ArrayTypeName annotated(List<AnnotationSpec> annotations) {
-    return new ArrayTypeName(componentType, concatAnnotations(annotations));
+    return new ArrayTypeName(componentType(), concatAnnotations(annotations));
   }
 
   @Override public TypeName withoutAnnotations() {
-    return new ArrayTypeName(componentType);
+    return new ArrayTypeName(componentType());
   }
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
@@ -57,10 +61,10 @@ public final class ArrayTypeName extends TypeName {
   }
 
   private CodeWriter emitLeafType(CodeWriter out) throws IOException {
-    if (TypeName.asArray(componentType) != null) {
-      return TypeName.asArray(componentType).emitLeafType(out);
+    if (TypeName.asArray(componentType()) != null) {
+      return TypeName.asArray(componentType()).emitLeafType(out);
     }
-    return componentType.emit(out);
+    return componentType().emit(out);
   }
 
   private CodeWriter emitBrackets(CodeWriter out, boolean varargs) throws IOException {
@@ -69,12 +73,12 @@ public final class ArrayTypeName extends TypeName {
       emitAnnotations(out);
     }
 
-    if (TypeName.asArray(componentType) == null) {
+    if (TypeName.asArray(componentType()) == null) {
       // Last bracket.
       return out.emit(varargs ? "..." : "[]");
     }
     out.emit("[]");
-    return TypeName.asArray(componentType) .emitBrackets(out, varargs);
+    return TypeName.asArray(componentType()).emitBrackets(out, varargs);
   }
 
 

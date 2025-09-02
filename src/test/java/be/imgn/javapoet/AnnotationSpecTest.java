@@ -141,7 +141,8 @@ public final class AnnotationSpecTest {
     var taco = TypeSpec.classBuilder("Taco")
         .addAnnotation(annotation)
         .build();
-    assertThat(toString(taco)).isEqualTo("""
+    assertThat(toString(taco))
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.javapoet.AnnotationSpecTest;
@@ -292,7 +293,8 @@ public final class AnnotationSpecTest {
     var taco = TypeSpec.classBuilder("Taco")
         .addAnnotation(spec)
         .build();
-    assertThat(toString(taco)).isEqualTo("""
+    assertThat(toString(taco))
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.javapoet.AnnotationSpecTest;
@@ -327,7 +329,8 @@ public final class AnnotationSpecTest {
     var taco = TypeSpec.classBuilder("Taco")
         .addAnnotation(spec)
         .build();
-    assertThat(toString(taco)).isEqualTo("""
+    assertThat(toString(taco))
+      .isEqualTo("""
             package be.imgn.tacos;
 
             import be.imgn.javapoet.AnnotationSpecTest;

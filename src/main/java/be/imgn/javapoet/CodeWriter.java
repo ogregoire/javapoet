@@ -169,14 +169,14 @@ final class CodeWriter {
     var builder = javadocCodeBlock.toBuilder();
     var newLine = true;
     for (var parameter : parameters) {
-      if (!parameter.javadoc.isEmpty()) {
+      if (!parameter.javadoc().isEmpty()) {
         if (newLine) {
           if (!javadocCodeBlock.isEmpty()) {
             builder.add("\n");
           }
           newLine = false;
         }
-        builder.add("@param $L $L", parameter.name, parameter.javadoc);
+        builder.add("@param $L $L", parameter.name(), parameter.javadoc());
       }
     }
     emitJavadoc(builder.build());
@@ -214,16 +214,16 @@ final class CodeWriter {
   public void emitTypeVariables(List<TypeVariableName> typeVariables) throws IOException {
     if (typeVariables.isEmpty()) return;
 
-    typeVariables.forEach(typeVariable -> currentTypeVariables.add(typeVariable.name));
+    typeVariables.forEach(typeVariable -> currentTypeVariables.add(typeVariable.name()));
 
     emit("<");
     var firstTypeVariable = true;
     for (var typeVariable : typeVariables) {
       if (!firstTypeVariable) emit(", ");
-      emitAnnotations(typeVariable.annotations, true);
-      emit("$L", typeVariable.name);
+      emitAnnotations(typeVariable.annotations(), true);
+      emit("$L", typeVariable.name());
       var firstBound = true;
-      for (var bound : typeVariable.bounds) {
+      for (var bound : typeVariable.bounds()) {
         emit(firstBound ? " extends $T" : " & $T", bound);
         firstBound = false;
       }
@@ -233,7 +233,7 @@ final class CodeWriter {
   }
 
   public void popTypeVariables(List<TypeVariableName> typeVariables) {
-    typeVariables.forEach(typeVariable -> currentTypeVariables.remove(typeVariable.name));
+    typeVariables.forEach(typeVariable -> currentTypeVariables.remove(typeVariable.name()));
   }
 
   public void emitParameters(List<ParameterSpec> parameters, boolean varargs) throws IOException {
@@ -469,7 +469,7 @@ final class CodeWriter {
     }
 
     // Match the top-level class.
-    if (!typeSpecStack.isEmpty() && Objects.equals(typeSpecStack.getFirst().name, simpleName)) {
+    if (!typeSpecStack.isEmpty() && Objects.equals(typeSpecStack.getFirst().name(), simpleName)) {
       return ClassName.get(packageName, simpleName);
     }
 
@@ -485,9 +485,9 @@ final class CodeWriter {
    * Returns the class named {@code simpleName} when nested in the class at {@code stackDepth}.
    */
   private ClassName stackClassName(int stackDepth, String simpleName) {
-    var className = ClassName.get(packageName, typeSpecStack.getFirst().name);
+    var className = ClassName.get(packageName, typeSpecStack.getFirst().name());
     for (var i = 1; i <= stackDepth; i++) {
-      className = className.nestedClass(typeSpecStack.get(i).name);
+      className = className.nestedClass(typeSpecStack.get(i).name());
     }
     return className.nestedClass(simpleName);
   }

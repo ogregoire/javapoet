@@ -53,10 +53,10 @@ public final class JavaFile {
     }
   };
 
-  public final CodeBlock fileComment;
-  public final String packageName;
-  public final TypeSpec typeSpec;
-  public final boolean skipJavaLangImports;
+  private final CodeBlock fileComment;
+  private final String packageName;
+  private final TypeSpec typeSpec;
+  private final boolean skipJavaLangImports;
   private final Set<String> staticImports;
   private final Set<String> alwaysQualify;
   private final String indent;
@@ -75,8 +75,8 @@ public final class JavaFile {
   }
 
   private void fillAlwaysQualifiedNames(TypeSpec spec, Set<String> alwaysQualifiedNames) {
-    alwaysQualifiedNames.addAll(spec.alwaysQualifiedNames);
-    for (var nested : spec.typeSpecs) {
+    alwaysQualifiedNames.addAll(spec.alwaysQualifiedNames());
+    for (var nested : spec.typeSpecs()) {
       fillAlwaysQualifiedNames(nested, alwaysQualifiedNames);
     }
   }
@@ -135,7 +135,7 @@ public final class JavaFile {
       Files.createDirectories(outputDirectory);
     }
 
-    var outputPath = outputDirectory.resolve(typeSpec.name + ".java");
+    var outputPath = outputDirectory.resolve(typeSpec.name() + ".java");
     try (var writer = new OutputStreamWriter(Files.newOutputStream(outputPath), charset)) {
       writeTo(writer);
     }
@@ -160,9 +160,9 @@ public final class JavaFile {
   /** Writes this to {@code filer}. */
   public void writeTo(Filer filer) throws IOException {
     var fileName = packageName.isEmpty()
-        ? typeSpec.name
-        : packageName + "." + typeSpec.name;
-    var originatingElements = typeSpec.originatingElements;
+        ? typeSpec.name()
+        : packageName + "." + typeSpec.name();
+    var originatingElements = typeSpec.originatingElements();
     var filerSourceFile = filer.createSourceFile(fileName,
         originatingElements.toArray(new Element[0]));
     try (var writer = filerSourceFile.openWriter()) {
@@ -239,8 +239,8 @@ public final class JavaFile {
 
   public JavaFileObject toJavaFileObject() {
     var uri = URI.create((packageName.isEmpty()
-        ? typeSpec.name
-        : packageName.replace('.', '/') + '/' + typeSpec.name)
+        ? typeSpec.name()
+        : packageName.replace('.', '/') + '/' + typeSpec.name())
         + Kind.SOURCE.extension);
     return new SimpleJavaFileObject(uri, Kind.SOURCE) {
       private final long lastModified = System.currentTimeMillis();

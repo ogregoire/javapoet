@@ -167,7 +167,8 @@ public final class FileWritingTest {
     assertThat(fooPath).exists();
     var source = new String(Files.readAllBytes(fooPath));
 
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package foo;
 
             import java.lang.String;
@@ -195,7 +196,8 @@ public final class FileWritingTest {
     javaFile.writeTo(fsRoot);
 
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Taco.java"));
-    assertThat(new String(Files.readAllBytes(fooPath), UTF_8)).isEqualTo("""
+    assertThat(new String(Files.readAllBytes(fooPath), UTF_8))
+      .isEqualTo("""
             // Pi\u00f1ata\u00a1
             package foo;
 
@@ -208,6 +210,7 @@ public final class FileWritingTest {
     var javaFile = JavaFile.builder("foo", TypeSpec.classBuilder("Taco").build()).build();
     var filePath = javaFile.writeToPath(fsRoot);
     // Cast to avoid ambiguity between assertThat(Path) and assertThat(Iterable<?>)
-    assertThat((Iterable<?>) filePath).isEqualTo(fsRoot.resolve(fs.getPath("foo", "Taco.java")));
+    assertThat((Iterable<?>) filePath)
+      .isEqualTo(fsRoot.resolve(fs.getPath("foo", "Taco.java")));
   }
 }

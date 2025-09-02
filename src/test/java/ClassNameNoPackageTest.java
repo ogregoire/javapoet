@@ -26,8 +26,10 @@ import org.junit.jupiter.api.Test;
 public final class ClassNameNoPackageTest {
   @Test public void shouldSupportClassInDefaultPackage() {
     var className = ClassName.get(ClassNameNoPackageTest.class);
-    assertThat(className.packageName()).isEqualTo("");
-    assertThat(className.simpleName()).isEqualTo("ClassNameNoPackageTest");
+    assertThat(className.packageName())
+      .isEqualTo("");
+    assertThat(className.simpleName())
+      .isEqualTo("ClassNameNoPackageTest");
     assertThat(className)
       .hasToString("ClassNameNoPackageTest");
   }

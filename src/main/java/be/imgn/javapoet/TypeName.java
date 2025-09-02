@@ -87,7 +87,7 @@ public class TypeName {
 
   /** The name of this type if it is a keyword, or null. */
   private final String keyword;
-  public final List<AnnotationSpec> annotations;
+  private final List<AnnotationSpec> annotations;
 
   /** Lazily-initialized toString of this type name. */
   private String cachedString;
@@ -106,6 +106,10 @@ public class TypeName {
     this(null, annotations);
   }
 
+  public List<AnnotationSpec> annotations() {
+    return annotations;
+  }
+
   public final TypeName annotated(AnnotationSpec... annotations) {
     return annotated(List.of(annotations));
   }
@@ -116,20 +120,20 @@ public class TypeName {
   }
 
   public TypeName withoutAnnotations() {
-    if (annotations.isEmpty()) {
+    if (annotations().isEmpty()) {
       return this;
     }
     return new TypeName(keyword);
   }
 
   protected final List<AnnotationSpec> concatAnnotations(List<AnnotationSpec> annotations) {
-    var allAnnotations = new ArrayList<>(this.annotations);
+    var allAnnotations = new ArrayList<>(this.annotations());
     allAnnotations.addAll(annotations);
     return allAnnotations;
   }
 
   public boolean isAnnotated() {
-    return !annotations.isEmpty();
+    return !annotations().isEmpty();
   }
 
   /**
@@ -173,7 +177,7 @@ public class TypeName {
     else if (keyword.equals(FLOAT.keyword)) boxed = BOXED_FLOAT;
     else if (keyword.equals(DOUBLE.keyword)) boxed = BOXED_DOUBLE;
     else throw new AssertionError(keyword);
-    return annotations.isEmpty() ? boxed : boxed.annotated(annotations);
+    return annotations().isEmpty() ? boxed : boxed.annotated(annotations());
   }
 
   /**
@@ -196,7 +200,7 @@ public class TypeName {
     else if (thisWithoutAnnotations.equals(BOXED_FLOAT)) unboxed = FLOAT;
     else if (thisWithoutAnnotations.equals(BOXED_DOUBLE)) unboxed = DOUBLE;
     else throw new UnsupportedOperationException("cannot unbox " + this);
-    return annotations.isEmpty() ? unboxed : unboxed.annotated(annotations);
+    return annotations().isEmpty() ? unboxed : unboxed.annotated(annotations());
   }
 
   @Override public final boolean equals(Object o) {
@@ -237,7 +241,7 @@ public class TypeName {
   }
 
   CodeWriter emitAnnotations(CodeWriter out) throws IOException {
-    for (var annotation : annotations) {
+    for (var annotation : annotations()) {
       annotation.emit(out, true);
       out.emit(" ");
     }
@@ -359,7 +363,7 @@ public class TypeName {
   /** Returns the array component of {@code type}, or null if {@code type} is not an array. */
   static TypeName arrayComponent(TypeName type) {
     return type instanceof ArrayTypeName arrayType
-        ? arrayType.componentType
+        ? arrayType.componentType()
         : null;
   }
 

@@ -54,7 +54,8 @@ public class FileReadingTest {
 
   @Test public void javaFileObjectKind() {
     var javaFile = JavaFile.builder("", TypeSpec.classBuilder("Test").build()).build();
-    assertThat(javaFile.toJavaFileObject().getKind()).isEqualTo(Kind.SOURCE);
+    assertThat(javaFile.toJavaFileObject().getKind())
+      .isEqualTo(Kind.SOURCE);
   }
 
   @Test public void javaFileObjectCharacterContent() throws IOException {
@@ -66,8 +67,10 @@ public class FileReadingTest {
     var javaFileObject = javaFile.toJavaFileObject();
 
     // We can never have encoding issues (everything is in process)
-    assertThat(javaFileObject.getCharContent(true)).isEqualTo(javaFile.toString());
-    assertThat(javaFileObject.getCharContent(false)).isEqualTo(javaFile.toString());
+    assertThat(javaFileObject.getCharContent(true))
+      .isEqualTo(javaFile.toString());
+    assertThat(javaFileObject.getCharContent(false))
+      .isEqualTo(javaFile.toString());
   }
 
   @Test public void javaFileObjectInputStreamIsUtf8() throws IOException {
@@ -77,7 +80,8 @@ public class FileReadingTest {
     var bytes = ByteStreams.toByteArray(javaFile.toJavaFileObject().openInputStream());
 
     // JavaPoet always uses UTF-8.
-    assertThat(bytes).isEqualTo(javaFile.toString().getBytes(UTF_8));
+    assertThat(bytes)
+      .isEqualTo(javaFile.toString().getBytes(UTF_8));
   }
 
   @Test public void compileJavaFile() throws Exception {
@@ -114,6 +118,7 @@ public class FileReadingTest {
             .asSubclass(Callable.class)
             .getDeclaredConstructor()
             .newInstance();
-    assertThat(Callable.class.getMethod("call").invoke(test)).isEqualTo(value);
+    assertThat(Callable.class.getMethod("call").invoke(test))
+      .isEqualTo(value);
   }
 }

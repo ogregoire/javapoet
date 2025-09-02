@@ -172,8 +172,10 @@ public class TypeNameTest {
   @ParameterizedTest
   @MethodSource("providePrimitiveAndBoxedTypeChecks")
   public void primitiveAndBoxedTypeChecks(TypeName typeName, boolean expectedIsPrimitive, boolean expectedIsBoxedPrimitive) {
-    assertThat(typeName.isPrimitive()).isEqualTo(expectedIsPrimitive);
-    assertThat(typeName.isBoxedPrimitive()).isEqualTo(expectedIsBoxedPrimitive);
+    assertThat(typeName.isPrimitive())
+      .isEqualTo(expectedIsPrimitive);
+    assertThat(typeName.isBoxedPrimitive())
+      .isEqualTo(expectedIsBoxedPrimitive);
   }
 
   private static List<Arguments> providePrimitiveAndBoxedTypeChecks() {

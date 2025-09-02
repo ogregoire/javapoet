@@ -49,8 +49,10 @@ public final class ClassNameTest {
   @Test public void bestGuessNonAscii() {
     var className = ClassName.bestGuess(
         "com.\ud835\udc1andro\ud835\udc22d.\ud835\udc00ctiv\ud835\udc22ty");
-    assertThat("com.\ud835\udc1andro\ud835\udc22d").isEqualTo(className.packageName());
-    assertThat("\ud835\udc00ctiv\ud835\udc22ty").isEqualTo(className.simpleName());
+    assertThat("com.\ud835\udc1andro\ud835\udc22d")
+      .isEqualTo(className.packageName());
+    assertThat("\ud835\udc00ctiv\ud835\udc22ty")
+      .isEqualTo(className.simpleName());
   }
 
   static class OuterClass {
@@ -97,9 +99,11 @@ public final class ClassNameTest {
   @Test public void createNestedClass() {
     var foo = ClassName.get("com.example", "Foo");
     var bar = foo.nestedClass("Bar");
-    assertThat(bar).isEqualTo(ClassName.get("com.example", "Foo", "Bar"));
+    assertThat(bar)
+      .isEqualTo(ClassName.get("com.example", "Foo", "Bar"));
     var baz = bar.nestedClass("Baz");
-    assertThat(baz).isEqualTo(ClassName.get("com.example", "Foo", "Bar", "Baz"));
+    assertThat(baz)
+      .isEqualTo(ClassName.get("com.example", "Foo", "Bar", "Baz"));
   }
 
   static class $Outer {
