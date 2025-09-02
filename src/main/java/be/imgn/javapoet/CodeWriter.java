@@ -164,6 +164,24 @@ final class CodeWriter {
     emit(" */\n");
   }
 
+  public void emitJavadocWithParameters(CodeBlock javadocCodeBlock, List<ParameterSpec> parameters)
+      throws IOException {
+    var builder = javadocCodeBlock.toBuilder();
+    var newLine = true;
+    for (var parameter : parameters) {
+      if (!parameter.javadoc.isEmpty()) {
+        if (newLine) {
+          if (!javadocCodeBlock.isEmpty()) {
+            builder.add("\n");
+          }
+          newLine = false;
+        }
+        builder.add("@param $L $L", parameter.name, parameter.javadoc);
+      }
+    }
+    emitJavadoc(builder.build());
+  }
+
   public void emitAnnotations(List<AnnotationSpec> annotations, boolean inline) throws IOException {
     for (var annotationSpec : annotations) {
       annotationSpec.emit(this, inline);
@@ -216,6 +234,20 @@ final class CodeWriter {
 
   public void popTypeVariables(List<TypeVariableName> typeVariables) {
     typeVariables.forEach(typeVariable -> currentTypeVariables.remove(typeVariable.name));
+  }
+
+  public void emitParameters(List<ParameterSpec> parameters, boolean varargs) throws IOException {
+    emit(CodeBlock.of("($Z"));
+
+    var firstParameter = true;
+    for (var i = parameters.iterator(); i.hasNext(); ) {
+      var parameter = i.next();
+      if (!firstParameter) emit(",").emitWrappingSpace();
+      parameter.emit(this, !i.hasNext() && varargs);
+      firstParameter = false;
+    }
+
+    emit(")");
   }
 
   public CodeWriter emit(String s) throws IOException {

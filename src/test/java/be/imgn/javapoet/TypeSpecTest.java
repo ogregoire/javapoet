@@ -2666,4 +2666,179 @@ public final class TypeSpecTest {
             }
             """);
   }
+
+  @Test public void simpleRecord() {
+    var point = TypeSpec.recordBuilder("Taco")
+        .recordConstructor(MethodSpec.constructorBuilder()
+            .addParameter(String.class, "a")
+            .addParameter(long.class, "b")
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", point)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile.toString()).isEqualTo("""
+        package be.imgn.tacos;
+
+        record Taco(String a, long b) {
+        }
+        """);
+  }
+
+  @Test public void recordWithCompactConstructor() {
+    var person = TypeSpec.recordBuilder("Taco")
+        .recordConstructor(MethodSpec.compactConstructorBuilder()
+            .addParameter(String.class, "one")
+            .addParameter(int.class, "two")
+            .addCode("""
+                /* snippet */
+                """, IllegalArgumentException.class)
+            .build())
+        .addMethod(MethodSpec.methodBuilder("method")
+            .addModifiers(Modifier.PUBLIC)
+            .returns(boolean.class)
+            .addStatement("return true")
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", person)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile.toString())
+      .isEqualTo("""
+        package be.imgn.tacos;
+
+        record Taco(String one, int two) {
+          Taco {
+            /* snippet */
+          }
+
+          public boolean method() {
+            return true;
+          }
+        }
+        """);
+  }
+
+  @Test public void recordWithZeroParameters() {
+    var empty = TypeSpec.recordBuilder("Taco")
+        .recordConstructor(MethodSpec.constructorBuilder()
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", empty)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile.toString()).isEqualTo("""
+        package be.imgn.tacos;
+
+        record Taco() {
+        }
+        """);
+  }
+
+  @Test public void recordWithJavadoc() {
+    var point = TypeSpec.recordBuilder("Taco")
+        .addJavadoc("Tacocat.")
+        .recordConstructor(MethodSpec.constructorBuilder()
+            .addParameter(ParameterSpec.builder(String.class, "one")
+                .addJavadoc("the one value\n")
+                .build())
+            .addParameter(ParameterSpec.builder(long.class, "two")
+                .addJavadoc("the two value\n")
+                .build())
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", point)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile.toString())
+      .isEqualTo("""
+        package be.imgn.tacos;
+
+        /**
+         * Tacocat.
+         * @param one the one value
+         * @param two the two value
+         */
+        record Taco(String one, long two) {
+        }
+        """);
+  }
+
+  @Test public void recordWithPartialJavadoc() {
+    var person = TypeSpec.recordBuilder("Person")
+        .addJavadoc("Represents a person with optional metadata.\n")
+        .recordConstructor(MethodSpec.constructorBuilder()
+            .addParameter(ParameterSpec.builder(String.class, "name")
+                .addJavadoc("the person's full name\n")
+                .build())
+            .addParameter(int.class, "age") // No javadoc for this parameter
+            .addParameter(ParameterSpec.builder(String.class, "email")
+                .addJavadoc("the person's email address\n")
+                .build())
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", person)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile)
+      .hasToString("""
+        package be.imgn.tacos;
+
+        /**
+         * Represents a person with optional metadata.
+         *
+         * @param name the person's full name
+         * @param email the person's email address
+         */
+        record Person(String name, int age, String email) {
+        }
+        """);
+  }
+
+  @Test public void recordWithAdditionalConstructor() {
+    var person = TypeSpec.recordBuilder("Person")
+        .recordConstructor(MethodSpec.compactConstructorBuilder()
+            .addParameter(String.class, "name")
+            .addParameter(int.class, "age")
+            .addCode("""
+                requireNonNull(name);
+                if (age < 0) throw new $T();
+                """, IllegalArgumentException.class)
+            .build())
+        .addMethod(MethodSpec.constructorBuilder()
+            .addParameter(String.class, "name")
+            .addStatement("this(name, 0)")
+            .build())
+        .build();
+
+    var javaFile = JavaFile.builder("be.imgn.tacos", person)
+        .skipJavaLangImports(true)
+        .build();
+
+    assertThat(javaFile)
+      .hasToString("""
+        package be.imgn.tacos;
+
+        record Person(String name, int age) {
+          Person {
+            requireNonNull(name);
+            if (age < 0) throw new IllegalArgumentException();
+          }
+
+          Person(String name) {
+            this(name, 0);
+          }
+        }
+        """);
+  }
 }

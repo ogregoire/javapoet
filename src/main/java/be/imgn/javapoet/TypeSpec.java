@@ -63,6 +63,7 @@ public final class TypeSpec {
   final Set<String> nestedTypesSimpleNames;
   public final List<Element> originatingElements;
   public final Set<String> alwaysQualifiedNames;
+  public final MethodSpec recordConstructor;
 
   private TypeSpec(Builder builder) {
     this.kind = builder.kind;
@@ -81,6 +82,7 @@ public final class TypeSpec {
     this.methodSpecs = List.copyOf(builder.methodSpecs);
     this.typeSpecs = List.copyOf(builder.typeSpecs);
     this.alwaysQualifiedNames = Util.immutableSet(builder.alwaysQualifiedNames);
+    this.recordConstructor = builder.recordConstructor;
 
     nestedTypesSimpleNames = new HashSet<>(builder.typeSpecs.size());
     var originatingElementsMutable = new ArrayList<>(builder.originatingElements);
@@ -116,6 +118,7 @@ public final class TypeSpec {
     this.originatingElements = Collections.emptyList();
     this.nestedTypesSimpleNames = Collections.emptySet();
     this.alwaysQualifiedNames = Collections.emptySet();
+    this.recordConstructor = null;
   }
 
   public boolean hasModifier(Modifier modifier) {
@@ -128,6 +131,14 @@ public final class TypeSpec {
 
   public static Builder classBuilder(ClassName className) {
     return classBuilder(checkNotNull(className, "className == null").simpleName());
+  }
+
+  public static Builder recordBuilder(String name) {
+    return new Builder(Kind.RECORD, checkNotNull(name, "name == null"), null);
+  }
+
+  public static Builder recordBuilder(ClassName className) {
+    return recordBuilder(checkNotNull(className, "className == null").simpleName());
   }
 
   public static Builder interfaceBuilder(String name) {
@@ -178,10 +189,11 @@ public final class TypeSpec {
     builder.staticBlock.add(staticBlock);
     builder.originatingElements.addAll(originatingElements);
     builder.alwaysQualifiedNames.addAll(alwaysQualifiedNames);
+    builder.recordConstructor = recordConstructor;
     return builder;
   }
 
-  void emit(CodeWriter codeWriter, String enumName, Set<Modifier> implicitModifiers)
+   void emit(CodeWriter codeWriter, String enumName, Set<Modifier> implicitModifiers)
       throws IOException {
     // Nested classes interrupt wrapped line indentation. Stash the current wrapping state and put
     // it back afterwards when this type is complete.
@@ -211,7 +223,11 @@ public final class TypeSpec {
         // Push an empty type (specifically without nested types) for type-resolution.
         codeWriter.pushType(new TypeSpec(this));
 
-        codeWriter.emitJavadoc(javadoc);
+        if (recordConstructor != null) {
+          codeWriter.emitJavadocWithParameters(javadoc, recordConstructor.parameters);
+        } else {
+          codeWriter.emitJavadoc(javadoc);
+        }
         codeWriter.emitAnnotations(annotations, false);
         codeWriter.emitModifiers(modifiers, Util.union(implicitModifiers, kind.asMemberModifiers));
         if (kind == Kind.ANNOTATION) {
@@ -220,6 +236,14 @@ public final class TypeSpec {
           codeWriter.emit("$L $L", kind.name().toLowerCase(Locale.US), name);
         }
         codeWriter.emitTypeVariables(typeVariables);
+
+        if (kind == Kind.RECORD) {
+          if (recordConstructor != null) {
+            codeWriter.emitParameters(recordConstructor.parameters, recordConstructor.varargs);
+          } else {
+            codeWriter.emitParameters(List.of(), false);
+          }
+        }
 
         List<TypeName> extendsTypes;
         List<TypeName> implementsTypes;
@@ -306,6 +330,13 @@ public final class TypeSpec {
         firstMember = false;
       }
 
+      // Compact constructor.
+      if (recordConstructor != null && !recordConstructor.code.isEmpty()) {
+        if (!firstMember) codeWriter.emit("\n");
+        recordConstructor.emit(codeWriter, name, kind.implicitMethodModifiers);
+        firstMember = false;
+      }
+
       // Constructors.
       for (var methodSpec : methodSpecs) {
         if (!methodSpec.isConstructor()) continue;
@@ -387,7 +418,13 @@ public final class TypeSpec {
         Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)),
         Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.ABSTRACT)),
         Util.immutableSet(List.of(Modifier.PUBLIC, Modifier.STATIC)),
-        Util.immutableSet(Set.of(Modifier.STATIC)));
+        Util.immutableSet(Set.of(Modifier.STATIC))),
+
+    RECORD(
+        Set.of(),
+        Set.of(),
+        Set.of(),
+        Set.of(Modifier.STATIC));
 
     private final Set<Modifier> implicitFieldModifiers;
     private final Set<Modifier> implicitMethodModifiers;
@@ -414,6 +451,7 @@ public final class TypeSpec {
     private TypeName superclass = ClassName.OBJECT;
     private final CodeBlock.Builder staticBlock = CodeBlock.builder();
     private final CodeBlock.Builder initializerBlock = CodeBlock.builder();
+    private MethodSpec recordConstructor;
 
     public final Map<String, TypeSpec> enumConstants = new LinkedHashMap<>();
     public final List<AnnotationSpec> annotations = new ArrayList<>();
@@ -426,8 +464,7 @@ public final class TypeSpec {
     public final List<Element> originatingElements = new ArrayList<>();
     public final Set<String> alwaysQualifiedNames = new LinkedHashSet<>();
 
-    private Builder(Kind kind, String name,
-        CodeBlock anonymousTypeArguments) {
+    private Builder(Kind kind, String name, CodeBlock anonymousTypeArguments) {
       checkArgument(name == null || SourceVersion.isName(name), "not a valid name: %s", name);
       this.kind = kind;
       this.name = name;
@@ -481,6 +518,14 @@ public final class TypeSpec {
 
     public Builder addTypeVariable(TypeVariableName typeVariable) {
       typeVariables.add(typeVariable);
+      return this;
+    }
+
+    public Builder recordConstructor(MethodSpec recordConstructor) {
+      checkState(this.kind == Kind.RECORD, "only records can have record constructors");
+      checkArgument(recordConstructor != null, "recordConstructor == null");
+      checkArgument(recordConstructor.isConstructor(), "recordConstructor must be a constructor");
+      this.recordConstructor = recordConstructor;
       return this;
     }
 
@@ -758,6 +803,12 @@ public final class TypeSpec {
         }
       }
 
+      if (recordConstructor != null) {
+        for (var parameter : recordConstructor.parameters) {
+          checkArgument(parameter.modifiers.isEmpty(), "parameter may not have any modifiers.");
+        }
+      }
+
       for (var superinterface : superinterfaces) {
         checkArgument(superinterface != null, "superinterfaces contains null");
       }
@@ -819,7 +870,10 @@ public final class TypeSpec {
             kind.implicitTypeModifiers);
       }
 
-      boolean isAbstract = modifiers.contains(Modifier.ABSTRACT) || kind != Kind.CLASS;
+      var isAbstract = switch (kind) {
+        case CLASS, RECORD -> modifiers.contains(Modifier.ABSTRACT);
+        default -> true;
+      };
       for (var methodSpec : methodSpecs) {
         checkArgument(isAbstract || !methodSpec.hasModifier(Modifier.ABSTRACT),
             "non-abstract type %s cannot declare abstract method %s", name, methodSpec.name);

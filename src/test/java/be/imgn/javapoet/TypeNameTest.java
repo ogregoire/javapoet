@@ -83,8 +83,7 @@ public class TypeNameTest {
 
     // Make sure the generic argument is present
     assertThat(genericTypeName)
-      .hasToString(
-        TestGeneric.class.getCanonicalName() + "<java.lang.String>.Inner");
+      .hasToString(TestGeneric.class.getCanonicalName() + "<java.lang.String>.Inner");
   }
 
   @Test public void innerGenericInGenericType() throws Exception {
@@ -96,8 +95,7 @@ public class TypeNameTest {
 
     // Make sure the generic argument is present
     assertThat(genericTypeName)
-      .hasToString(
-        TestGeneric.class.getCanonicalName() + "<java.lang.Short>.InnerGeneric<java.lang.Long>");
+      .hasToString(TestGeneric.class.getCanonicalName() + "<java.lang.Short>.InnerGeneric<java.lang.Long>");
   }
 
   @Test public void innerStaticInGenericType() throws Exception {

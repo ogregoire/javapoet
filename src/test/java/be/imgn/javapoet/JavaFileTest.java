@@ -1018,7 +1018,8 @@ public final class JavaFileTest {
         childTypeBuilder().addSuperinterface(getElement(ParentInterface.class).asType()).build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.javapoet;
 
             import java.lang.String;
@@ -1063,7 +1064,8 @@ public final class JavaFileTest {
             .build())
         .build()
         .toString();
-    assertThat(source).isEqualTo("""
+    assertThat(source)
+      .isEqualTo("""
             package be.imgn.javapoet;
 
             import java.util.Map;

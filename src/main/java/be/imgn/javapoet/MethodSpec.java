@@ -50,6 +50,7 @@ public final class MethodSpec {
   public final List<TypeName> exceptions;
   public final CodeBlock code;
   public final CodeBlock defaultValue;
+  private final boolean compactConstructor;
 
   private MethodSpec(Builder builder) {
     var code = builder.code.build();
@@ -69,6 +70,7 @@ public final class MethodSpec {
     this.exceptions = List.copyOf(builder.exceptions);
     this.defaultValue = builder.defaultValue;
     this.code = code;
+    this.compactConstructor = builder.compactConstructor;
   }
 
   private boolean lastParameterIsArray(List<ParameterSpec> parameters) {
@@ -78,7 +80,7 @@ public final class MethodSpec {
 
   void emit(CodeWriter codeWriter, String enclosingName, Set<Modifier> implicitModifiers)
       throws IOException {
-    codeWriter.emitJavadoc(javadocWithParameters());
+    codeWriter.emitJavadocWithParameters(javadoc, parameters);
     codeWriter.emitAnnotations(annotations, false);
     codeWriter.emitModifiers(modifiers, implicitModifiers);
 
@@ -87,21 +89,15 @@ public final class MethodSpec {
       codeWriter.emit(" ");
     }
 
-    if (isConstructor()) {
-      codeWriter.emit("$L($Z", enclosingName);
+    if (compactConstructor) {
+      codeWriter.emit("$L", enclosingName);
+    } else if (isConstructor()) {
+      codeWriter.emit("$L", enclosingName);
+      codeWriter.emitParameters(parameters, varargs);
     } else {
-      codeWriter.emit("$T $L($Z", returnType, name);
+      codeWriter.emit("$T $L", returnType, name);
+      codeWriter.emitParameters(parameters, varargs);
     }
-
-    var firstParameter = true;
-    for (var i = parameters.iterator(); i.hasNext(); ) {
-      var parameter = i.next();
-      if (!firstParameter) codeWriter.emit(",").emitWrappingSpace();
-      parameter.emit(codeWriter, !i.hasNext() && varargs);
-      firstParameter = false;
-    }
-
-    codeWriter.emit(")");
 
     if (defaultValue != null && !defaultValue.isEmpty()) {
       codeWriter.emit(" default ");
@@ -134,20 +130,6 @@ public final class MethodSpec {
       codeWriter.emit("}\n");
     }
     codeWriter.popTypeVariables(typeVariables);
-  }
-
-  private CodeBlock javadocWithParameters() {
-    var builder = javadoc.toBuilder();
-    var emitTagNewline = true;
-    for (var parameterSpec : parameters) {
-      if (!parameterSpec.javadoc.isEmpty()) {
-        // Emit a new line before @param section only if the method javadoc is present.
-        if (emitTagNewline && !javadoc.isEmpty()) builder.add("\n");
-        emitTagNewline = false;
-        builder.add("@param $L $L", parameterSpec.name, parameterSpec.javadoc);
-      }
-    }
-    return builder.build();
   }
 
   public boolean hasModifier(Modifier modifier) {
@@ -186,6 +168,10 @@ public final class MethodSpec {
 
   public static Builder constructorBuilder() {
     return new Builder(CONSTRUCTOR);
+  }
+
+  public static Builder compactConstructorBuilder() {
+    return new Builder(CONSTRUCTOR, true);
   }
 
   /**
@@ -296,6 +282,7 @@ public final class MethodSpec {
     private final CodeBlock.Builder code = CodeBlock.builder();
     private boolean varargs;
     private CodeBlock defaultValue;
+    private final boolean compactConstructor;
 
     public final List<TypeVariableName> typeVariables = new ArrayList<>();
     public final List<AnnotationSpec> annotations = new ArrayList<>();
@@ -303,7 +290,12 @@ public final class MethodSpec {
     public final List<ParameterSpec> parameters = new ArrayList<>();
 
     private Builder(String name) {
+      this(name, false);
+    }
+
+    private Builder(String name, boolean compactConstructor) {
       setName(name);
+      this.compactConstructor = compactConstructor;
     }
 
     public Builder setName(String name) {
