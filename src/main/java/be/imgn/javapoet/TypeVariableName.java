@@ -28,7 +28,7 @@ import javax.lang.model.type.TypeVariable;
 
 import static be.imgn.javapoet.ClassName.OBJECT;
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class TypeVariableName extends TypeName {
   private final String name;
@@ -40,7 +40,7 @@ public final class TypeVariableName extends TypeName {
 
   private TypeVariableName(String name, List<TypeName> bounds, List<AnnotationSpec> annotations) {
     super(annotations);
-    this.name = checkNotNull(name, "name == null");
+    this.name = requireNonNull(name, "name == null");
     this.bounds = bounds;
 
     for (var bound : this.bounds) {
@@ -92,7 +92,7 @@ public final class TypeVariableName extends TypeName {
 
   /** Returns type variable named {@code name} without bounds. */
   public static TypeVariableName get(String name) {
-    return TypeVariableName.of(name, Collections.emptyList());
+    return TypeVariableName.of(name, List.of());
   }
 
   /** Returns type variable named {@code name} with {@code bounds}. */

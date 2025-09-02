@@ -61,7 +61,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   final String canonicalName;
 
   private ClassName(String packageName, ClassName enclosingClassName, String simpleName) {
-    this(packageName, enclosingClassName, simpleName, Collections.emptyList());
+    this(packageName, enclosingClassName, simpleName, List.of());
   }
 
   private ClassName(String packageName, ClassName enclosingClassName, String simpleName,
@@ -92,26 +92,14 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     return super.isAnnotated() || (enclosingClassName != null && enclosingClassName.isAnnotated());
   }
 
-  /**
-   * Returns the package name, like {@code "java.util"} for {@code Map.Entry}. Returns the empty
-   * string for the default package.
-   */
   public String packageName() {
     return packageName;
   }
 
-  /**
-   * Returns the enclosing class, like {@link Map} for {@code Map.Entry}. Returns null if this class
-   * is not nested in another class.
-   */
   public ClassName enclosingClassName() {
     return enclosingClassName;
   }
 
-  /**
-   * Returns the top class in this nesting group. Equivalent to chained calls to {@link
-   * #enclosingClassName()} until the result's enclosing class is null.
-   */
   public ClassName topLevelClassName() {
     return enclosingClassName != null ? enclosingClassName.topLevelClassName() : this;
   }

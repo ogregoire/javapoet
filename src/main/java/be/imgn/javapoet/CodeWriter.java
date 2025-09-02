@@ -31,10 +31,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
 import static be.imgn.javapoet.Util.checkState;
 import static be.imgn.javapoet.Util.stringLiteralWithDoubleQuotes;
 import static java.lang.String.join;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Converts a {@link JavaFile} to a string suitable to both human- and javac-consumption. This
@@ -85,10 +85,10 @@ final class CodeWriter {
              Set<String> staticImports,
              Set<String> alwaysQualify) {
     this.out = new LineWrapper(out, indent, 100);
-    this.indent = checkNotNull(indent, "indent == null");
-    this.importedTypes = checkNotNull(importedTypes, "importedTypes == null");
-    this.staticImports = checkNotNull(staticImports, "staticImports == null");
-    this.alwaysQualify = checkNotNull(alwaysQualify, "alwaysQualify == null");
+    this.indent = requireNonNull(indent, "indent == null");
+    this.importedTypes = requireNonNull(importedTypes, "importedTypes == null");
+    this.staticImports = requireNonNull(staticImports, "staticImports == null");
+    this.alwaysQualify = requireNonNull(alwaysQualify, "alwaysQualify == null");
     this.staticImportClassNames = new LinkedHashSet<>();
     for (var signature : staticImports) {
       staticImportClassNames.add(signature.substring(0, signature.lastIndexOf('.')));
@@ -120,7 +120,7 @@ final class CodeWriter {
 
   public CodeWriter pushPackage(String packageName) {
     checkState(this.packageName == NO_PACKAGE, "package already set: %s", this.packageName);
-    this.packageName = checkNotNull(packageName, "packageName == null");
+    this.packageName = requireNonNull(packageName, "packageName == null");
     return this;
   }
 

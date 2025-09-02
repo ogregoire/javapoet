@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ParameterizedTypeName extends TypeName {
   private final ParameterizedTypeName enclosingType;
@@ -40,7 +40,7 @@ public final class ParameterizedTypeName extends TypeName {
   private ParameterizedTypeName(ParameterizedTypeName enclosingType, ClassName rawType,
       List<TypeName> typeArguments, List<AnnotationSpec> annotations) {
     super(annotations);
-    this.rawType = checkNotNull(rawType, "rawType == null").annotated(annotations);
+    this.rawType = requireNonNull(rawType, "rawType == null").annotated(annotations);
     this.enclosingType = enclosingType;
     this.typeArguments = List.copyOf(typeArguments);
 
@@ -101,7 +101,7 @@ public final class ParameterizedTypeName extends TypeName {
    * inside this class.
    */
   public ParameterizedTypeName nestedClass(String name) {
-    checkNotNull(name, "name == null");
+    requireNonNull(name, "name == null");
     return new ParameterizedTypeName(this, rawType().nestedClass(name), new ArrayList<>(),
         new ArrayList<>());
   }
@@ -111,7 +111,7 @@ public final class ParameterizedTypeName extends TypeName {
    * inside this class, with the specified {@code typeArguments}.
    */
   public ParameterizedTypeName nestedClass(String name, List<TypeName> typeArguments) {
-    checkNotNull(name, "name == null");
+    requireNonNull(name, "name == null");
     return new ParameterizedTypeName(this, rawType().nestedClass(name), typeArguments,
         new ArrayList<>());
   }

@@ -28,7 +28,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /** A generated parameter declaration. */
 public final class ParameterSpec {
@@ -39,10 +39,10 @@ public final class ParameterSpec {
   private final CodeBlock javadoc;
 
   private ParameterSpec(Builder builder) {
-    this.name = checkNotNull(builder.name, "name == null");
+    this.name = requireNonNull(builder.name, "name == null");
     this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
-    this.type = checkNotNull(builder.type, "type == null");
+    this.type = requireNonNull(builder.type, "type == null");
     this.javadoc = builder.javadoc.build();
   }
 
@@ -133,7 +133,7 @@ public final class ParameterSpec {
   }
 
   public static Builder builder(TypeName type, String name, Modifier... modifiers) {
-    checkNotNull(type, "type == null");
+    requireNonNull(type, "type == null");
     checkArgument(isValidParameterName(name), "not a valid name: %s", name);
     return new Builder(type, name)
         .addModifiers(modifiers);
@@ -206,7 +206,7 @@ public final class ParameterSpec {
     }
 
     public Builder addModifiers(Iterable<Modifier> modifiers) {
-      checkNotNull(modifiers, "modifiers == null");
+      requireNonNull(modifiers, "modifiers == null");
       for (var modifier : modifiers) {
         if (!modifier.equals(Modifier.FINAL)) {
           throw new IllegalStateException("unexpected parameter modifier: " + modifier);

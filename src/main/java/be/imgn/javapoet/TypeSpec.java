@@ -39,9 +39,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
 import static be.imgn.javapoet.Util.checkState;
 import static be.imgn.javapoet.Util.requireExactlyOneOf;
+import static java.util.Objects.requireNonNull;
 
 /** A generated class, interface, or enum declaration. */
 public final class TypeSpec {
@@ -104,18 +104,18 @@ public final class TypeSpec {
     this.name = type.name();
     this.anonymousTypeArguments = null;
     this.javadoc = type.javadoc();
-    this.annotations = Collections.emptyList();
+    this.annotations = List.of();
     this.modifiers = Collections.emptySet();
-    this.typeVariables = Collections.emptyList();
+    this.typeVariables = List.of();
     this.superclass = null;
-    this.superinterfaces = Collections.emptyList();
+    this.superinterfaces = List.of();
     this.enumConstants = Collections.emptyMap();
-    this.fieldSpecs = Collections.emptyList();
+    this.fieldSpecs = List.of();
     this.staticBlock = type.staticBlock();
     this.initializerBlock = type.initializerBlock();
-    this.methodSpecs = Collections.emptyList();
-    this.typeSpecs = Collections.emptyList();
-    this.originatingElements = Collections.emptyList();
+    this.methodSpecs = List.of();
+    this.typeSpecs = List.of();
+    this.originatingElements = List.of();
     this.nestedTypesSimpleNames = Collections.emptySet();
     this.alwaysQualifiedNames = Collections.emptySet();
     this.recordConstructor = null;
@@ -198,35 +198,35 @@ public final class TypeSpec {
   }
 
   public static Builder classBuilder(String name) {
-    return new Builder(Kind.CLASS, checkNotNull(name, "name == null"), null);
+    return new Builder(Kind.CLASS, requireNonNull(name, "name == null"), null);
   }
 
   public static Builder classBuilder(ClassName className) {
-    return classBuilder(checkNotNull(className, "className == null").simpleName());
+    return classBuilder(requireNonNull(className, "className == null").simpleName());
   }
 
   public static Builder recordBuilder(String name) {
-    return new Builder(Kind.RECORD, checkNotNull(name, "name == null"), null);
+    return new Builder(Kind.RECORD, requireNonNull(name, "name == null"), null);
   }
 
   public static Builder recordBuilder(ClassName className) {
-    return recordBuilder(checkNotNull(className, "className == null").simpleName());
+    return recordBuilder(requireNonNull(className, "className == null").simpleName());
   }
 
   public static Builder interfaceBuilder(String name) {
-    return new Builder(Kind.INTERFACE, checkNotNull(name, "name == null"), null);
+    return new Builder(Kind.INTERFACE, requireNonNull(name, "name == null"), null);
   }
 
   public static Builder interfaceBuilder(ClassName className) {
-    return interfaceBuilder(checkNotNull(className, "className == null").simpleName());
+    return interfaceBuilder(requireNonNull(className, "className == null").simpleName());
   }
 
   public static Builder enumBuilder(String name) {
-    return new Builder(Kind.ENUM, checkNotNull(name, "name == null"), null);
+    return new Builder(Kind.ENUM, requireNonNull(name, "name == null"), null);
   }
 
   public static Builder enumBuilder(ClassName className) {
-    return enumBuilder(checkNotNull(className, "className == null").simpleName());
+    return enumBuilder(requireNonNull(className, "className == null").simpleName());
   }
 
   public static Builder anonymousClassBuilder(String typeArgumentsFormat, Object... args) {
@@ -238,11 +238,11 @@ public final class TypeSpec {
   }
 
   public static Builder annotationBuilder(String name) {
-    return new Builder(Kind.ANNOTATION, checkNotNull(name, "name == null"), null);
+    return new Builder(Kind.ANNOTATION, requireNonNull(name, "name == null"), null);
   }
 
   public static Builder annotationBuilder(ClassName className) {
-    return annotationBuilder(checkNotNull(className, "className == null").simpleName());
+    return annotationBuilder(requireNonNull(className, "className == null").simpleName());
   }
 
   public Builder toBuilder() {
@@ -323,10 +323,10 @@ public final class TypeSpec {
         List<TypeName> implementsTypes;
         if (kind() == Kind.INTERFACE) {
           extendsTypes = superinterfaces();
-          implementsTypes = Collections.emptyList();
+          implementsTypes = List.of();
         } else {
           extendsTypes = superclass().equals(ClassName.OBJECT)
-              ? Collections.emptyList()
+              ? List.of()
               : Collections.singletonList(superclass());
           implementsTypes = superinterfaces();
         }
@@ -580,7 +580,7 @@ public final class TypeSpec {
     }
 
     public Builder addAnnotation(AnnotationSpec annotationSpec) {
-      checkNotNull(annotationSpec, "annotationSpec == null");
+      requireNonNull(annotationSpec, "annotationSpec == null");
       this.annotations.add(annotationSpec);
       return this;
     }
@@ -883,7 +883,7 @@ public final class TypeSpec {
 
     public TypeSpec build() {
       for (var annotationSpec : annotations) {
-        checkNotNull(annotationSpec, "annotationSpec == null");
+        requireNonNull(annotationSpec, "annotationSpec == null");
       }
 
       if (!modifiers.isEmpty()) {

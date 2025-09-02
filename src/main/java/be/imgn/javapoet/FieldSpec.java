@@ -25,8 +25,8 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
 import static be.imgn.javapoet.Util.checkState;
+import static java.util.Objects.requireNonNull;
 
 /** A generated field declaration. */
 public final class FieldSpec {
@@ -38,8 +38,8 @@ public final class FieldSpec {
   private final CodeBlock initializer;
 
   private FieldSpec(Builder builder) {
-    this.type = checkNotNull(builder.type, "type == null");
-    this.name = checkNotNull(builder.name, "name == null");
+    this.type = requireNonNull(builder.type, "type == null");
+    this.name = requireNonNull(builder.name, "name == null");
     this.javadoc = builder.javadoc.build();
     this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
@@ -111,7 +111,7 @@ public final class FieldSpec {
   }
 
   public static Builder builder(TypeName type, String name, Modifier... modifiers) {
-    checkNotNull(type, "type == null");
+    requireNonNull(type, "type == null");
     checkArgument(SourceVersion.isName(name), "not a valid name: %s", name);
     return new Builder(type, name)
         .addModifiers(modifiers);
@@ -188,7 +188,7 @@ public final class FieldSpec {
 
     public Builder initializer(CodeBlock codeBlock) {
       checkState(this.initializer == null, "initializer was already set");
-      this.initializer = checkNotNull(codeBlock, "codeBlock == null");
+      this.initializer = requireNonNull(codeBlock, "codeBlock == null");
       return this;
     }
 

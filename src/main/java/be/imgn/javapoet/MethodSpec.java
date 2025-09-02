@@ -32,8 +32,8 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.Types;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
 import static be.imgn.javapoet.Util.checkState;
+import static java.util.Objects.requireNonNull;
 
 /** A generated constructor or method declaration. */
 public final class MethodSpec {
@@ -59,7 +59,7 @@ public final class MethodSpec {
     checkArgument(!builder.varargs || lastParameterIsArray(builder.parameters),
         "last parameter of varargs method %s must be an array", builder.name);
 
-    this.name = checkNotNull(builder.name, "name == null");
+    this.name = requireNonNull(builder.name, "name == null");
     this.javadoc = builder.javadoc.build();
     this.annotations = List.copyOf(builder.annotations);
     this.modifiers = Util.immutableSet(builder.modifiers);
@@ -228,7 +228,7 @@ public final class MethodSpec {
    * parameters of the overridden method. Since JavaPoet 1.8 annotations must be added separately.
    */
   public static Builder overriding(ExecutableElement method) {
-    checkNotNull(method, "method == null");
+    requireNonNull(method, "method == null");
 
     var enclosingClass = method.getEnclosingElement();
     if (enclosingClass.getModifiers().contains(Modifier.FINAL)) {
@@ -343,7 +343,7 @@ public final class MethodSpec {
     }
 
     public Builder setName(String name) {
-      checkNotNull(name, "name == null");
+      requireNonNull(name, "name == null");
       checkArgument(name.equals(CONSTRUCTOR) || SourceVersion.isName(name),
           "not a valid name: %s", name);
       this.name = name;
@@ -384,13 +384,13 @@ public final class MethodSpec {
     }
 
     public Builder addModifiers(Modifier... modifiers) {
-      checkNotNull(modifiers, "modifiers == null");
+      requireNonNull(modifiers, "modifiers == null");
       Collections.addAll(this.modifiers, modifiers);
       return this;
     }
 
     public Builder addModifiers(Iterable<Modifier> modifiers) {
-      checkNotNull(modifiers, "modifiers == null");
+      requireNonNull(modifiers, "modifiers == null");
       for (var modifier : modifiers) {
         this.modifiers.add(modifier);
       }
@@ -493,7 +493,7 @@ public final class MethodSpec {
 
     public Builder defaultValue(CodeBlock codeBlock) {
       checkState(this.defaultValue == null, "defaultValue was already set");
-      this.defaultValue = checkNotNull(codeBlock, "codeBlock == null");
+      this.defaultValue = requireNonNull(codeBlock, "codeBlock == null");
       return this;
     }
 

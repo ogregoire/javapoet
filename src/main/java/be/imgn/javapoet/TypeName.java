@@ -46,6 +46,7 @@ import static be.imgn.javapoet.ClassName.BOXED_INT;
 import static be.imgn.javapoet.ClassName.BOXED_LONG;
 import static be.imgn.javapoet.ClassName.BOXED_SHORT;
 import static be.imgn.javapoet.ClassName.BOXED_VOID;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Any type in Java's type system, plus {@code void}. This class is an identifier for primitive
@@ -115,7 +116,7 @@ public class TypeName {
   }
 
   public TypeName annotated(List<AnnotationSpec> annotations) {
-    Util.checkNotNull(annotations, "annotations == null");
+    requireNonNull(annotations, "annotations == null");
     return new TypeName(keyword, concatAnnotations(annotations));
   }
 

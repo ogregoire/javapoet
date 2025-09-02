@@ -36,8 +36,8 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.SimpleJavaFileObject;
 
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 /** A Java file containing a single top level class. */
 public final class JavaFile {
@@ -257,8 +257,8 @@ public final class JavaFile {
   }
 
   public static Builder builder(String packageName, TypeSpec typeSpec) {
-    checkNotNull(packageName, "packageName == null");
-    checkNotNull(typeSpec, "typeSpec == null");
+    requireNonNull(packageName, "packageName == null");
+    requireNonNull(typeSpec, "typeSpec == null");
     return new Builder(packageName, typeSpec);
   }
 

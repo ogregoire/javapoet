@@ -85,7 +85,7 @@ public final class WildcardTypeName extends TypeName {
    * ? extends Object}.
    */
   public static WildcardTypeName subtypeOf(TypeName upperBound) {
-    return new WildcardTypeName(Collections.singletonList(upperBound), Collections.emptyList());
+    return new WildcardTypeName(Collections.singletonList(upperBound), List.of());
   }
 
   public static WildcardTypeName subtypeOf(Type upperBound) {

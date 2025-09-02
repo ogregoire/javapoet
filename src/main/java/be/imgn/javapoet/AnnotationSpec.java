@@ -36,7 +36,7 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
 import static be.imgn.javapoet.Util.characterLiteralWithoutSingleQuotes;
 import static be.imgn.javapoet.Util.checkArgument;
-import static be.imgn.javapoet.Util.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /** A generated annotation on a declaration. */
 public final class AnnotationSpec {
@@ -159,7 +159,7 @@ public final class AnnotationSpec {
   }
 
   public static Builder builder(ClassName type) {
-    checkNotNull(type, "type == null");
+    requireNonNull(type, "type == null");
     return new Builder(type);
   }
 
@@ -222,9 +222,9 @@ public final class AnnotationSpec {
      * the class of the given {@code value} object is not supported.
      */
     Builder addMemberForValue(String memberName, Object value) {
-      checkNotNull(memberName, "memberName == null");
-      checkNotNull(value, "value == null, constant non-null value expected for %s", memberName);
-      checkArgument(SourceVersion.isName(memberName), "not a valid name: %s", memberName);
+      requireNonNull(memberName, "memberName == null");
+      requireNonNull(value, "value == null, constant non-null value expected for " + memberName);
+      checkArgument(SourceVersion.isName(memberName), "not a valid name: " + memberName);
       return switch (value) {
         case Class<?> classValue ->
           addMember(memberName, "$T.class", classValue);
@@ -245,7 +245,7 @@ public final class AnnotationSpec {
 
     public AnnotationSpec build() {
       for (var name : members.keySet()) {
-        checkNotNull(name, "name == null");
+        requireNonNull(name, "name == null");
         checkArgument(SourceVersion.isName(name), "not a valid name: %s", name);
       }
       return new AnnotationSpec(this);
