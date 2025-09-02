@@ -50,7 +50,8 @@ public class FieldSpecTest {
           .addAnnotation(SuppressWarnings.class);
 
     builder.annotations.remove(1);
-    assertThat(builder.build().annotations()).hasSize(1);
+    assertThat(builder.build().annotations())
+      .hasSize(1);
   }
 
   @Test public void modifyModifiers() {
@@ -58,6 +59,7 @@ public class FieldSpecTest {
           .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
     builder.modifiers.remove(1);
-    assertThat(builder.build().modifiers()).containsExactly(Modifier.PUBLIC);
+    assertThat(builder.build().modifiers())
+      .containsExactly(Modifier.PUBLIC);
   }
 }

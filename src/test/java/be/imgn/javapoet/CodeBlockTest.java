@@ -77,7 +77,8 @@ public final class CodeBlockTest {
   @MethodSource("provideFormatsCanBeIndexed")
   public void formatCanBeIndexed(String format, Object argument, String expectedOutput) {
     var block = CodeBlock.builder().add(format, argument).build();
-    assertThat(block).hasToString(expectedOutput);
+    assertThat(block)
+      .hasToString(expectedOutput);
   }
 
   private static List<Arguments> provideFormatsCanBeIndexed() {
@@ -275,6 +276,7 @@ public final class CodeBlockTest {
         .clear()
         .build();
 
-    assertThat(block.toString()).isEmpty();
+    assertThat(block.toString())
+      .isEmpty();
   }
 }

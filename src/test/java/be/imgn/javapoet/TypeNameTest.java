@@ -71,7 +71,8 @@ public class TypeNameTest {
     TypeName.get(recursiveEnum.getGenericParameterTypes()[0]);
 
     // Make sure the generic argument is present
-    assertThat(genericTypeName.toString()).contains("Enum");
+    assertThat(genericTypeName.toString())
+      .contains("Enum");
   }
 
   @Test public void innerClassInGenericType() throws Exception {

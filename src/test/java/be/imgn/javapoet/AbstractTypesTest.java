@@ -118,7 +118,8 @@ public abstract class AbstractTypesTest {
       }
     }).compile(hasErrorTypes);
 
-    assertThat(compilation).failed();
+    assertThat(compilation)
+      .failed();
   }
 
   static class Parameterized<

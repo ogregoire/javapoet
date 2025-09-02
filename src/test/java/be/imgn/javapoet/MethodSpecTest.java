@@ -252,7 +252,8 @@ public final class MethodSpecTest {
             .build();
     var jfo = JavaFile.builder(implClassName.packageName, type).build().toJavaFileObject();
     var compilation = javac().compile(jfo);
-    assertThat(compilation).succeeded();
+    assertThat(compilation)
+      .succeeded();
   }
 
   @Test public void equalsAndHashCode() {
@@ -410,7 +411,8 @@ public final class MethodSpecTest {
             .addTypeVariable(TypeVariableName.get("V"));
 
     builder.typeVariables.remove(1);
-    assertThat(builder.build().typeVariables()).containsExactly(t);
+    assertThat(builder.build().typeVariables())
+      .containsExactly(t);
   }
 
   @Test public void ensureTrailingNewline() {

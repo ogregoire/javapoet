@@ -1202,7 +1202,8 @@ public final class TypeSpecTest {
             .addOriginatingElement(innerElement)
             .build())
         .build();
-    assertThat(outer.originatingElements()).containsExactly(outerElement, innerElement);
+    assertThat(outer.originatingElements())
+      .containsExactly(outerElement, innerElement);
   }
 
   @Test public void intersectionType() {
@@ -2621,7 +2622,8 @@ public final class TypeSpecTest {
             .addAnnotation(SuppressWarnings.class);
 
     builder.annotations.remove(1);
-    assertThat(builder.build().annotations()).hasSize(1);
+    assertThat(builder.build().annotations())
+      .hasSize(1);
   }
 
   @Test
@@ -2630,7 +2632,8 @@ public final class TypeSpecTest {
         TypeSpec.classBuilder("Taco").addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
     builder.modifiers.remove(1);
-    assertThat(builder.build().modifiers()).containsExactly(Modifier.PUBLIC);
+    assertThat(builder.build().modifiers())
+      .containsExactly(Modifier.PUBLIC);
   }
 
   @Test
@@ -2639,7 +2642,8 @@ public final class TypeSpecTest {
         .addField(int.class, "source");
 
     builder.fieldSpecs.remove(0);
-    assertThat(builder.build().fieldSpecs()).isEmpty();
+    assertThat(builder.build().fieldSpecs())
+      .isEmpty();
   }
 
   @Test
@@ -2651,7 +2655,8 @@ public final class TypeSpecTest {
             .addTypeVariable(TypeVariableName.get("V"));
 
     builder.typeVariables.remove(1);
-    assertThat(builder.build().typeVariables()).containsExactly(t);
+    assertThat(builder.build().typeVariables())
+      .containsExactly(t);
   }
 
   @Test
@@ -2660,7 +2665,8 @@ public final class TypeSpecTest {
         .addSuperinterface(File.class);
 
     builder.superinterfaces.clear();
-    assertThat(builder.build().superinterfaces()).isEmpty();
+    assertThat(builder.build().superinterfaces())
+      .isEmpty();
   }
 
   @Test
@@ -2669,7 +2675,8 @@ public final class TypeSpecTest {
         .addMethod(MethodSpec.methodBuilder("bell").build());
 
     builder.methodSpecs.clear();
-    assertThat(builder.build().methodSpecs()).isEmpty();
+    assertThat(builder.build().methodSpecs())
+      .isEmpty();
   }
 
   @Test
@@ -2678,7 +2685,8 @@ public final class TypeSpecTest {
         .addType(TypeSpec.classBuilder("Bell").build());
 
     builder.typeSpecs.clear();
-    assertThat(builder.build().typeSpecs()).isEmpty();
+    assertThat(builder.build().typeSpecs())
+      .isEmpty();
   }
 
   @Test
@@ -2699,7 +2707,8 @@ public final class TypeSpecTest {
         .addOriginatingElement(Mockito.mock(Element.class));
 
     builder.originatingElements.clear();
-    assertThat(builder.build().originatingElements()).isEmpty();
+    assertThat(builder.build().originatingElements())
+      .isEmpty();
   }
 
   @Test public void javadocWithTrailingLineDoesNotAddAnother() {

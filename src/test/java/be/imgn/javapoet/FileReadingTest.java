@@ -110,8 +110,10 @@ public class FileReadingTest {
         Set.of(),
         Set.of(javaFile.toJavaFileObject()));
 
-    assertThat(task.call()).isTrue();
-    assertThat(diagnosticCollector.getDiagnostics()).isEmpty();
+    assertThat(task.call())
+      .isTrue();
+    assertThat(diagnosticCollector.getDiagnostics())
+      .isEmpty();
 
     var loader = fileManager.getClassLoader(StandardLocation.CLASS_OUTPUT);
     var test = Class.forName("foo.Test", true, loader)

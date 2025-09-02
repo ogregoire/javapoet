@@ -306,7 +306,7 @@ public final class TypeSpec {
         if (kind() == Kind.ANNOTATION) {
           codeWriter.emit("$L $L", "@interface", name());
         } else {
-          codeWriter.emit("$L $L", kind().name().toLowerCase(Locale.US), name());
+          codeWriter.emit("$L $L", kind().name().toLowerCase(Locale.ROOT), name());
         }
         codeWriter.emitTypeVariables(typeVariables());
 

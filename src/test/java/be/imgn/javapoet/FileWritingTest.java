@@ -72,7 +72,8 @@ public final class FileWritingTest {
     JavaFile.builder("", type).build().writeTo(fsRoot);
 
     var testPath = fsRoot.resolve("Test.java");
-    assertThat(testPath).exists();
+    assertThat(testPath)
+      .exists();
   }
 
   @Test public void fileDefaultPackage() throws IOException {
@@ -80,7 +81,8 @@ public final class FileWritingTest {
     JavaFile.builder("", type).build().writeTo(tmp);
 
     var testFile = tmp.resolve("Test.java");
-    assertThat(testFile).exists();
+    assertThat(testFile)
+      .exists();
   }
 
   @Test public void filerDefaultPackage() throws IOException {
@@ -88,7 +90,8 @@ public final class FileWritingTest {
     JavaFile.builder("", type).build().writeTo(filer);
 
     var testPath = fsRoot.resolve("Test.java");
-    assertThat(testPath).exists();
+    assertThat(testPath)
+      .exists();
   }
 
   @Test public void pathNestedClasses() throws IOException {
@@ -100,9 +103,12 @@ public final class FileWritingTest {
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
     var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
     var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
-    assertThat(fooPath).exists();
-    assertThat(barPath).exists();
-    assertThat(bazPath).exists();
+    assertThat(fooPath)
+      .exists();
+    assertThat(barPath)
+      .exists();
+    assertThat(bazPath)
+      .exists();
   }
 
   @Test public void fileNestedClasses() throws IOException {
@@ -111,9 +117,12 @@ public final class FileWritingTest {
     JavaFile.builder("foo.bar", type).build().writeTo(tmp);
     JavaFile.builder("foo.bar.baz", type).build().writeTo(tmp);
 
-    assertThat(tmp.resolve("foo/Test.java")).exists();
-    assertThat(tmp.resolve("foo/bar/Test.java")).exists();
-    assertThat(tmp.resolve("foo/bar/baz/Test.java")).exists();
+    assertThat(tmp.resolve("foo/Test.java"))
+      .exists();
+    assertThat(tmp.resolve("foo/bar/Test.java"))
+      .exists();
+    assertThat(tmp.resolve("foo/bar/baz/Test.java"))
+      .exists();
   }
 
   @Test public void filerNestedClasses() throws IOException {
@@ -125,9 +134,12 @@ public final class FileWritingTest {
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
     var barPath = fsRoot.resolve(fs.getPath("foo", "bar", "Test.java"));
     var bazPath = fsRoot.resolve(fs.getPath("foo", "bar", "baz", "Test.java"));
-    assertThat(fooPath).exists();
-    assertThat(barPath).exists();
-    assertThat(bazPath).exists();
+    assertThat(fooPath)
+      .exists();
+    assertThat(barPath)
+      .exists();
+    assertThat(bazPath)
+      .exists();
   }
 
   @Test public void filerPassesOriginatingElements() throws IOException {
@@ -147,9 +159,11 @@ public final class FileWritingTest {
     JavaFile.builder("example", test2).build().writeTo(filer);
 
     var testPath1 = fsRoot.resolve(fs.getPath("example", "Test1.java"));
-    assertThat(filer.getOriginatingElements(testPath1)).containsExactly(element1_1);
+    assertThat(filer.getOriginatingElements(testPath1))
+      .containsExactly(element1_1);
     var testPath2 = fsRoot.resolve(fs.getPath("example", "Test2.java"));
-    assertThat(filer.getOriginatingElements(testPath2)).containsExactly(element2_1, element2_2);
+    assertThat(filer.getOriginatingElements(testPath2))
+      .containsExactly(element2_1, element2_2);
   }
 
   @Test public void filerClassesWithTabIndent() throws IOException {
@@ -164,7 +178,8 @@ public final class FileWritingTest {
     JavaFile.builder("foo", test).indent("\t").build().writeTo(filer);
 
     var fooPath = fsRoot.resolve(fs.getPath("foo", "Test.java"));
-    assertThat(fooPath).exists();
+    assertThat(fooPath)
+      .exists();
     var source = new String(Files.readAllBytes(fooPath));
 
     assertThat(source)
